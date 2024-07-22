@@ -23,11 +23,15 @@ import { IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { BASE_API_URL } from '../../api';
 import { Drawer, Box, Divider } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 
 const IncidentDetails = (props) => {
+    const [message, setMessage] = useState('');
     const [selectedSection, setSelectedSection] = useState('Interim Investigation');
     const [caseDescription, setCaseDescription] = useState('');
     const [selectedFiles, setSelectedFiles] = useState([]);
+    const [severity, setSeverity] = useState('success');
+    const [open, setOpen] = useState(false);
 
     const handleSectionChange = (section) => {
         setSelectedSection(section);
@@ -144,7 +148,12 @@ const IncidentDetails = (props) => {
         }
         console.log(`Updated ${name} State:`, inputs[name]);  // Debug log
     };
-
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpen(false);
+    };
     const [users, setUsers] = useState([])
     const [selectedUser, setSelectedUser] = useState(null);
     const handleUserChange = (event, newValue) => {
@@ -950,6 +959,12 @@ const IncidentDetails = (props) => {
                     </Button>
                 </DialogActions>
             </Dialog> */}
+
+            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert onClose={handleClose} severity={severity}>
+                    {message}
+                </Alert>
+            </Snackbar>
         </div>
     )
 }
