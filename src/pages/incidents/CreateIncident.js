@@ -491,32 +491,12 @@ const CreateIncident = (props) => {
                                 ))}
 
                                 <Col md={3} sm={4} className="mb-3">
+                                    <Button variant="contained" className='accordian_submit_btn'  onClick={handleDrawerOpen}>
+                                        More Fields...
+                                    </Button>
 
-                                    <div className='resolve-drop'>
-                                        <Autocomplete
-                                            style={{ padding: "0px" }}
-                                            options={users}
-                                            value={selectedUser}
-                                            onChange={handleUserChange}
-                                            getOptionLabel={(option) => option.title} renderOption={(props, option) => (
-                                                <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
-                                                    {option.title}
-                                                </li>
-                                            )}
-                                            renderInput={(params) => (
-                                                <TextField {...params}
-                                                    label="Department"
-                                                    variant="outlined"
-                                                    InputProps={{
-                                                        ...params.InputProps,
-                                                        className: 'custom-input-drop' // Apply the custom class
-                                                    }}
-                                                    className="custom-textfield"
-                                                />
-                                            )}
-                                        />
-                                    </div>
                                 </Col>
+
 
 
 
@@ -556,6 +536,33 @@ const CreateIncident = (props) => {
                                             )}
                                             renderInput={(params) => (
                                                 <TextField {...params}
+                                                    label="Department"
+                                                    variant="outlined"
+                                                    InputProps={{
+                                                        ...params.InputProps,
+                                                        className: 'custom-input-drop' // Apply the custom class
+                                                    }}
+                                                    className="custom-textfield"
+                                                />
+                                            )}
+                                        />
+                                    </div>
+                                </Col>
+                                <Col md={3} sm={4} className="mb-3">
+
+                                    <div className='resolve-drop'>
+                                        <Autocomplete
+                                            style={{ padding: "0px" }}
+                                            options={users}
+                                            value={selectedUser}
+                                            onChange={handleUserChange}
+                                            getOptionLabel={(option) => option.title} renderOption={(props, option) => (
+                                                <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
+                                                    {option.title}
+                                                </li>
+                                            )}
+                                            renderInput={(params) => (
+                                                <TextField {...params}
                                                     label="Assign To"
                                                     variant="outlined"
                                                     InputProps={{
@@ -569,12 +576,12 @@ const CreateIncident = (props) => {
                                     </div>
                                 </Col>
 
-                                <Col md={3} sm={4} className="mb-3">
+                                {/* <Col md={3} sm={4} className="mb-3">
                                     <Button variant="contained" className='accordian_submit_btn' onClick={handleDrawerOpen}>
                                         More Fields...
                                     </Button>
 
-                                </Col>
+                                </Col> */}
 
                             </Row>
 
@@ -582,7 +589,7 @@ const CreateIncident = (props) => {
                             {/* </div> */}
                             <div className='row mb-3'>
 
-                                <div className='col-md-6 text_field'>
+                                <div className='col-md-12 text_field'>
                                     <Form.Group
                                         className='mb-0'
                                         controlId='exampleForm.ControlTextarea1'
@@ -600,16 +607,21 @@ const CreateIncident = (props) => {
                                         />
                                     </Form.Group>
                                 </div>
-                                <div className='col-md-6 mt-3 file_upload'>
-                                    {/* <label className="text_color" for="formFileMultiple" class="form-label" onChange={handleFileChange}> Browse</label> */}
+                                {/* <div className='col-md-6 mt-3 file_upload'>
+                                  
                                     <input class="form-control" type="file" id="formFileMultiple" multiple onChange={handleFileSelect} />
-                                </div>
+                                </div> */}
                             </div>
 
                         </div>
                         <div className="attached-files-info mb-3">
                             <div className="row">
-                                <div className="col-xxl-6">
+                            <div className='col-md-4  file_upload'>
+                                    {/* <label className="text_color" for="formFileMultiple" class="form-label" onChange={handleFileChange}> Browse</label> */}
+                                    <input class="form-control" type="file" id="formFileMultiple" multiple onChange={handleFileSelect} />
+                                </div>
+                                {/* <div className="col-xxl-6"> */}
+                                <div className='col-md-8'>
                                     <div className="attached-files">
                                         <ul>
 
@@ -713,7 +725,7 @@ const CreateIncident = (props) => {
                     {props.isCraeteNewIncidentButton == true ?
                         <div></div>
                         :
-                        <div className='mt-4 col-md-2 float-end'>
+                        <div className=' col-md-2 float-end'>
                             <Button className='search_btn' type='submit'>Create incident</Button>
                         </div>
                     }
@@ -817,19 +829,16 @@ const CreateIncident = (props) => {
                                     </Col>
                                 ))}
 
-                                <Divider />
+                                {/* <Divider />
                                 <Button
-                                    // style={{
-                                    //     textTransform: "capitalize", backgroundColor: "#533529", color
-                                    //         : "white", border: "none", padding: "10px 15px", fontWeight: "600"
-                                    // }}
+                                 
                                     style={{ color: "#533529", fontWeight: "600", marginTop: "10px" }}
 
                                     onClick={fieldDialogOpen}
 
                                 >
                                     Create new Fields
-                                </Button>
+                                </Button> */}
 
                                 <form>
                                     {fields.map((field, index) => (
@@ -890,7 +899,7 @@ const CreateIncident = (props) => {
                                                             <Grid item xs={10}>
                                                                 {fields[index + 1].type === 'input' ? (
                                                                     <TextField
-                                                                
+
                                                                         InputProps={{ className: 'custom-input' }}
                                                                         className='w-100 custom-textfield mb-2'
                                                                         type="text"
@@ -901,7 +910,7 @@ const CreateIncident = (props) => {
                                                                     />
                                                                 ) : (
                                                                     <Autocomplete
-                                                                    
+
                                                                         options={fields[index + 1].options}
                                                                         value={fields[index + 1].value || null}
                                                                         onChange={(event, newValue) => handleFieldValueChange(index + 1, newValue)}
@@ -930,8 +939,14 @@ const CreateIncident = (props) => {
                             </Box>
                             <Divider />
                             <Box p={2} className="drawer-footer " display="flex" justifyContent="space-between">
-                                <Button variant='outlined' className='accordian_submit_btn m-1'>Save</Button>
-                                <Button variant='outlined' className='accordian_cancel_btn p-2' onClick={handleDrawerClose}>Close</Button>
+                                <Button
+                                    variant='outlined' className='accordian_submit_btn '
+                                    onClick={fieldDialogOpen}
+                                >
+                                    Create new Fields
+                                </Button>
+                                {/* <Button variant='outlined' className='accordian_submit_btn m-1'>Save</Button> */}
+                                <Button variant='outlined' className='accordian_cancel_btn p-2' >Save</Button>
                             </Box>
 
                         </Box>
