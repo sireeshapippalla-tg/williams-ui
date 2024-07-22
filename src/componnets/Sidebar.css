@@ -1,0 +1,19 @@
+.MuiListItemIcon-root {
+     margin-right: 0px !important;
+}
+
+.css-10hburv-MuiTypography-root {
+     margin-left: 20px !important;
+     /* color: #717171 !important; */
+}
+
+.css-10hburv-MuiTypography-root.active {
+     color: "#2B3B7B"
+}
+
+.sidebar_collapse .css-qumn4c .MuiDrawer-paper,
+.sidebar_collapse .css-4fyatf .MuiDrawer-paper {
+     top: 110px;
+     border-top: 1px solid #ddd;
+     border-radius: 0 17px 0 0;
+}

@@ -1,0 +1,215 @@
+@media only screen and (max-width:1920px) {
+    .sidebar-arrow-mbl {
+        display: none !important;
+    }
+
+    .mbl-sidebar {
+        display: none;
+    }
+
+    .mblDrawer {
+        display: none;
+    }
+}
+
+@media only screen and (max-width:1769px) {}
+
+@media only screen and (max-width:1690px) {}
+
+@media only screen and (max-width:1600px) {}
+
+
+
+@media only screen and (max-width:1400px) {}
+
+@media only screen and (max-width:1300px) {}
+
+@media only screen and (max-width:1200px) {
+    .card_incident {
+        width: 50% !important;
+        min-width: 50% !important;
+        margin-bottom: 10px !important;
+    }
+
+
+}
+
+
+@media only screen and (max-width:1024px) {}
+
+
+@media only screen and (max-width:1024px) {}
+
+
+@media only screen and (max-width:995px) {
+    .calendar_align DatePicker {
+        width: 100%;
+    }
+
+    .tablescroll-mobile {
+        max-width: 1100px;
+        overflow-x: scroll;
+        display: block;
+    }
+
+    .sidebar-arrow-mbl {
+        display: none !important;
+    }
+
+    .mbl-sidebar {
+        display: none;
+    }
+
+    .sidebar-arrow-mbl {
+        display: block !important;
+    }
+
+    /* .sidebar_collapse {
+        display: none;
+    } */
+
+
+
+}
+
+
+
+@media only screen and (max-width:991px) {
+    .MuiTableCell-root {
+        padding: 12px;
+        font-size: 16px;
+    }
+
+    .MuiTableContainer-root {
+        max-height: 400px;
+    }
+
+    .sidebar-arrow-mbl {
+        display: none !important;
+    }
+
+    .tbl_scrool {
+        max-width: 650px;
+    }
+}
+
+@media only screen and (max-width:879px) {
+    .sidebar-arrow-mbl {
+        display: none !important;
+    }
+}
+
+
+
+@media only screen and (max-width:767px) {
+    .incident_mbl {
+        width: 50% !important;
+    }
+
+    .mbl-sidebar {
+        display: none;
+        z-index: 9999;
+        margin-top: 50px;
+        position: absolute;
+    }
+
+    .MuiTableCell-root {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .MuiTableContainer-root {
+        max-height: 350px;
+    }
+
+    .dynamic_below {
+        margin-top: 20px !important;
+    }
+
+    .assigntask_row {
+        gap: 15px;
+    }
+
+    .description {
+        margin-bottom: 10px;
+    }
+
+    .sidebar-arrow-mbl {
+        display: block !important;
+    }
+    .sidebar_collapse {
+        display: none;
+    }
+    .mblDrawer {
+        display: block;
+    
+    }
+
+}
+
+
+@media only screen and (max-width:599px) {
+    .card_incident {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+
+    .btn_incident_create {
+        margin-top: 10px !important;
+    }
+
+    .header-mobi {
+        display: block !important;
+        margin: 0 auto !important;
+        text-align: center !important;
+    }
+
+    .sidebar-arrow-mbl {
+        display: block !important;
+    }
+
+    .sidebar_collapse {
+        display: none;
+    }
+
+    .MuiTableCell-root {
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    .MuiTableContainer-root {
+        max-height: 300px;
+    }
+
+    .description {
+        margin-bottom: 10px;
+    }
+
+    .dynamic_below {
+        margin-top: 20px !important;
+    }
+
+    .assigntask_row {
+        gap: 15px;
+    }
+
+    .mbl_mb {
+        margin-bottom: 10px;
+    }
+    .mblDrawer {
+        display: block;
+    
+    }
+
+}
+
+
+
+
+@media only screen and (min-width:768px) {
+
+    nav {
+        display: block !important;
+    }
+
+}
