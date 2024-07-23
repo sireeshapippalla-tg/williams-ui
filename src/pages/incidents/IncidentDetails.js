@@ -24,6 +24,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { BASE_API_URL } from '../../api';
 import { Drawer, Box, Divider } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 const IncidentDetails = (props) => {
     const [message, setMessage] = useState('');
@@ -499,9 +500,12 @@ const IncidentDetails = (props) => {
                                                         <div className="file-actions d-flex align-items-center">
                                                             <div className="file-download me-2">
                                                                 <a href="#">
-                                                                    <ArrowDownwardIcon style={{ marginRight: "5px" }} />Download
+                                                                    <ArrowDownwardIcon style={{ marginRight: "5px" }} />
                                                                 </a>
                                                             </div>
+                                                            <IconButton>
+                                                                <VisibilityIcon />
+                                                            </IconButton>
                                                             <IconButton
                                                                 edge='end'
                                                                 aria-label='delete'
@@ -525,9 +529,12 @@ const IncidentDetails = (props) => {
                                                                 <div className="file-actions d-flex align-items-center">
                                                                     <div className="file-download me-2">
                                                                         <a href="#">
-                                                                            <ArrowDownwardIcon style={{ marginRight: "5px" }} />Download
+                                                                            <ArrowDownwardIcon style={{ marginRight: "5px" }} />
                                                                         </a>
                                                                     </div>
+                                                                    <IconButton>
+                                                                        <VisibilityIcon />
+                                                                    </IconButton>
                                                                     <IconButton
                                                                         edge='end'
                                                                         aria-label='delete'
@@ -545,6 +552,8 @@ const IncidentDetails = (props) => {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* render component */}
                             <div className='row dynamic_below'>
                                 <div className='task_assigning'>
                                     <TaskAssign />

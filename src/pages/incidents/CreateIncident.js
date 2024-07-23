@@ -26,7 +26,11 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { Drawer, Box, Divider } from '@mui/material';
 import Modal from 'react-bootstrap/Modal';
-
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 
 const CreateIncident = (props) => {
@@ -34,6 +38,7 @@ const CreateIncident = (props) => {
     const [widgets, setWidgets] = useState([]);
     const [movingDivTop, setMovingDivTop] = useState(200);
     const [selectedFiles, setSelectedFiles] = useState([]);
+    const [fileInputKey, setFileInputKey] = useState(Date.now());
     const [caseSummary, setCaseSummary] = useState('');
     const [caseDescription, setCaseDescription] = useState('');
     const [dynamicFields, setDynamicFields] = useState({})
@@ -95,6 +100,11 @@ const CreateIncident = (props) => {
         }
     };
 
+    const handleRemoveField = (index) => {
+        const newFields = fields.filter((_, i) => i !== index);
+        setFields(newFields);
+    };
+
     const handleOptionChange = (index, value) => {
         const newOptions = [...currentField.options];
         newOptions[index] = value;
@@ -130,7 +140,7 @@ const CreateIncident = (props) => {
 
     const confirmDrawerOpen = () => {
         setFieldAddDialog(false);
-        setDrawerOpen(true)
+        // setDrawerOpen(true)
     }
     const handleFileChange = (e) => {
         setSelectedFiles([...e.target.files]);
@@ -394,9 +404,10 @@ const CreateIncident = (props) => {
     const handleFileSelect = (event) => {
         const files = Array.from(event.target.files);
         setSelectedFiles((prevFiles) => [...prevFiles, ...files]);
+
     };
     const handleRemoveFile = (index) => {
-        setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
+        setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
     };
 
     const staticFile = {
@@ -414,242 +425,211 @@ const CreateIncident = (props) => {
                         </h5>
                     }
                     <hr style={{ border: "1px solid white" }} />
-                    <div className='col-md-8 mt-3'>
-                        <div className=''>
-
-                            <Row>
-
-                                {Object.entries(inputs).map(([name, { value, options }], index) => (
-                                    <Col key={index} md={3} sm={4} className="mb-3">
-
-                                        <div >
-                                            <Autocomplete
-                                                style={{ padding: "0px" }}
-                                                value={value}
-                                                onChange={handleChange(name)}
-                                                filterOptions={(options, params) => {
-                                                    const filtered = options.filter(option =>
-                                                        option.title.toLowerCase().includes(params.inputValue.toLowerCase())
-                                                    );
-                                                    const { inputValue } = params;
-                                                    const isExisting = options.some(option => inputValue === option.title);
-                                                    if (inputValue !== '' && !isExisting) {
-                                                        filtered.push({
-                                                            inputValue,
-                                                            title: `"${inputValue}"`,
-                                                            addOption: true
-                                                        });
-                                                    }
-                                                    return filtered;
-                                                }}
-
-                                                selectOnFocus
-                                                clearOnBlur
-                                                handleHomeEndKeys
-                                                id={`${name}-autocomplete`}
-                                                open={handleToggleOpen[name]}
-                                                onOpen={() => setHandleToggleOpen(prev => ({ ...prev, [name]: true }))}
-                                                onClose={() => setHandleToggleOpen(prev => ({ ...prev, [name]: false }))}
-                                                options={options}
-                                                getOptionLabel={(option) => {
-                                                    if (typeof option === 'string') {
-                                                        return option;
-                                                    }
-                                                    if (option.inputValue) {
-                                                        return option.inputValue;
-                                                    }
-                                                    return option.title;
-                                                }}
-                                                renderOption={(props, option) => (
-                                                    <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
-                                                        {option.addOption ? (
-                                                            <>
-                                                                {option.title}
-                                                                <AddIcon style={{ marginLeft: "10px" }} />
-                                                            </>
-                                                        ) : (
-                                                            option.title
-                                                        )}
-                                                    </li>
-                                                )}
-                                                sx={{ width: '100%' }}
-                                                renderInput={(params) => (
-                                                    <TextField {...params}
-                                                        label={`${name}`}
-                                                        variant="outlined"
-                                                        InputProps={{
-                                                            ...params.InputProps,
-                                                            className: 'custom-input-drop' // Apply the custom class
-                                                        }}
-                                                        className="custom-textfield"
-                                                    />
-                                                )}
-                                            />
-                                        </div>
-
-                                    </Col>
-                                ))}
-
-                                <Col md={3} sm={4} className="mb-3">
-                                    <Button variant="contained" className='accordian_submit_btn'  onClick={handleDrawerOpen}>
-                                        More Fields...
-                                    </Button>
-
-                                </Col>
-
-
-
-
-                                <Col md={6} sm={6} className="mb-3">
-
+                    <div className='col-md-8 '>
+                        <Row>
+                            {Object.entries(inputs).map(([name, { value, options }], index) => (
+                                <Col key={index} md={4} sm={4} className="mb-3">
                                     <div className='resolve-drop'>
-                                        <Form.Group
-                                            className='mb-0'
-                                            controlId='exampleForm.ControlTextarea1'
-                                        >
-                                            <TextField
-                                                InputProps={{ className: 'custom-input' }}
-                                                placeholder='Subject...'
+                                        <Autocomplete
+                                            style={{ padding: "0px" }}
+                                            value={value}
+                                            onChange={handleChange(name)}
+                                            filterOptions={(options, params) => {
+                                                const filtered = options.filter(option =>
+                                                    option.title.toLowerCase().includes(params.inputValue.toLowerCase())
+                                                );
+                                                const { inputValue } = params;
+                                                const isExisting = options.some(option => inputValue === option.title);
+                                                if (inputValue !== '' && !isExisting) {
+                                                    filtered.push({
+                                                        inputValue,
+                                                        title: `"${inputValue}"`,
+                                                        addOption: true
+                                                    });
+                                                }
+                                                return filtered;
+                                            }}
+                                            selectOnFocus
+                                            clearOnBlur
+                                            handleHomeEndKeys
+                                            id={`${name}-autocomplete`}
+                                            open={handleToggleOpen[name]}
+                                            onOpen={() => setHandleToggleOpen(prev => ({ ...prev, [name]: true }))}
+                                            onClose={() => setHandleToggleOpen(prev => ({ ...prev, [name]: false }))}
+                                            options={options}
+                                            getOptionLabel={(option) => {
+                                                if (typeof option === 'string') {
+                                                    return option;
+                                                }
+                                                if (option.inputValue) {
+                                                    return option.inputValue;
+                                                }
+                                                return option.title;
+                                            }}
+                                            renderOption={(props, option) => (
+                                                <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
+                                                    {option.addOption ? (
+                                                        <>
+                                                            {option.title}
+                                                            <AddIcon style={{ marginLeft: "10px" }} />
+                                                        </>
+                                                    ) : (
+                                                        option.title
+                                                    )}
+                                                </li>
+                                            )}
+                                            renderInput={(params) => (
+                                                <TextField {...params}
+                                                    label={`${name}`}
+                                                    variant="outlined"
+                                                    InputProps={{
+                                                        ...params.InputProps,
+                                                        className: 'custom-input-drop' // Apply the custom class
+                                                    }}
+                                                    className="custom-textfield"
+                                                />
+                                            )}
+                                        />
+                                    </div>
+                                </Col>
+                            ))}
 
-                                                label='Subject'
+                            <Col md={4} sm={4} className="mb-3">
+                                <div className='resolve-drop'>
+                                    <Autocomplete
+                                        style={{ padding: "0px" }}
+                                        options={users}
+                                        value={selectedUser}
+                                        onChange={handleUserChange}
+                                        getOptionLabel={(option) => option.title}
+                                        renderOption={(props, option) => (
+                                            <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
+                                                {option.title}
+                                            </li>
+                                        )}
+                                        renderInput={(params) => (
+                                            <TextField {...params}
+                                                label="Department"
                                                 variant="outlined"
-                                                className='w-100'
-                                                style={{ backgroundColor: "white" }}
-                                                value={caseSummary}
-                                                onChange={(e) => setCaseSummary(e.target.value)}
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    className: 'custom-input-drop' // Apply the custom class
+                                                }}
+                                                className="custom-textfield"
                                             />
-                                        </Form.Group>
-                                    </div>
-                                </Col>
-                                <Col md={3} sm={4} className="mb-3">
+                                        )}
+                                    />
+                                </div>
+                            </Col>
 
-                                    <div className='resolve-drop'>
-                                        <Autocomplete
-                                            style={{ padding: "0px" }}
-                                            options={users}
-                                            value={selectedUser}
-                                            onChange={handleUserChange}
-                                            getOptionLabel={(option) => option.title} renderOption={(props, option) => (
-                                                <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
-                                                    {option.title}
-                                                </li>
-                                            )}
-                                            renderInput={(params) => (
-                                                <TextField {...params}
-                                                    label="Department"
-                                                    variant="outlined"
-                                                    InputProps={{
-                                                        ...params.InputProps,
-                                                        className: 'custom-input-drop' // Apply the custom class
-                                                    }}
-                                                    className="custom-textfield"
-                                                />
-                                            )}
+                            <Col md={4} sm={4} className="mb-3">
+                                <div className='resolve-drop'>
+                                    <Autocomplete
+                                        style={{ padding: "0px" }}
+                                        options={users}
+                                        value={selectedUser}
+                                        onChange={handleUserChange}
+                                        getOptionLabel={(option) => option.title}
+                                        renderOption={(props, option) => (
+                                            <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
+                                                {option.title}
+                                            </li>
+                                        )}
+                                        renderInput={(params) => (
+                                            <TextField {...params}
+                                                label="Assign To"
+                                                variant="outlined"
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    className: 'custom-input-drop' // Apply the custom class
+                                                }}
+                                                className="custom-textfield"
+                                            />
+                                        )}
+                                    />
+                                </div>
+                            </Col>
+
+                            <Col md={4} sm={4} className="mb-3">
+                                <div className='resolve-drop'>
+                                    <Form.Group className='mb-0' controlId='exampleForm.ControlTextarea1'>
+                                        <TextField
+                                            id="outlined-basic"
+                                            InputProps={{ className: 'custom-input' }}
+                                            className='w-100 custom-textfield'
+                                            placeholder='Subject...'
+                                            label='Subject'
+                                            variant="outlined"
+                                            value={caseSummary}
+                                            onChange={(e) => setCaseSummary(e.target.value)}
                                         />
-                                    </div>
-                                </Col>
-                                <Col md={3} sm={4} className="mb-3">
+                                    </Form.Group>
+                                </div>
+                            </Col>
 
-                                    <div className='resolve-drop'>
-                                        <Autocomplete
-                                            style={{ padding: "0px" }}
-                                            options={users}
-                                            value={selectedUser}
-                                            onChange={handleUserChange}
-                                            getOptionLabel={(option) => option.title} renderOption={(props, option) => (
-                                                <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
-                                                    {option.title}
-                                                </li>
-                                            )}
-                                            renderInput={(params) => (
-                                                <TextField {...params}
-                                                    label="Assign To"
-                                                    variant="outlined"
-                                                    InputProps={{
-                                                        ...params.InputProps,
-                                                        className: 'custom-input-drop' // Apply the custom class
-                                                    }}
-                                                    className="custom-textfield"
-                                                />
-                                            )}
-                                        />
-                                    </div>
-                                </Col>
-
-                                {/* <Col md={3} sm={4} className="mb-3">
-                                    <Button variant="contained" className='accordian_submit_btn' onClick={handleDrawerOpen}>
-                                        More Fields...
-                                    </Button>
-
-                                </Col> */}
-
-                            </Row>
-
-
-                            {/* </div> */}
-                            <div className='row mb-3'>
-
-                                <div className='col-md-12 text_field'>
-                                    <Form.Group
-                                        className='mb-0'
-                                        controlId='exampleForm.ControlTextarea1'
-                                    >
+                            <Col md={12} sm={6}>
+                                <div className='resolve-drop'>
+                                    <Form.Group className='mb-0' controlId='exampleForm.ControlTextarea1'>
                                         <TextField
                                             id="outlined-basic"
                                             label="Description"
                                             className='w-100'
                                             multiline={true}
                                             variant="outlined"
-                                            minRows={2}
-                                            style={{ backgroundColor: "white" }}
+                                            minRows={3}
+                                            style={{ backgroundColor: "white", borderRadius: "6px" }}
                                             value={caseDescription}
                                             onChange={(e) => setCaseDescription(e.target.value)}
                                         />
                                     </Form.Group>
                                 </div>
-                                {/* <div className='col-md-6 mt-3 file_upload'>
-                                  
-                                    <input class="form-control" type="file" id="formFileMultiple" multiple onChange={handleFileSelect} />
-                                </div> */}
-                            </div>
+                            </Col>
+                        </Row>
 
-                        </div>
                         <div className="attached-files-info mb-3">
-                            <div className="row">
-                            <div className='col-md-4  file_upload'>
-                                    {/* <label className="text_color" for="formFileMultiple" class="form-label" onChange={handleFileChange}> Browse</label> */}
-                                    <input class="form-control" type="file" id="formFileMultiple" multiple onChange={handleFileSelect} />
-                                </div>
-                                {/* <div className="col-xxl-6"> */}
-                                <div className='col-md-8'>
-                                    <div className="attached-files">
-                                        <ul>
+                            <Row>
+                                <Col md={12} className='file_upload'>
 
-                                            <li className='mt-2'>
-                                                <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
-                                                    <div className="d-flex align-items-center">
-                                                        <span className="file-icon">
-                                                            <TextSnippetIcon style={{ color: "#533529" }} />
-                                                        </span>
-                                                        <p className="mb-0 ms-2">{staticFile.name}</p>
-                                                    </div>
-                                                    <div className="file-actions d-flex align-items-center">
-                                                        <div className="file-download me-2">
-                                                            <a href="#">
-                                                                <ArrowDownwardIcon style={{ marginRight: "5px" }} />Download
-                                                            </a>
+                                    <input class="form-control" type="file" id="formFileMultiple" multiple onChange={handleFileSelect} />
+                                </Col>
+                                <Col md={12}>
+
+                                    {selectedFiles && selectedFiles.length > 0 ?
+                                        <div className="attached-files">
+                                            <ul>
+                                                {selectedFiles.map((file, index) => (
+                                                    <li key={index} className='mt-2'>
+                                                        <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
+                                                            <div className="d-flex align-items-center">
+                                                                <span className="file-icon">
+                                                                    <TextSnippetIcon style={{ color: "#533529" }} />
+                                                                </span>
+                                                                <p className="mb-0 ms-2">{file.name}</p>
+                                                            </div>
+                                                            <div className="file-actions d-flex align-items-center">
+                                                                <div className="file-download me-2">
+                                                                    <a href="#">
+                                                                        <ArrowDownwardIcon style={{ marginRight: "5px" }} />
+                                                                    </a>
+                                                                </div>
+                                                                <IconButton>
+                                                                    <VisibilityIcon />
+                                                                </IconButton>
+                                                                <IconButton edge='end' aria-label='delete' onClick={() => handleRemoveFile(index)}>
+                                                                    <CloseIcon className='close_icon' />
+                                                                </IconButton>
+                                                            </div>
                                                         </div>
-                                                        <IconButton
-                                                            edge='end'
-                                                            aria-label='delete'
-                                                        // onClick={() => handleRemoveFile(index)}
-                                                        >
-                                                            <CloseIcon className='close_icon' />
-                                                        </IconButton>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                            {selectedFiles.length > 0 && (
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                        : ""
+                                    }
+                                    {/* <div className="attached-files">
+                                        <ul>
+                                          
+                                            {selectedFiles && selectedFiles.length > 0 ?
                                                 selectedFiles.map((file, index) => (
                                                     <li key={index} className='mt-2'>
                                                         <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
@@ -662,32 +642,240 @@ const CreateIncident = (props) => {
                                                             <div className="file-actions d-flex align-items-center">
                                                                 <div className="file-download me-2">
                                                                     <a href="#">
-                                                                        <ArrowDownwardIcon style={{ marginRight: "5px" }} />Download
+                                                                        <ArrowDownwardIcon style={{ marginRight: "5px" }} />
                                                                     </a>
                                                                 </div>
-                                                                <IconButton
-                                                                    edge='end'
-                                                                    aria-label='delete'
-                                                                    onClick={() => handleRemoveFile(index)}
-                                                                >
+                                                                <IconButton>
+                                                                    <VisibilityIcon />
+                                                                </IconButton>
+                                                                <IconButton edge='end' aria-label='delete' onClick={() => handleRemoveFile(index)}>
                                                                     <CloseIcon className='close_icon' />
                                                                 </IconButton>
                                                             </div>
                                                         </div>
                                                     </li>
-                                                ))
-                                            )}
+                                                )) : <div>No selected files</div>}
                                         </ul>
-                                    </div>
-                                </div>
-                            </div>
+                                    </div> */}
+                                </Col>
+                            </Row>
                         </div>
+
+                        <Accordion className='mb-2 accordian_arrow'>
+                            <AccordionSummary
+                                style={{
+                                    // color: '#0c63e4',
+                                    backgroundColor: '#533529',
+                                    boxShadow: 'inset 0 -1px 0 rgba(0, 0, 0, .125);',
+                                    padding: '0px 20px',
+                                }}
+                                expandIcon={<ExpandMoreIcon className='accordian_arrow' />}
+                                aria-controls='panel3-content'
+                                id='panel3-header'
+                            >
+                                <Typography className='accord_typo'>
+                                    Additional Fields
+                                </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <Grid container alignItems="center" spacing={2}>
+                                    {draggableItems.map((widget, index) => (
+                                        <Grid item xs={4} key={index}>
+                                            {widget.widgetType === 'dropdown' ? (
+                                                <div className='resolve-drop'>
+                                                    <Autocomplete
+                                                        style={{ width: '100%' }}
+                                                        value={dynamicFields[widget.label] || null}
+                                                        onChange={DragablehandleChange(widget.label)}
+                                                        filterOptions={(options, params) => {
+                                                            const filtered = options.filter(option =>
+                                                                option.toLowerCase().includes(params.inputValue.toLowerCase())
+                                                            );
+                                                            if (params.inputValue !== '') {
+                                                                filtered.push({
+                                                                    inputValue: params.inputValue,
+                                                                    title: `Add "${params.inputValue}"`,
+                                                                });
+                                                            }
+                                                            return filtered;
+                                                        }}
+                                                        selectOnFocus
+                                                        clearOnBlur
+                                                        handleHomeEndKeys
+                                                        options={widget.options}
+                                                        getOptionLabel={(option) => {
+                                                            if (typeof option === 'string') {
+                                                                return option;
+                                                            }
+                                                            if (option.inputValue) {
+                                                                return option.inputValue;
+                                                            }
+                                                            return option;
+                                                        }}
+                                                        renderOption={(props, option) => (
+                                                            <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
+                                                                {option.inputValue ? (
+                                                                    <>
+                                                                        Add "{option.inputValue}"
+                                                                        <AddIcon style={{ marginLeft: "10px" }} />
+                                                                    </>
+                                                                ) : (
+                                                                    option
+                                                                )}
+                                                            </li>
+                                                        )}
+                                                        renderInput={(params) => (
+                                                            <TextField
+                                                                {...params}
+                                                                label={`${widget.label}`}
+                                                                variant="outlined"
+                                                                InputProps={{
+                                                                    ...params.InputProps,
+                                                                    className: 'custom-input-drop' // Apply the custom class
+                                                                }}
+                                                                className="custom-textfield"
+                                                            />
+                                                        )}
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <Form.Group
+                                                    className='mb-0'
+                                                    controlId='exampleForm.ControlTextarea1 '
+                                                >
+                                                    <TextField
+                                                        id="outlined-basic"
+                                                        InputProps={{ className: 'custom-input' }}
+                                                        className='w-100 custom-textfield'
+                                                        label={` ${widget.label}`}
+                                                        variant="outlined"
+                                                        value={dynamicFields[widget.label] || ''}
+                                                        onChange={DragablehandleChange(widget.label)}
+                                                    />
+                                                </Form.Group>
+                                            )}
+                                        </Grid>
+                                    ))}
+
+                                    <form>
+                                        {fields.map((field, index) => (
+                                            index % 2 === 0 && ( // Render two fields per row
+                                                <Row key={index} className='mb-3'>
+                                                    <Col md={6} sm={6}>
+                                                        <Grid container alignItems="center">
+                                                            {/* <Grid item xs={2}>
+                                                                <Checkbox
+                                                                    checked={!!field.value && field.value.trim() !== ''}
+                                                                    onChange={handleCheckboxChange(index)}
+                                                                    color="primary"
+                                                                />
+                                                            </Grid> */}
+                                                            <Grid item xs={10}>
+                                                                {field.type === 'input' ? (
+                                                                    <TextField
+                                                                        InputProps={{ className: 'custom-input' }}
+                                                                        className="custom-textfield"
+                                                                        type="text"
+                                                                        label={field.label}
+                                                                        name={field.label}
+                                                                        value={field.value || ''}
+                                                                        onChange={(e) => handleFieldValueChange(index, e.target.value)}
+                                                                    />
+                                                                ) : (
+                                                                    <Autocomplete
+                                                                        options={field.options}
+                                                                        value={field.value || null}
+                                                                        onChange={(event, newValue) => handleFieldValueChange(index, newValue)}
+                                                                        renderInput={(params) => (
+                                                                            <TextField
+                                                                                {...params}
+                                                                                label={field.label}
+                                                                                variant="outlined"
+                                                                                InputProps={{
+                                                                                    ...params.InputProps,
+                                                                                    className: 'custom-input-drop' // Apply the custom class
+                                                                                }}
+                                                                                className="custom-textfield"
+                                                                            />
+                                                                        )}
+                                                                    />
+                                                                )}
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Col>
+                                                    {index + 1 < fields.length && ( // Ensure not out of bounds
+                                                        <Col md={6} sm={6}>
+                                                            <Grid container alignItems="center">
+                                                                <Grid item xs={2}>
+                                                                    <Checkbox
+                                                                        checked={!!fields[index + 1].value && fields[index + 1].value.trim() !== ''}
+                                                                        onChange={handleCheckboxChange(index + 1)}
+                                                                        color="primary"
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item xs={10}>
+                                                                    {fields[index + 1].type === 'input' ? (
+                                                                        <TextField
+                                                                            InputProps={{ className: 'custom-input' }}
+                                                                            className="custom-textfield"
+                                                                            type="text"
+                                                                            label={fields[index + 1].label}
+                                                                            name={fields[index + 1].label}
+                                                                            value={fields[index + 1].value || ''}
+                                                                            onChange={(e) => handleFieldValueChange(index + 1, e.target.value)}
+                                                                        />
+                                                                    ) : (
+                                                                        <Autocomplete
+                                                                            options={fields[index + 1].options}
+                                                                            value={fields[index + 1].value || null}
+                                                                            onChange={(event, newValue) => handleFieldValueChange(index + 1, newValue)}
+                                                                            renderInput={(params) => (
+                                                                                <TextField
+                                                                                    {...params}
+                                                                                    label={fields[index + 1].label}
+                                                                                    variant="outlined"
+                                                                                    InputProps={{
+                                                                                        ...params.InputProps,
+                                                                                        className: 'custom-input-drop' // Apply the custom class
+                                                                                    }}
+                                                                                    className="custom-textfield"
+                                                                                />
+                                                                            )}
+                                                                        />
+                                                                    )}
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Col>
+                                                    )}
+                                                </Row>
+                                            )
+                                        ))}
+                                    </form>
+                                </Grid>
+
+                            </AccordionDetails>
+
+
+
+                        </Accordion>
                     </div>
                     {console.log("issummary", props.isSummaryVisible)}
-
+                    {/* right content */}
 
                     {props.isRightContentVisible == true ? <div className='col-md-4'></div> :
-                        <div className='col-md-4 mt-3'>
+                        <div className='col-md-4 '>
+                            <div className='mb-3' style={{ display: "flex", justifyContent: "end" }}>
+                                <Button
+                                    variant='outlined'
+                                    className='accordian_submit_btn'
+                                    onClick={fieldDialogOpen}
+
+                                    style={{ color: "#533529", fontWeight: "600", }}
+                                >
+                                    Create new Fields
+                                </Button>
+                            </div>
+
                             <div className="ticket-chat attached-files mb-3" >
                                 <h5 style={{ fontWeight: "600" }}>History</h5>
                                 {/* <TextField
@@ -720,6 +908,7 @@ const CreateIncident = (props) => {
 
                             </div>
 
+
                         </div>
                     }
                     {props.isCraeteNewIncidentButton == true ?
@@ -729,6 +918,7 @@ const CreateIncident = (props) => {
                             <Button className='search_btn' type='submit'>Create incident</Button>
                         </div>
                     }
+
 
                     <Drawer anchor="right" open={drawerOpen} onClose={handleDrawerOpen}>
                         <Box sx={{ width: 400 }} className="drawer-container">
@@ -964,7 +1154,7 @@ const CreateIncident = (props) => {
                         <Modal.Body className='modal_bg_body'>
                             <div>
                                 <div className='row'>
-                                    <Col md={6} sm={12} className="mb-3">
+                                    <Col md={5} sm={12} className="mb-3">
                                         <Autocomplete
                                             options={fieldTypeOptions}
                                             value={fieldTypeOptions.find(option => option.title.toLowerCase() === currentField.type) || null}
@@ -988,7 +1178,7 @@ const CreateIncident = (props) => {
                                             )}
                                         />
                                     </Col>
-                                    <Col md={6} sm={12} className="mb-3">
+                                    <Col md={5} sm={12} className="mb-3">
                                         <TextField
                                             InputProps={{ className: 'custom-input' }}
                                             className="custom-textfield"
@@ -1001,131 +1191,105 @@ const CreateIncident = (props) => {
                                             onChange={handleFieldChange}
                                         />
                                     </Col>
+                                    <Col md={2} >
+                                        <IconButton className='dynamic-addicon' onClick={handleAddField}>
+                                            <AddIcon />
+                                        </IconButton>
+                                    </Col>
                                     {currentField.type === 'dropdown' && (
                                         <div className='mt-0'>
-                                            <label className='fw-bold'>Options:</label>
+                                            <label>Dropdown options:</label>
                                             <br />
-                                            <TextField
-                                                InputProps={{ className: 'custom-input' }}
-                                                className="custom-textfield m-1"
-                                                type="text"
+                                            <Col md={6} className='mb-2'>
+                                                <Grid container alignItems="center">
+                                                    <Grid item xs={11}>
+                                                        <TextField
+                                                            InputProps={{ className: 'custom-input' }}
+                                                            className="custom-textfield m-1"
+                                                            type="text"
 
-                                                label="Option 1"
-                                                value={currentField.options[0]}
-                                                onChange={(e) => handleOptionChange(0, e.target.value)}
-                                            />
-                                            <Button className=' dynamic_btn' onClick={handleAddOption}>Add Option</Button>
+                                                            label="Option 1"
+                                                            value={currentField.options[0]}
+                                                            onChange={(e) => handleOptionChange(0, e.target.value)}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={1}>
+                                                        <IconButton onClick={handleAddOption}>
+                                                            <AddIcon />
+                                                        </IconButton>
+                                                    </Grid>
+                                                </Grid>
+                                            </Col>
+
+
+                                            {/* <Button className=' dynamic_btn' onClick={handleAddOption}>Add Option</Button> */}
                                             {currentField.options.slice(1).map((option, index) => (
-                                                <div key={index}>
-                                                    <TextField
-                                                        type="text"
-                                                        InputProps={{ className: 'custom-input m-1' }}
-                                                        className="custom-textfield"
-                                                        label={`Option ${index + 2}`}
-                                                        value={option}
-                                                        onChange={(e) => handleOptionChange(index + 1, e.target.value)}
-                                                    />
-                                                </div>
+                                                <Col md={6} className='mb-2'>
+                                                    <Grid container alignItems="center">
+                                                        <Grid item xs={11}>
+                                                            <div key={index}>
+                                                                <TextField
+                                                                    type="text"
+                                                                    InputProps={{ className: 'custom-input m-1' }}
+                                                                    className="custom-textfield"
+                                                                    label={`Option ${index + 2}`}
+                                                                    value={option}
+                                                                    onChange={(e) => handleOptionChange(index + 1, e.target.value)}
+                                                                />
+                                                            </div>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Col>
+
                                             ))}
                                         </div>
                                     )}
                                 </div>
-                                <Button className='add-Field-btn' onClick={handleAddField}>Add Field</Button>
-                                <h6 className='mt-5 font-weight-bold'>Generated Fields</h6>
-
-
+                                {/* <Button className='add-Field-btn' onClick={handleAddField}>Add Field</Button> */}
+                                <h6 style={{ fontWeight: "600" }}>Generated Fields</h6>
                                 <form>
                                     {fields.map((field, index) => (
-                                        index % 2 === 0 && ( // Render two fields per row
-                                            <Row key={index} className='mb-3'>
-                                                <Col md={6} sm={6}>
-                                                    <Grid container alignItems="center">
-                                                        <Grid item xs={2}>
-                                                            <Checkbox
-                                                                checked={!!field.value && field.value.trim() !== ''}
-                                                                onChange={handleCheckboxChange(index)}
-                                                                color="primary"
+                                        <Row key={index} className='mb-3'>
+                                            <Col md={10} sm={12}>
+                                                {field.type === 'input' ? (
+                                                    <TextField
+                                                        InputProps={{ className: 'custom-input' }}
+                                                        className="custom-textfield"
+                                                        type="text"
+                                                        label={field.label}
+                                                        name={field.label}
+                                                        value={field.value || ''}
+                                                        onChange={(e) => handleFieldValueChange(index, e.target.value)}
+                                                        fullWidth
+                                                    />
+                                                ) : (
+                                                    <Autocomplete
+                                                        options={field.options}
+                                                        value={field.value || null}
+                                                        onChange={(event, newValue) => handleFieldValueChange(index, newValue)}
+                                                        renderInput={(params) => (
+                                                            <TextField
+                                                                {...params}
+                                                                label={field.label}
+                                                                variant="outlined"
+                                                                InputProps={{
+                                                                    ...params.InputProps,
+                                                                    className: 'custom-input-drop' // Apply the custom class
+                                                                }}
+                                                                className="custom-textfield"
+                                                                fullWidth
                                                             />
-                                                        </Grid>
-                                                        <Grid item xs={10}>
-                                                            {field.type === 'input' ? (
-                                                                <TextField
-                                                                    InputProps={{ className: 'custom-input' }}
-                                                                    className="custom-textfield"
-                                                                    type="text"
-                                                                    label={field.label}
-                                                                    name={field.label}
-                                                                    value={field.value || ''}
-                                                                    onChange={(e) => handleFieldValueChange(index, e.target.value)}
-                                                                />
-                                                            ) : (
-                                                                <Autocomplete
-                                                                    options={field.options}
-                                                                    value={field.value || null}
-                                                                    onChange={(event, newValue) => handleFieldValueChange(index, newValue)}
-                                                                    renderInput={(params) => (
-                                                                        <TextField
-                                                                            {...params}
-                                                                            label={field.label}
-                                                                            variant="outlined"
-                                                                            InputProps={{
-                                                                                ...params.InputProps,
-                                                                                className: 'custom-input-drop' // Apply the custom class
-                                                                            }}
-                                                                            className="custom-textfield"
-                                                                        />
-                                                                    )}
-                                                                />
-                                                            )}
-                                                        </Grid>
-                                                    </Grid>
-                                                </Col>
-                                                {index + 1 < fields.length && ( // Ensure not out of bounds
-                                                    <Col md={6} sm={6}>
-                                                        <Grid container alignItems="center">
-                                                            <Grid item xs={2}>
-                                                                <Checkbox
-                                                                    checked={!!fields[index + 1].value && fields[index + 1].value.trim() !== ''}
-                                                                    onChange={handleCheckboxChange(index + 1)}
-                                                                    color="primary"
-                                                                />
-                                                            </Grid>
-                                                            <Grid item xs={10}>
-                                                                {fields[index + 1].type === 'input' ? (
-                                                                    <TextField
-                                                                        InputProps={{ className: 'custom-input' }}
-                                                                        className="custom-textfield"
-                                                                        type="text"
-                                                                        label={fields[index + 1].label}
-                                                                        name={fields[index + 1].label}
-                                                                        value={fields[index + 1].value || ''}
-                                                                        onChange={(e) => handleFieldValueChange(index + 1, e.target.value)}
-                                                                    />
-                                                                ) : (
-                                                                    <Autocomplete
-                                                                        options={fields[index + 1].options}
-                                                                        value={fields[index + 1].value || null}
-                                                                        onChange={(event, newValue) => handleFieldValueChange(index + 1, newValue)}
-                                                                        renderInput={(params) => (
-                                                                            <TextField
-                                                                                {...params}
-                                                                                label={fields[index + 1].label}
-                                                                                variant="outlined"
-                                                                                InputProps={{
-                                                                                    ...params.InputProps,
-                                                                                    className: 'custom-input-drop' // Apply the custom class
-                                                                                }}
-                                                                                className="custom-textfield"
-                                                                            />
-                                                                        )}
-                                                                    />
-                                                                )}
-                                                            </Grid>
-                                                        </Grid>
-                                                    </Col>
+                                                        )}
+                                                    />
                                                 )}
-                                            </Row>
-                                        )
+                                            </Col>
+                                            <Col md={2}>
+                                                <IconButton onClick={() => handleRemoveField(index)}>
+                                                    <CloseIcon className='close_icon' />
+                                                </IconButton>
+
+                                            </Col>
+                                        </Row>
                                     ))}
                                 </form>
                             </div>

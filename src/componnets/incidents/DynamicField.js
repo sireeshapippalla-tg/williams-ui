@@ -84,7 +84,7 @@ const DynamicField = (props) => {
                 //     textTransform: "capitalize", backgroundColor: "#533529", color
                 //         : "white", border: "none", padding: "10px 15px", fontWeight: "600"
                 // }}
-                style={{color:"#533529", fontWeight:"600", marginTop:"10px"}}
+                style={{ color: "#533529", fontWeight: "600", marginTop: "10px" }}
 
                 onClick={fieldDialogOpen}
 
@@ -104,7 +104,7 @@ const DynamicField = (props) => {
                 <Modal.Body className='modal_bg_body'>
                     <div>
                         <div className='row'>
-                            <Col md={6} sm={12} className="mb-3">
+                            <Col md={5} sm={12} className="mb-3">
                                 <Autocomplete
                                     options={fieldTypeOptions}
                                     value={fieldTypeOptions.find(option => option.title.toLowerCase() === currentField.type) || null}
@@ -128,7 +128,7 @@ const DynamicField = (props) => {
                                     )}
                                 />
                             </Col>
-                            <Col md={6} sm={12} className="mb-3">
+                            <Col md={5} sm={12} className="mb-3">
                                 <TextField
                                     InputProps={{ className: 'custom-input' }}
                                     className="custom-textfield"
@@ -140,6 +140,9 @@ const DynamicField = (props) => {
                                     value={currentField.label}
                                     onChange={handleFieldChange}
                                 />
+                            </Col>
+                            <Col md={2}>
+                                <IconButton><AddIcon /></IconButton>
                             </Col>
                             {currentField.type === 'dropdown' && (
                                 <div className='mt-0'>
@@ -155,6 +158,7 @@ const DynamicField = (props) => {
                                         onChange={(e) => handleOptionChange(0, e.target.value)}
                                     />
                                     <Button className=' dynamic_btn' onClick={handleAddOption}>Add Option</Button>
+
                                     {currentField.options.slice(1).map((option, index) => (
                                         <div key={index}>
                                             <TextField
@@ -170,7 +174,7 @@ const DynamicField = (props) => {
                                 </div>
                             )}
                         </div>
-                        <Button className='add-Field-btn' onClick={handleAddField}>Add Field</Button>
+                        {/* <Button className='add-Field-btn' onClick={handleAddField}>Add Field</Button> */}
                         <h6 className='mt-5 font-weight-bold'>Generated Fields</h6>
 
 

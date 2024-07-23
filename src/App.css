@@ -301,10 +301,10 @@ header h3 {
 
 .ticket-chat .ticket-chat-head .chat-post-box {
   background: #fff;
-  border: 1px solid #d3d3d4;
+  /* border: 1px solid #d3d3d4; */
   border-radius: 5px;
   margin-bottom: 15px;
-  padding: 15px;
+  padding: 4px;
 }
 
 .ticket-chat .ticket-chat-head .chat-post-box .files-attached {
@@ -523,7 +523,7 @@ input {
   float: right !important;
   border: 1px solid #533529 !important;
   border-radius: 6px !important;
-  padding: 10px 20px !important;
+  padding: 7px 20px !important;
   font-size: 14px !important;
   color: #533529 !important;
   line-height: 21px !important;
@@ -749,13 +749,13 @@ div.modal_bg_body .modal-body {
   height: 37px; /* Adjust the height as needed */
   display: flex;
   align-items: center; /* Center text vertically */
-  padding: 6px 10px; /* Adjust the padding as needed */
+  padding: 6px 10px !important; /* Adjust the padding as needed */
 }
 .custom-input-drop .MuiInputBase-input {
   height: 16px; /* Adjust the height as needed */
   display: flex;
   align-items: center; /* Center text vertically */
-  padding: 6px 10px; /* Adjust the padding as needed */
+  padding: 6px 10px !important; /* Adjust the padding as needed */
 }
 .brown-menu .MuiPaper-root {
   background-color: #FFF8DC; /* Cornsilk color */
@@ -861,4 +861,11 @@ a {
 
 .close_icon{
   color: red
+}
+.dynamic-addicon{
+  height: 25px;
+  width: 25px;
+  background-color: #533529 !important;
+  color: white !important;
+  top: 10px;
 }
