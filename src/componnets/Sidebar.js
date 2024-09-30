@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useState } from "react";
 import { styled, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
@@ -17,13 +18,15 @@ import {
 import IconButton from '@mui/material/IconButton';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 import Header from "./Header";
 import './Sidebar.css';
 import HomeIcon from '@mui/icons-material/Home';
+
 import Home from '../assets/images/HomeIcon.png';
 import Incident from '../assets/images/Incident.png';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-import { useState } from "react";
+
 
 
 
@@ -38,6 +41,11 @@ const SidebarItems = [
         label: "Incident",
         path: "/incident",
         icon: <ReportProblemIcon />
+    },
+    {
+        label: "Users",
+        path: "/users",
+        icon: <PersonAddAltIcon />
     },
 ];
 

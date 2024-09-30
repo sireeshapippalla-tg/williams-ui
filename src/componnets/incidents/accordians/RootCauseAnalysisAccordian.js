@@ -24,6 +24,15 @@ import AddIcon from '@mui/icons-material/Add';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import { useParams } from 'react-router-dom';
+import { Snackbar } from '@mui/material';
+import Alert from '@mui/material/Alert';
+import axios from 'axios';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import { saveRootCause, getRootCauseDetails } from '../../../api';
+
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -38,66 +47,51 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 const RootCauseAnalysisAccordian = () => {
+
+    const { id } = useParams();
+    console.log(id)
+
+    // const [whyInputs, setWhyInputs] = useState([
+    //     { label: 'First Why', value: ['', '', ''] },
+    // ]);
     const [whyInputs, setWhyInputs] = useState([
-        { label: 'First Why', value: ['', '', ''] },
+        {
+            label: "First why",
+            value: ["", "", ""],
+            id: 0
+        }
     ]);
     const [problemDescription, setProblemDescription] = useState('');
+    const [summary, setSummary] = useState('')
     const [rootSelectedFiles, setRootSelectedFiles] = useState([]);
-    function numberToWords(number) {
-        const units = [
-            '',
-            'First',
-            'Second',
-            'Third',
-            'Forth',
-            'Fifth',
-            'Sixth',
-            'Seventh',
-            'Eighth',
-            'Ninth',
-        ];
-        const teens = [
-            'Tenth',
-            'Eleventh',
-            'Twelveth',
-            'Thirteenth',
-            'Fourteenth',
-            'Fifteenth',
-            'Sixteenth',
-            'Seventeenth',
-            'Eighteenth',
-            'Nineteenth',
-        ];
-        const tens = [
-            '',
-            '',
-            'Twentyth',
-            'Thirtyth',
-            'Fortyth',
-            'Fiftyth',
-            'Sixtyth',
-            'Seventyth',
-            'Eightyth',
-            'Ninetyth',
-        ];
+    const [message, setMessage] = useState('');
+    const [severity, setSeverity] = useState('success');
+    const [open, setOpen] = useState(false);
+    const [fetchedFiles, setFitchedFiles] = useState([])
+    const [selectedFileUrl, setSelectedFileUrl] = useState(null);
+    const [rootCauseId, setRootCauseId] = useState()
+    const [problemStageId, setProblemStageId] = useState()
 
-        if (number < 10) {
-            return units[number];
-        } else if (number < 20) {
-            return teens[number - 10];
-        } else if (number < 100) {
-            return `${tens[Math.floor(number / 10)]} ${units[number % 10]}`.trim();
-        } else {
-            return number.toString();
+
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
         }
-    }
+        setOpen(false);
+    };
+
+    const getOrdinalWord = (index) => {
+        const ordinals = ["First", "Second", "Third", "Fourth", "Fifth"];
+        return ordinals[index] || `${index + 1}th`;
+    };
+
 
     const whyInputshandleAddRow = () => {
 
         if (whyInputs.length < 5) {
             const newInputs = [
                 ...whyInputs,
-                { label: `Why ${whyInputs.length + 1}`, value: ['', '', ''] },
+                { label: `${getOrdinalWord(whyInputs.length)} why`, value: ['', '', ''] }
             ];
             setWhyInputs(newInputs);
         }
@@ -126,6 +120,139 @@ const RootCauseAnalysisAccordian = () => {
     };
     const handleDragOver = (event) => {
         event.preventDefault();
+    };
+
+    const handleFileSelect = (event) => {
+        const files = Array.from(event.target.files);
+        setRootSelectedFiles((prevFiles) => [...prevFiles, ...files]);
+    };
+
+    const rootcauseHandleRemoveFile = (index) => {
+        setRootSelectedFiles(rootSelectedFiles.filter((_, i) => i !== index));
+    };
+
+
+
+    useEffect(() => {
+        fetch_rootcause_analysis();
+    }, [])
+
+
+
+    const handleRootCauseSubmit = async (e) => {
+        e.preventDefault();
+
+        try {
+            const problems = whyInputs.map((input, index) => ({
+                problemStatusId: input.id ? input.id : 0,
+                stage: input.label,
+                stageNumber: index + 1,
+                occur: input.value[0],
+                undetected: input.value[1],
+                prevented: input.value[2]
+            }));
+            const requestBody = {
+                "orgId": 1,
+                "flag": rootCauseId ? "U" : "I",
+                "userId": 1,
+                "incidentId": id,
+                "rootCauseId": rootCauseId ? rootCauseId : 0,
+                "problemDescription": problemDescription,
+                "rootCauseSummary": summary,
+                "problems": problems
+            }
+            console.log(requestBody)
+
+            const formData = new FormData();
+            formData.append('rootCause', JSON.stringify(requestBody))
+
+            if (rootSelectedFiles && rootSelectedFiles.length > 10) {
+                console.log("Cannot upload more than 10 files");
+                setMessage("Cannot upload more than 10 files..");
+                setSeverity('error');
+                setOpen(true);
+                return;
+            }
+
+            if (rootSelectedFiles && rootSelectedFiles.length > 0) {
+                rootSelectedFiles.forEach((file, index) => {
+                    formData.append('files', file)
+                })
+            }
+            console.log(rootSelectedFiles)
+            console.log(formData)
+            const response = await axios.post(saveRootCause, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            })
+
+            console.log(response)
+
+            if(response?.data?.statusResponse?.responseCode === 200) {
+                setMessage("Root cause analysis created Successfully");
+                setSeverity('success');
+                setOpen(true);
+                setRootSelectedFiles([])
+            }
+         
+
+        } catch (error) {
+            console.log(error)
+            setMessage("Failed to submit Root cause analysis. Error: " + error.message);
+            setSeverity('error');
+            setOpen(true);
+        }
+
+    }
+
+
+    const fetch_rootcause_analysis = async () => {
+        try {
+            const requestBody = {
+                "orgId": 1,
+                "incidentId": id,
+                "userId": 0
+            }
+            const response = await axios.post(getRootCauseDetails, requestBody);
+            console.log(response)
+            const data = response.data.incidentRootCauseDetails;
+
+
+            console.log(data)
+            // Set problem description and summary
+            setProblemDescription(data.problemDescription)
+            setSummary(data.rootCauseSummary)
+            setFitchedFiles(response.data.rootCauseFiles)
+            setRootCauseId(data.rootCauseId)
+
+
+            // Map root cause details to whyInputs
+            const detailsData = response.data.rootCauseDetails.map((details) => ({
+                label: `${details.stage} why`,
+                value: [details.occur, details.undetected, details.prevented],
+                id: details.problemStageId
+            }))
+            setWhyInputs(detailsData)
+            console.log(detailsData)
+
+        } catch (error) {
+            console.log('error in fetching root cause data:', error)
+        }
+
+    }
+
+    const handleFilePreview = (fileUrl) => {
+        setSelectedFileUrl(fileUrl); // Set the selected file URL
+    };
+
+    const downloadFile = (url, fileName) => {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName; // Set the file name for the download
+        document.body.appendChild(link); // Append to body
+        link.click(); // Trigger the download
+        document.body.removeChild(link); // Clean up
     };
     return (
         <div>
@@ -157,9 +284,6 @@ const RootCauseAnalysisAccordian = () => {
                                             {/* Placeholder for vertical heading */}
                                             <TableCell>
                                                 <div className='accordian_tbl_txt'>Why did this specific issue occur?</div>
-                                                {/* <div className='trianglediv'>
-                                                                        Why did this specific issue occur?
-                                                                    </div> */}
                                             </TableCell>
                                             <TableCell>
                                                 <div className='accordian_tbl_txt'>
@@ -168,7 +292,6 @@ const RootCauseAnalysisAccordian = () => {
                                             </TableCell>
                                             <TableCell>
                                                 <div className='accordian_tbl_txt' >
-
                                                     Why was the problem not prevented?
                                                 </div>
                                             </TableCell >
@@ -199,11 +322,11 @@ const RootCauseAnalysisAccordian = () => {
 
                                         {whyInputs.map((input, index) => (
                                             <TableRow key={index}>
-                                                <TableCell style={{ minWidth: "150px" }}>
-                                                    {/* <label className='rootcause_label'>{input.label}</label> */}
-                                                    <label className='accordian_tbl_txt'>{`${numberToWords(
+                                                <TableCell style={{ minWidth: "150px", textAlign: "center" }}>
+                                                    <label className='accordian_tbl_txt'>{input.label}</label>
+                                                    {/* <label className='accordian_tbl_txt'>{`${numberToWords(
                                                         index + 1
-                                                    )} why`}</label>
+                                                    )} why`}</label> */}
                                                 </TableCell>
                                                 <TableCell style={{ minWidth: "150px" }}>
                                                     <textarea
@@ -293,85 +416,148 @@ const RootCauseAnalysisAccordian = () => {
                                         rows={2}
                                         placeholder='Write your Summary'
                                         style={{ backgroundColor: "#f1f0ef" }}
+                                        value={summary}
+                                        onChange={(e) =>
+                                            setSummary(e.target.value)
+                                        }
                                     />
                                 </Form.Group>
                             </div>
-                            <div className='col-md-6 ps-0'>
-                                <div className='col-md-12 file_upload'>
-                                    {/* <label className="text_color" for="formFileMultiple" class="form-label" onChange={handleFileChange}> Browse</label> */}
-                                    <input class="form-control" type="file" id="formFileMultiple" multiple onChange={rootHandleFileChange} />
-                                </div>
-
+                            <div className='col-md-6 ps-0 file_upload upload-file-border'>
+                                <Button
+                                    component='label'
+                                    style={{ color: "black" }}
+                                >
+                                    Choose file
+                                    <VisuallyHiddenInput
+                                        type='file'
+                                        multiple
+                                        style={{ display: 'none' }}
+                                        onChange={handleFileSelect}
+                                    />
+                                </Button>
+                                <span className='vertical-line'></span>
+                                <span style={{ marginLeft: "10px" }}> {rootSelectedFiles.length > 0 ? `${rootSelectedFiles.length} file(s) selected` : 'No file chosen'}</span>
                             </div>
-
-                            {/* <div className='d-flex justify-content-end gap-3 '>
-                        <Button className='add-Field-btn' >Submit</Button>
-                        <Button
-                            className='dynamic_btn'
-                        >
-                            Close
-                        </Button>
-                    </div> */}
                         </div>
+
+
                         <div className='row accordian_row'>
 
-
-                            {/* <div className='col-md-2 col-sm-2 col-xs-2 accordian_btn' >
-<Button className='accordian_submit_btn  ' style={{ float: "none" }}>Submit</Button>
-
-</div>
-<div className='col-md-2 col-sm-2 col-xs-2 accordian_btn'>
-<Button className='accordian_cancel_btn'>Close</Button>
-</div> */}
-                            <div className='col-md-8 attached-files-info mt-3'>
-                                <div className="row">
-                                    <div className="col-xxl-6">
-                                        <div className="attached-files">
-                                            <ul>
-                                                {rootSelectedFiles.length > 0 && (
-                                                    rootSelectedFiles.map((file, index) => (
-                                                        <li key={index} className='mt-2'>
-                                                            <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
-                                                                <div className="d-flex align-items-center">
-                                                                    <span className="file-icon">
-                                                                        <TextSnippetIcon style={{ color: "#533529" }} />
-                                                                    </span>
-                                                                    <p className="mb-0 ms-2">{file.name}</p>
-                                                                </div>
-                                                                <div className="file-actions d-flex align-items-center">
-                                                                    <div className="file-download me-2">
-                                                                        <a href="#">
-                                                                            <ArrowDownwardIcon style={{ marginRight: "5px" }} />
-                                                                        </a>
-                                                                    </div>
-                                                                    <IconButton>
-                                                                        <VisibilityIcon />
-                                                                    </IconButton>
-                                                                    <IconButton
-                                                                        edge='end'
-                                                                        aria-label='delete'
-                                                                        onClick={() => rootHandleRemoveFile(index)}
-                                                                    >
-                                                                        <CloseIcon className='close_icon' />
-                                                                    </IconButton>
-                                                                </div>
+                            {rootSelectedFiles.length > 0 && (
+                                rootSelectedFiles.map((file, index) => (
+                                    <div className="row attached-files-info mt-3">
+                                        <div className="col-xxl-6">
+                                            <div className="attached-files">
+                                                <ul>
+                                                    <li key={index} className='mt-2'>
+                                                        <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
+                                                            <div className="d-flex align-items-center">
+                                                                <span className="file-icon">
+                                                                    <TextSnippetIcon style={{ color: "#533529" }} />
+                                                                </span>
+                                                                <p className="mb-0 ms-2">{file.name}</p>
                                                             </div>
-                                                        </li>
-                                                    ))
-                                                )}
-                                            </ul>
+                                                            <div className="file-actions d-flex align-items-center">
+                                                                <IconButton
+                                                                    edge='end'
+                                                                    aria-label='delete'
+                                                                    onClick={() => rootcauseHandleRemoveFile(index)}
+                                                                >
+                                                                    <CloseIcon className='close_icon' />
+                                                                </IconButton>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </div>
                                         </div>
                                     </div>
+                                ))
+                            )}
+
+                            {fetchedFiles && fetchedFiles.length > 0 && (
+                                <div className='col-md-12 mb-3'>
+                                    {/* <h5 style={{ fontWeight: "600" }}>Incident Files</h5> */}
+                                    <ul>
+                                        {fetchedFiles.map((file, index) => (
+                                            <li key={index} className='mt-2'>
+                                                <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
+                                                    <div className="d-flex align-items-center">
+                                                        <span className="file-icon">
+                                                            <TextSnippetIcon style={{ color: "#533529" }} />
+                                                        </span>
+                                                        <p className="mb-0 ms-2">
+                                                            <a href={file.documentUrl} target="_blank" rel="noopener noreferrer">
+                                                                {file.documentName}
+                                                            </a> ({(file.documentSize / 1024).toFixed(2)} KB)
+                                                        </p>
+                                                    </div>
+                                                    <div className="file-actions d-flex align-items-center">
+                                                        <div className="file-download me-2">
+                                                            <ArrowDownwardIcon
+                                                                style={{ marginRight: "5px", cursor: 'pointer' }}
+                                                                onClick={() => downloadFile(file.documentUrl, file.documentName)}
+                                                            />
+                                                        </div>
+                                                        <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
+                                                            <VisibilityIcon />
+                                                        </IconButton>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </div>
-                            </div>
-                            <div className='col-md-4'>
-                                <Button className='accordian_submit_btn  ' style={{ float: "none", marginRight: "15px" }}>Submit</Button>
-                                <Button className='accordian_cancel_btn'>Close</Button>
+                            )}
+
+
+                            <div className='d-flex justify-content-end gap-3 mt-3'>
+                                <Button className='accordian_submit_btn  ' style={{ float: "none", marginRight: "15px" }} onClick={handleRootCauseSubmit}>Submit</Button>
+                                {/* <Button className='accordian_cancel_btn'>Close</Button> */}
                             </div>
                         </div>
                     </div>
                 </AccordionDetails>
             </Accordion>
+
+
+            <Dialog
+                open={Boolean(selectedFileUrl)} // Open the dialog if a file is selected
+                onClose={() => setSelectedFileUrl(null)} // Close the dialog
+                fullWidth // This makes the dialog take the full width of its container
+                maxWidth="xl" // Options: 'xs', 'sm', 'md', 'lg', 'xl'
+                sx={{
+                    '& .MuiDialog-paper': {
+                        width: '80vw',
+                        maxWidth: 'none',
+                    }
+                }}
+            >
+                <DialogContent>
+                    {selectedFileUrl && (
+                        <iframe
+                            src={selectedFileUrl}
+                            width="100%"
+                            height="500px"
+                            style={{ border: 'none' }}
+                            title="File Preview"
+                        />
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setSelectedFileUrl(null)} className='accordian_submit_btn' >
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+
+            <Snackbar open={open} autoHideDuration={2000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert onClose={handleClose} severity={severity}>
+                    {message}
+                </Alert>
+            </Snackbar>
         </div>
     )
 }

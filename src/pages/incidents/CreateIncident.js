@@ -31,16 +31,45 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { styled } from '@mui/material/styles';
+import { useLocation } from 'react-router-dom';
+import {
+    getAllDepartments,
+    getAllUserByDepartment,
+    getMastersListByType,
+    addIncident,
+    saveIncidentChart
+} from '../../api';
+
+
+const VisuallyHiddenInput = styled('input')({
+    clip: 'rect(0 0 0 0)',
+    clipPath: 'inset(50%)',
+    height: 1,
+    overflow: 'hidden',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    whiteSpace: 'nowrap',
+    width: 1,
+});
 
 
 const CreateIncident = (props) => {
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const data = location.state || {}
+
     // const [fields, setFields] = useState(initialFields);
     const [widgets, setWidgets] = useState([]);
     const [movingDivTop, setMovingDivTop] = useState(200);
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [fileInputKey, setFileInputKey] = useState(Date.now());
     const [caseSummary, setCaseSummary] = useState('');
-    const [caseDescription, setCaseDescription] = useState('');
+    const [confirmAddFieldDialog, setConfirmAddFieldDialog] = useState(false)
+    const [pendingField, setPendingField] = useState(null);
+
     const [dynamicFields, setDynamicFields] = useState({})
     const [message, setMessage] = useState('');
     const [severity, setSeverity] = useState('success');
@@ -50,6 +79,8 @@ const CreateIncident = (props) => {
         Category: { value: null, options: [] },
         Severity: { value: null, options: [] },
     });
+    const [caseDescription, setCaseDescription] = useState('');
+    const [subject, setSubject] = useState('')
     const [handleToggleOpen, setHandleToggleOpen] = useState({
         Source: false,
         Category: false,
@@ -66,11 +97,32 @@ const CreateIncident = (props) => {
     const [fieldAddDialog, setFieldAddDialog] = useState(false);
     const [fields, setFields] = useState([]);
     const [currentField, setCurrentField] = useState({ type: 'input', label: '', options: [] });
-    const [confirmAddFieldDialog, setConfirmAddFieldDialog] = useState(false)
-    const [pendingField, setPendingField] = useState(null);
 
+    const [departments, setDepartments] = useState([])
+    const [selectedDepartment, setSelectedDepartment] = useState(null)
+    const [isAIGenerated, setIsAIGenerated] = useState(false);
+    const [showModal3, setShowModal3] = useState(false);
+    const toggleModal3 = () => {
+        setShowModal3(!showModal3);
+    };
 
-    const navigate = useNavigate();
+    // useEffect(() => {
+    //     if (data) {
+    //         // Populate the form with AI-generated data
+    //         setCaseDescription(data.description || "");
+    //         setSubject(data.title || "");
+    //         setInputs(prevState => ({
+    //             ...prevState,
+    //             Source: { ...prevState.Source, value: data.source || "" },
+    //             Category: { ...prevState.Category, value: data.category || "" },
+    //             Severity: { ...prevState.Severity, value: data.severity || "" }
+    //         }));
+    //         setSelectedDepartment({ id: 0, title: data.department || "" });
+    //         setSelectedUser(null);
+    //         setIsAIGenerated(true);
+    //     }
+    // }, []);
+
 
     const handleAddField = () => {
         setFields([...fields, { ...currentField, value: '' }]);
@@ -188,19 +240,19 @@ const CreateIncident = (props) => {
     useEffect(() => {
 
         fetchDropdowns();
-        fetchUsers();
+        // fetchUsers();
+        fetchDepartments()
 
-        const handleScroll = () => {
-            setMovingDivTop(window.scrollY);
-        };
-
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+    useEffect(() => {
+        if (data) {
+            populateAiData(data);
+        }
+    }, [departments]);
 
     const fetchDropdownData = async (sourceName) => {
         try {
-            const response = await axios.post(BASE_API_URL + 'incident/getMastersListByType', { sourceName });
+            const response = await axios.post(getMastersListByType, { sourceName });
             console.log('dropresponse', response)
             return response.data.masterList.map(item => ({ id: item.sourceId, title: item.sourceType }));
 
@@ -230,47 +282,138 @@ const CreateIncident = (props) => {
         }
     };
 
-    // Get all users
+    //get all departments
 
-    const fetchUsers = async () => {
+
+    const fetchDepartments = async () => {
         try {
             const payload = {
                 "orgId": 1
             }
-            const response = await axios.post(BASE_API_URL + 'incident/getAllUsers', payload)
-            console.log('users response', payload)
-            const userList = response.data.map((user) => ({ id: user.userId, title: user.userName }));
-            setUsers(userList);
+            const response = await axios.post(getAllDepartments, {})
+            console.log('departments', response)
+            const departmentList = response.data.map((dept) => ({
+                id: dept.departmentID,
+                title: dept.departmentName
+            }))
+            setDepartments(departmentList)
 
         } catch (error) {
-            console.log(`Error in fetching the users:`, error)
+            console.log(`Error in fetching the Departments:`, error)
         }
     }
+    // Get all users by department
+
+    const fetchUsersByDept = async (departmentID) => {
+        try {
+            const payload = {
+                "orgId": 1,
+                "departmentId": departmentID
+            }
+            const response = await axios.post(getAllUserByDepartment, payload)
+            console.log('getusersbydept', response)
+            const userList = response.data.map((user) => ({ id: user.userId, title: user.userName }))
+            setUsers(userList)
+            console.log('depUSer', users)
+        } catch (error) {
+            console.log(`Error in fetching the users by dept:`, error)
+        }
+    }
+    const handleDepartmentChange = (event, newValue) => {
+        setSelectedDepartment(newValue);
+        if (newValue) {
+            fetchUsersByDept(newValue.id)
+        } else {
+            setUsers([])
+        }
+        console.log('Selected department:', newValue);
+    }
+
+    const handleUserChange = (event, newValue) => {
+        setSelectedUser(newValue);
+        console.log('Selected user:', newValue);
+    }
+
+    // const fetchUsers = async () => {
+    //     try {
+    //         const payload = {
+    //             "orgId": 1
+    //         }
+    //         const response = await axios.post(BASE_API_URL + 'incident/getAllUsers', payload)
+    //         console.log('users response', payload)
+    //         const userList = response.data.map((user) => ({ id: user.userId, title: user.userName }));
+    //         setUsers(userList);
+
+    //     } catch (error) {
+    //         console.log(`Error in fetching the users:`, error)
+    //     }
+    // }
+
+    const populateAiData = (aiResponse) => {
+        // setSubject(aiResponse.title || '')
+        // setCaseDescription(aiResponse.description || '');
+        const department = departments.find(dept => dept.title.toLowerCase() === (aiResponse.department || '').toLowerCase());
+        if (department) {
+            setSelectedDepartment(department);
+            fetchUsersByDept(department.id);
+        }
+    }
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log("submit")
 
         try {
+            const isAIGenerated = !!data;
+
             const payload = {
                 orgId: 1,
-                caseSummary,
-                caseDescription,
+                description: caseDescription,
                 sourceId: inputs.Source.value ? inputs.Source.value.id : null,
                 categoryId: inputs.Category.value ? inputs.Category.value.id : null,
                 severityId: inputs.Severity.value ? inputs.Severity.value.id : null,
+                departmentId: selectedDepartment ? selectedDepartment.id : null, // Add departmentId to the payload
                 assignedUserId: selectedUser ? selectedUser.id : null,
                 attachmentUrl: 'URL4',
                 incidentStatusId: 34,
+                title: subject,
                 userId: 1
-                // assignedUserID: 2,
             }
+            // const payload = {
+            //     orgId: 1,
+            //     description: caseDescription,
+            //     assignedUserId: isAIGenerated ? 0 : (selectedUser ? selectedUser.id : null),
+            //     attachmentUrl: 'URL4',
+            //     incidentStatusId: 34,
+            //     title: subject,
+            //     userId: 1,
+            //     departmentId: isAIGenerated ? 0 : (selectedDepartment ? selectedDepartment.id : null),
+            //     source: isAIGenerated ? 0 : (inputs ?  inputs.Source.value : null),
+            //     category: isAIGenerated ? 0 : (inputs ? inputs.Category.value: null),
+            //     severity:isAIGenerated ? 0 : (inputs ?  inputs.Severity.value: null)
+            // };
             console.log("incdentpayload", payload)
-            const response = await axios.post(BASE_API_URL + 'incident/addIncident', payload)
+
+            const formData = new FormData();
+            formData.append('incident', JSON.stringify(payload))
+            if(selectedFiles && selectedFiles.length > 0) {
+                selectedFiles.forEach((file, index) => {
+                    formData.append('files', file)
+                })
+            }
+
+            console.log('formdata payload:', formData)
+            const response = await axios.post(addIncident, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            })
 
             if (response.status === 201 || response.data.statusResponse.responseCode === 201) {
                 setMessage("Incident added successfully!");
                 setSeverity('success');
+                setShowModal3(false)
                 setOpen(true);
                 setTimeout(() => {
                     navigate('/incident');
@@ -354,10 +497,6 @@ const CreateIncident = (props) => {
         console.log(`Updated ${name} State:`, inputs[name]);  // Debug log
     };
 
-    const handleUserChange = (event, newValue) => {
-        setSelectedUser(newValue);
-        console.log('Selected user:', newValue);
-    }
 
 
     const DragablehandleChange = (name) => (event, newValue) => {
@@ -401,11 +540,14 @@ const CreateIncident = (props) => {
         }
         setOpen(false);
     };
+
     const handleFileSelect = (event) => {
         const files = Array.from(event.target.files);
         setSelectedFiles((prevFiles) => [...prevFiles, ...files]);
-
     };
+    // const handleRemoveFile = (index) => {
+    //     setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+    // };
     const handleRemoveFile = (index) => {
         setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
     };
@@ -417,14 +559,15 @@ const CreateIncident = (props) => {
     return (
         <div className='right-cont'>
 
-            <form onSubmit={handleSubmit}>
+            <form >
+                {/* <form > */}
                 <div className='row'>
                     {props.isCraeteIncidentHeading == true ? "" :
                         <h5 style={{ fontSize: '24px', fontWeight: '600', }}>
                             Incident Case details
                         </h5>
                     }
-                    <hr style={{ border: "1px solid white" }} />
+                    <hr className='white-line'/>
                     <div className='col-md-8 '>
                         <Row>
                             {Object.entries(inputs).map(([name, { value, options }], index) => (
@@ -498,9 +641,9 @@ const CreateIncident = (props) => {
                                 <div className='resolve-drop'>
                                     <Autocomplete
                                         style={{ padding: "0px" }}
-                                        options={users}
-                                        value={selectedUser}
-                                        onChange={handleUserChange}
+                                        options={departments}
+                                        value={selectedDepartment}
+                                        onChange={handleDepartmentChange}
                                         getOptionLabel={(option) => option.title}
                                         renderOption={(props, option) => (
                                             <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
@@ -560,8 +703,8 @@ const CreateIncident = (props) => {
                                             placeholder='Subject...'
                                             label='Subject'
                                             variant="outlined"
-                                            value={caseSummary}
-                                            onChange={(e) => setCaseSummary(e.target.value)}
+                                            value={subject}
+                                            onChange={(e) => setSubject(e.target.value)}
                                         />
                                     </Form.Group>
                                 </div>
@@ -586,27 +729,42 @@ const CreateIncident = (props) => {
                             </Col>
                         </Row>
 
-                        <div className="attached-files-info mb-3">
-                            <Row>
-                                <Col md={12} className='file_upload'>
+                        <div className="attached-files-info ">
+                            <Row style={{ padding: "10px" }}>
+                                <Col md={12} className='' style={{ margin: "12px 0px 0px 0px", backgroundColor: "white", borderRadius: "6px" }}>
+                                    <Button
+                                        component='label'
 
-                                    <input class="form-control" type="file" id="formFileMultiple" multiple onChange={handleFileSelect} />
+                                        style={{ color: "black" }}
+
+                                    >
+                                        Choose file
+                                        <VisuallyHiddenInput
+                                            type='file'
+                                            multiple
+                                            style={{ display: 'none' }}
+                                            onChange={handleFileSelect}
+                                        />
+                                    </Button>
+                                    <span className='vertical-line'></span>
+
+                                    <span style={{ marginLeft: "10px" }}> {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : 'No file chosen'}</span>
                                 </Col>
-                                <Col md={12}>
+                                <Col md={12} className='mt-3 p-0'>
 
                                     {selectedFiles && selectedFiles.length > 0 ?
                                         <div className="attached-files">
                                             <ul>
                                                 {selectedFiles.map((file, index) => (
                                                     <li key={index} className='mt-2'>
-                                                        <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
-                                                            <div className="d-flex align-items-center">
+                                                        <div className="selectedFiles" style={{ width: "100%" }}>
+                                                            <div className="file-left-content">
                                                                 <span className="file-icon">
                                                                     <TextSnippetIcon style={{ color: "#533529" }} />
                                                                 </span>
                                                                 <p className="mb-0 ms-2">{file.name}</p>
                                                             </div>
-                                                            <div className="file-actions d-flex align-items-center">
+                                                            <div className="file-actions file-left-content">
                                                                 <div className="file-download me-2">
                                                                     <a href="#">
                                                                         <ArrowDownwardIcon style={{ marginRight: "5px" }} />
@@ -626,37 +784,7 @@ const CreateIncident = (props) => {
                                         </div>
                                         : ""
                                     }
-                                    {/* <div className="attached-files">
-                                        <ul>
-                                          
-                                            {selectedFiles && selectedFiles.length > 0 ?
-                                                selectedFiles.map((file, index) => (
-                                                    <li key={index} className='mt-2'>
-                                                        <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
-                                                            <div className="d-flex align-items-center">
-                                                                <span className="file-icon">
-                                                                    <TextSnippetIcon style={{ color: "#533529" }} />
-                                                                </span>
-                                                                <p className="mb-0 ms-2">{file.name}</p>
-                                                            </div>
-                                                            <div className="file-actions d-flex align-items-center">
-                                                                <div className="file-download me-2">
-                                                                    <a href="#">
-                                                                        <ArrowDownwardIcon style={{ marginRight: "5px" }} />
-                                                                    </a>
-                                                                </div>
-                                                                <IconButton>
-                                                                    <VisibilityIcon />
-                                                                </IconButton>
-                                                                <IconButton edge='end' aria-label='delete' onClick={() => handleRemoveFile(index)}>
-                                                                    <CloseIcon className='close_icon' />
-                                                                </IconButton>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                )) : <div>No selected files</div>}
-                                        </ul>
-                                    </div> */}
+                                  
                                 </Col>
                             </Row>
                         </div>
@@ -757,100 +885,58 @@ const CreateIncident = (props) => {
                                         </Grid>
                                     ))}
 
-                                    <form>
-                                        {fields.map((field, index) => (
-                                            index % 2 === 0 && ( // Render two fields per row
-                                                <Row key={index} className='mb-3'>
-                                                    <Col md={6} sm={6}>
-                                                        <Grid container alignItems="center">
-                                                            {/* <Grid item xs={2}>
-                                                                <Checkbox
-                                                                    checked={!!field.value && field.value.trim() !== ''}
-                                                                    onChange={handleCheckboxChange(index)}
-                                                                    color="primary"
+
+                                    {fields.map((field, index) => (
+                                        <>
+                                            <Grid item xs={4} key={index}>
+                                                {field.type === 'input' ? (
+                                                    <Form.Group
+                                                        className='mb-0'
+                                                        controlId='exampleForm.ControlTextarea1 '
+                                                    >
+                                                        <TextField
+                                                            id="outlined-basic"
+                                                            InputProps={{ className: 'custom-input' }}
+                                                            className='w-100 custom-textfield'
+                                                            label={field.label}
+                                                            variant="outlined"
+                                                            name={field.label}
+                                                            value={field.value || ''}
+                                                            onChange={(e) => handleFieldValueChange(index, e.target.value)}
+                                                        />
+                                                    </Form.Group>
+
+                                                ) : (
+                                                    <div className='resolve-drop'>
+                                                        <Autocomplete
+                                                            style={{ width: '100%' }}
+                                                            options={field.options}
+                                                            value={field.value || null}
+                                                            onChange={(event, newValue) => handleFieldValueChange(index, newValue)}
+                                                            renderInput={(params) => (
+                                                                <TextField
+                                                                    {...params}
+                                                                    label={field.label}
+                                                                    variant="outlined"
+                                                                    InputProps={{
+                                                                        ...params.InputProps,
+                                                                        className: 'custom-input-drop' // Apply the custom class
+                                                                    }}
+                                                                    className="custom-textfield"
                                                                 />
-                                                            </Grid> */}
-                                                            <Grid item xs={10}>
-                                                                {field.type === 'input' ? (
-                                                                    <TextField
-                                                                        InputProps={{ className: 'custom-input' }}
-                                                                        className="custom-textfield"
-                                                                        type="text"
-                                                                        label={field.label}
-                                                                        name={field.label}
-                                                                        value={field.value || ''}
-                                                                        onChange={(e) => handleFieldValueChange(index, e.target.value)}
-                                                                    />
-                                                                ) : (
-                                                                    <Autocomplete
-                                                                        options={field.options}
-                                                                        value={field.value || null}
-                                                                        onChange={(event, newValue) => handleFieldValueChange(index, newValue)}
-                                                                        renderInput={(params) => (
-                                                                            <TextField
-                                                                                {...params}
-                                                                                label={field.label}
-                                                                                variant="outlined"
-                                                                                InputProps={{
-                                                                                    ...params.InputProps,
-                                                                                    className: 'custom-input-drop' // Apply the custom class
-                                                                                }}
-                                                                                className="custom-textfield"
-                                                                            />
-                                                                        )}
-                                                                    />
-                                                                )}
-                                                            </Grid>
-                                                        </Grid>
-                                                    </Col>
-                                                    {index + 1 < fields.length && ( // Ensure not out of bounds
-                                                        <Col md={6} sm={6}>
-                                                            <Grid container alignItems="center">
-                                                                <Grid item xs={2}>
-                                                                    <Checkbox
-                                                                        checked={!!fields[index + 1].value && fields[index + 1].value.trim() !== ''}
-                                                                        onChange={handleCheckboxChange(index + 1)}
-                                                                        color="primary"
-                                                                    />
-                                                                </Grid>
-                                                                <Grid item xs={10}>
-                                                                    {fields[index + 1].type === 'input' ? (
-                                                                        <TextField
-                                                                            InputProps={{ className: 'custom-input' }}
-                                                                            className="custom-textfield"
-                                                                            type="text"
-                                                                            label={fields[index + 1].label}
-                                                                            name={fields[index + 1].label}
-                                                                            value={fields[index + 1].value || ''}
-                                                                            onChange={(e) => handleFieldValueChange(index + 1, e.target.value)}
-                                                                        />
-                                                                    ) : (
-                                                                        <Autocomplete
-                                                                            options={fields[index + 1].options}
-                                                                            value={fields[index + 1].value || null}
-                                                                            onChange={(event, newValue) => handleFieldValueChange(index + 1, newValue)}
-                                                                            renderInput={(params) => (
-                                                                                <TextField
-                                                                                    {...params}
-                                                                                    label={fields[index + 1].label}
-                                                                                    variant="outlined"
-                                                                                    InputProps={{
-                                                                                        ...params.InputProps,
-                                                                                        className: 'custom-input-drop' // Apply the custom class
-                                                                                    }}
-                                                                                    className="custom-textfield"
-                                                                                />
-                                                                            )}
-                                                                        />
-                                                                    )}
-                                                                </Grid>
-                                                            </Grid>
-                                                        </Col>
-                                                    )}
-                                                </Row>
-                                            )
-                                        ))}
-                                    </form>
+                                                            )}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </Grid>
+
+
+
+
+                                        </>
+
+                                    ))}
+
                                 </Grid>
 
                             </AccordionDetails>
@@ -858,13 +944,33 @@ const CreateIncident = (props) => {
 
 
                         </Accordion>
+
+                        <div style={{ display: "flex", justifyContent: "space-between" }}>
+                            <Button
+                                variant='outlined'
+                                className='accordian_submit_btn'
+                                onClick={fieldDialogOpen}
+
+                                style={{ color: "#533529", fontWeight: "600", }}
+                            >
+                                Create new Fields
+                            </Button>
+                            {/* <Button className='accordian_submit_btn 'style={{ color: "#533529", fontWeight: "600",}} type='submit'>Create incident</Button> */}
+
+
+                        </div>
+                        {/* <div className='col-md-2'></div> */}
+                        {/* <div className=' col-md-6 float-end'>
+                            
+                        </div> */}
+
                     </div>
                     {console.log("issummary", props.isSummaryVisible)}
                     {/* right content */}
 
                     {props.isRightContentVisible == true ? <div className='col-md-4'></div> :
                         <div className='col-md-4 '>
-                            <div className='mb-3' style={{ display: "flex", justifyContent: "end" }}>
+                            {/* <div className='mb-3' style={{ display: "flex", justifyContent: "end" }}>
                                 <Button
                                     variant='outlined'
                                     className='accordian_submit_btn'
@@ -874,9 +980,9 @@ const CreateIncident = (props) => {
                                 >
                                     Create new Fields
                                 </Button>
-                            </div>
+                            </div> */}
 
-                            <div className="ticket-chat attached-files mb-3" >
+                            <div className="ticket-chat attached-files mb-3 p-4" >
                                 <h5 style={{ fontWeight: "600" }}>History</h5>
                                 {/* <TextField
                                     InputProps={{ className: 'custom-input' }}
@@ -889,11 +995,11 @@ const CreateIncident = (props) => {
                                 /> */}
                                 <p>History not yet created</p>
                             </div>
-                            <div className="ticket-chat ">
+                            <div className="ticket-chat p-4">
                                 <div className="ticket-chat-head">
-                                    <h5 style={{ fontWeight: "600" }}>Incident Chat</h5>
-                                    <div className="chat-post-box">
-                                        <form>
+                                    <h5 style={{ fontWeight: "600", marginBottom:"20px" }}>Incident Chat</h5>
+                                    <div className="chat-post-box card p-4">
+                                        {/* <form>
                                             <textarea className="form-control mb-3" rows="4" style={{ backgroundColor: "#f4f4f4" }}>Post</textarea>
                                             <div className="files-attached d-flex justify-content-between align-items-center">
                                                 <div className="post-files">
@@ -902,20 +1008,15 @@ const CreateIncident = (props) => {
                                                 </div>
                                                 <button type="submit">Send</button>
                                             </div>
-                                        </form>
+                                        </form> */}
+                                        <p>Incident chat created not yet, you can chat after create incident</p>
                                     </div>
                                 </div>
 
                             </div>
+                            {/* <Button className='accordian_submit_btn mt-3' style={{ color: "#533529", fontWeight: "600", float: "inline-end" }} onClick={toggleModal3}>Create incident</Button> */}
+                            <Button className='accordian_submit_btn mt-3' style={{ color: "#533529", fontWeight: "600", float: "inline-end" }} onClick={toggleModal3}>Create incident</Button>
 
-
-                        </div>
-                    }
-                    {props.isCraeteNewIncidentButton == true ?
-                        <div></div>
-                        :
-                        <div className=' col-md-2 float-end'>
-                            <Button className='search_btn' type='submit'>Create incident</Button>
                         </div>
                     }
 
@@ -1299,6 +1400,27 @@ const CreateIncident = (props) => {
                                 onClick={confirmDrawerOpen}
                             >Yes</Button>
                             <Button variant='outlined' className='m-1 add-Field-btn p-2' onClick={fieldDialogClose}>No</Button>
+                        </Modal.Footer>
+                    </Modal>
+
+                    
+                    <Modal show={showModal3} onHide={toggleModal3}>
+                        <Modal.Header className='brown_bg '>
+                            <Modal.Title>Create the incident</Modal.Title>
+                            <button
+                                type='button'
+                                className='btn-close bg-white'
+                                onClick={toggleModal3}
+                            ></button>
+                        </Modal.Header>
+                        <Modal.Body className='modal_bg_body'>
+                            <label>Are you sure you want to create the incident!</label>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant='outlined' className='dynamic_btn m-1'
+                                onClick={handleSubmit}
+                            >Yes</Button>
+                            <Button className='m-1 add-Field-btn p-2' onClick={toggleModal3}>No</Button>
                         </Modal.Footer>
                     </Modal>
 

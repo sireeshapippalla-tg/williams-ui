@@ -580,7 +580,8 @@ header h3 {
     padding: 8px;
     font-size: 16px;
 }
-.css-1ex1afd-MuiTableCell-root { 
+
+.css-1ex1afd-MuiTableCell-root {
     font-family: "Montserrat", sans-serif !important;
 }
 
@@ -656,5 +657,6 @@ header h3 {
 .calendar_align input {
     padding: 11px 10px;
 }
+
 
 

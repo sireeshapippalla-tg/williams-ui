@@ -19,6 +19,9 @@ import { Snackbar } from '@mui/material';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import { savePreventiveAction, getPreventiveActionDetails } from '../../../api';
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -33,7 +36,10 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 const Preventivections = () => {
+    const { id } = useParams();
+    const[preventiveActionData, setPreventiveActionData] = useState('')
     const [preventiveFindings, setPreventiveFindings] = useState('')
+    const [preventiveId, setPreventiveId] = useState()
     const [preventingList, setPreventingList] = useState()
     const [preventiveSelectedFiles, setPreventiveSelectedFiles] = useState([]);
     const [open, setOpen] = useState(false);
@@ -61,6 +67,92 @@ const Preventivections = () => {
         }
         setOpen(false);
     };
+
+    useEffect(() => {
+        fetch_preventive_Action();
+    }, [])
+
+    const submit_Preventive_Action = async () => {
+        try {
+            const requestBody = {
+                findings: preventiveFindings,
+                incidentId: id,
+                // userId: 1,
+                createdBy: 1,
+                preventiveId: preventiveId ? preventiveId : '0',
+                flag: preventiveId ? 'U' : 'I'
+            }
+            console.log('requestbody', requestBody)
+
+            if (preventiveSelectedFiles > 10) {
+                console.log("Cannot upload more than 10 files");
+                setMessage("Cannot upload more than 10 files..");
+                setSeverity('error');
+                setOpen(true);
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('preventive', JSON.stringify(requestBody))
+            if(preventiveSelectedFiles && preventiveSelectedFiles.length > 0) {
+                preventiveSelectedFiles.forEach((file, index) => {
+                    formData.append('files', file)
+                })
+
+            }
+            const response = await axios.post(savePreventiveAction, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            })
+            console.log('response', response)
+            if (response?.data?.statusResponse?.responseCode === 201) {
+                setMessage("Preventive action created Successfully");
+                setSeverity('success');
+                setOpen(true);
+                setPreventiveSelectedFiles([])
+
+            } else if (response.data.statusResponse.responseCode === 200) {
+                setMessage("Preventive action Updated Successfully");
+                setSeverity('success');
+                setOpen(true);
+
+                setPreventiveSelectedFiles([])
+            } else {
+                setMessage("Failed to add Preventive action.");
+                setSeverity('error');
+                setOpen(true);
+            }
+        } catch (error) {
+            console.log('error in saving preventive action:', error)
+            setMessage("Failed to submit Preventive action. Error: " + error.message);
+            setSeverity('error');
+            setOpen(true);
+        }
+    }
+
+    const fetch_preventive_Action = async () => {
+        try {
+            const requestBody = {
+                orgId: 1,
+                incidentId: id,
+                userId: 1
+            }
+            const response = await axios.post(getPreventiveActionDetails, requestBody)
+            console.log('response', response);
+            const preventiveData = response.data.preventiveActionDetails;
+            console.log(preventiveData)
+            setPreventiveActionData(preventiveData);
+            setPreventiveId(preventiveData.preventiveId)
+            console.log(preventiveId)
+            if(preventiveData) {
+                setPreventiveFindings(preventiveData.findings)
+                console.log(preventiveFindings)
+            }
+        } catch (error) {
+            console.log('Failed to fetch preventive action details:', error)
+        }
+    }
 
     return (
         <div>
@@ -98,11 +190,27 @@ const Preventivections = () => {
                                 />
                             </Form.Group>
                         </div>
-                        <div className='col-md-6 ps-0'>
-                            <div className='col-md-12  file_upload'>
-                                {/* <label className="text_color" for="formFileMultiple" class="form-label" onChange={handleFileChange}> Browse</label> */}
+                        <div className='col-md-6 ps-0 file_upload upload-file-border'>
+                            {/* <div className='col-md-12  file_upload'>
                                 <input class="form-control" type="file" id="formFileMultiple" multiple onChange={preventiveHandleFileChange} />
-                            </div>
+                            </div> */}
+                               <Button
+                                component='label'
+
+                                style={{ color: "black" }}
+
+                            >
+                                Choose file
+                                <VisuallyHiddenInput
+                                    type='file'
+                                    multiple
+                                    style={{ display: 'none' }}
+                                    onChange={preventiveHandleFileChange}
+                                />
+                            </Button>
+                            <span className='vertical-line'></span>
+                            <span style={{ marginLeft: "10px" }}> {preventiveSelectedFiles.length > 0 ? `${preventiveSelectedFiles.length} file(s) selected` : 'No file chosen'}</span>
+
                         </div>
                     </div>
                     <div className='row accordian_row'>
@@ -158,7 +266,7 @@ const Preventivections = () => {
                         </div> */}
                         <div className='col-md-4 float-end mt-3 '>
                             <div className='d-flex justify-content-end gap-3 '>
-                                <Button className='accordian_submit_btn' >Submit</Button>
+                                <Button className='accordian_submit_btn' onClick={submit_Preventive_Action}>Submit</Button>
                                 <Button
                                     className='accordian_cancel_btn mr-1'
                                 >
@@ -167,15 +275,13 @@ const Preventivections = () => {
                             </div>
                         </div>
                     </div>
-
-
-                    <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-                        <Alert onClose={handleClose} severity={severity}>
-                            {message}
-                        </Alert>
-                    </Snackbar>
                 </AccordionDetails>
             </Accordion>
+            <Snackbar open={open} autoHideDuration={2000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert onClose={handleClose} severity={severity}>
+                    {message}
+                </Alert>
+            </Snackbar>
         </div>
     )
 }

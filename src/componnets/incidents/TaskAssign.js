@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import Button from '@mui/material/Button';
@@ -13,6 +13,7 @@ import IntrimAccordian from './accordians/IntrimAccordian';
 import RootCauseAnalysisAccordian from './accordians/RootCauseAnalysisAccordian';
 import CorrectiveAction from './accordians/CorrectiveAction';
 import Preventivections from './accordians/Preventivections';
+import { getEmployeesAndManager } from '../../api';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -45,7 +46,7 @@ const filterOptions = (options, params) => {
 };
 
 
-const TaskAssign = () => {
+const TaskAssign = ({selectedDepartment}) => {
   const [selectedSection, setSelectedSection] = useState('Interim Investigation');
   const [showModal3, setShowModal3] = useState(false);
   const [interimInvestigation, setInterimInvestigation] = useState({
@@ -68,8 +69,11 @@ const TaskAssign = () => {
     cc: '',
     redo: false,
   });
+  const [assignToOptions, setAssignToOptions] = useState([])
+  const [ccOptions, setCcOptions] = useState([])
+  // const [ccOptions, setCcOptions] = useState()
   const assignOptions = ['Person 1', 'Person 2', 'Person 3', 'Person 4'];
-  const ccOptions = ['CC 1', 'CC 2', 'CC 3', 'CC 4'];
+  // const ccOptions = ['CC 1', 'CC 2', 'CC 3', 'CC 4'];
 
   const toggleModal3 = () => {
     setShowModal3(!showModal3);
@@ -103,6 +107,56 @@ const TaskAssign = () => {
     }
   };
 
+
+  useEffect(() => {
+    if(selectedDepartment) {
+      fetchAssignToOptions(selectedDepartment.id)
+      fetchCcOptions(selectedDepartment.id)
+    }
+  }, [selectedDepartment])
+
+  const fetchAssignToOptions = async (departmentId) => {
+    try {
+      const requestBody = {
+        orgId: 1,
+        flag: "E",
+        departmentId: departmentId
+      };
+      console.log(requestBody)
+      const response = await axios.post(getEmployeesAndManager, requestBody);
+      console.log(response)
+      const fetchedEmployees = response.data.map((emp) => ({
+        id:emp.userId,
+        title:emp.userName
+      }))
+      
+      setAssignToOptions(fetchedEmployees)
+      console.log(assignToOptions)
+    } catch (error) {
+      console.log('Failed to fetch assign to options:', error)
+    }
+  }
+
+  const fetchCcOptions = async (departmentId) => {
+    try {
+      const requestBody = {
+        orgId: 1,
+        flag: "M",
+        departmentId: departmentId
+      }
+      console.log(requestBody);
+      const response = await axios.post(getEmployeesAndManager, requestBody);
+      console.log(response)
+      const fetchCc = response.data.map((cc) => ({
+        id:cc.userId,
+        title:cc.userName
+      }))
+      setCcOptions(fetchCc)
+
+    } catch (error) {
+      
+    }
+  }
   return (
     <div>
       <div className='ticket-purpose'>
@@ -164,7 +218,7 @@ const TaskAssign = () => {
                 <div className='col-md-4'>
                   <Form.Group className='' controlId='assignTo'>
                     <Autocomplete
-                      options={assignOptions}
+                      options={assignToOptions}
                       value={
                         selectedSection === 'Interim Investigation'
                           ? interimInvestigation.assignTo
@@ -175,16 +229,17 @@ const TaskAssign = () => {
                       onChange={(event, newValue) =>
                         handleFieldChange(selectedSection, 'assignTo', newValue)
                       }
+                      getOptionLabel={(option) => option.title || ''} 
                       renderInput={(params) => (
                         <TextField {...params}
-                         className='input_border custom-textfield'
-                          label='Assign To' 
-                          variant='outlined' 
+                          className='input_border custom-textfield'
+                          label='Assign To'
+                          variant='outlined'
                           InputProps={{
                             ...params.InputProps,
                             className: 'custom-input-drop' // Apply the custom class
                           }}
-                          />
+                        />
                       )}
                     />
                   </Form.Group>
@@ -194,6 +249,7 @@ const TaskAssign = () => {
                   <Form.Group className='' controlId='cc'>
                     <Autocomplete
                       options={ccOptions}
+                      getOptionLabel={(option) => option.title || ''} 
                       value={
                         selectedSection === 'Interim Investigation'
                           ? interimInvestigation.cc
@@ -207,14 +263,14 @@ const TaskAssign = () => {
                         handleFieldChange(selectedSection, 'cc', newValue)
                       }
                       renderInput={(params) => (
-                        <TextField {...params} 
-                        className='input_border custom-textfield' 
-                        label='CC' variant='outlined'
-                        InputProps={{
-                          ...params.InputProps,
-                          className: 'custom-input-drop' // Apply the custom class
-                        }}
-                         />
+                        <TextField {...params}
+                          className='input_border custom-textfield'
+                          label='CC' variant='outlined'
+                          InputProps={{
+                            ...params.InputProps,
+                            className: 'custom-input-drop' // Apply the custom class
+                          }}
+                        />
                       )}
                     />
                   </Form.Group>

@@ -215,6 +215,11 @@ header h3 {
   box-shadow: 0 4px 24px 0 hsla(0, 0%, 74%, .251);
 }
 
+.card_incident .card-head {
+  font-weight: 600;
+  display: block;
+}
+
 .search_btn {
   color: white !important;
   background-color: rgb(83 53 41) !important;
@@ -388,7 +393,7 @@ ul {
   background: #fff;
   border-radius: 5px;
   box-shadow: 0 4px 24px 0 hsla(0, 0%, 74%, .251);
-  padding: 8px 12px;
+  padding:1px 12px 8px 12px;
 }
 
 .attached-files-info .attached-files ul li {
@@ -493,6 +498,7 @@ input {
   height: 56px;
   border-color: #c4c4c4 !important;
   background-color: white !important;
+  border-radius: 6px !important;
 }
 
 /* .text_field .css-1d3z3hw-MuiOutlinedInput-notchedOutline {
@@ -721,6 +727,8 @@ div.modal_bg_body .modal-body {
 
 .file_upload {
   padding: 10px;
+  border-radius: 6px;
+  background-color: #fff;
 }
 
 .accord_typo {
@@ -868,4 +876,47 @@ a {
   background-color: #533529 !important;
   color: white !important;
   top: 10px;
+}
+.vertical-line {
+  display: inline-block;
+  width: 1px;
+  height: 24px; /* Adjust height as needed */
+  background-color: #000; /* Adjust color as needed */
+  margin-left: 10px;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+.adduser-card-main {
+  display: flex;
+  width: 100%;
+  margin: 0 auto;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+.adduser-card {
+  padding: 0px;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+  box-shadow: 0 0 20px #d8d8d8 !important;
+  border-radius: 24px !important;
+}
+
+hr{
+  border: 1px solid #ffffff !important;
+}
+
+
+.selectedFiles {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.file-left-content {
+  display: flex;
+  align-items: center;
+}
+.upload-file-border{
+  border: 1px solid #eee;
 }

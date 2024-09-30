@@ -218,7 +218,7 @@ const CorrectiveAction = () => {
                                                 <Button
                                                     component='label'
                                                     variant='contained'
-                                                    style={{ textTransform: 'capitalize', padding: "12px 29px" }}
+                                                    style={{ textTransform: 'capitalize', padding: "12px 29px", backgroundColor: '#533529' }}
                                                 // startIcon={<CloudUploadIcon />}
                                                 >
                                                     Upload file

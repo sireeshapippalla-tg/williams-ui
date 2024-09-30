@@ -18,9 +18,18 @@ import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { BASE_API_URL } from "../../api"
 import { Dialog, DialogTitle, DialogContent, DialogActions, Menu, MenuItem } from '@mui/material';
-import AiPrompt from '../../componnets/incidents/AiPrompt';
+
+import {  
+  getIncidentCountDetails1, 
+  fetchIncidentDetailsDashboard,
+  getMastersListByType,
+  addMasterByType,
+  addIncidentWithAI
+} from "../../api"
+
+
+
 
 
 
@@ -147,11 +156,12 @@ const Incident = () => {
 
     const fetchIncidentDetails = async () => {
       try {
-        const response = await axios.post(BASE_API_URL + 'incident/fetchIncidentDetailsDashboard', {
+        const response = await axios.post(fetchIncidentDetailsDashboard, {
           orgId: 1,
           incidentStatusId: 34,
           userId: 1
         });
+        console.log(response)
         const incidentData = response.data.dashboardList;
 
 
@@ -183,7 +193,7 @@ const Incident = () => {
 
   const fetchDropdownData = async (sourceName) => {
     try {
-      const response = await axios.post(BASE_API_URL + 'incident/getMastersListByType', { sourceName });
+      const response = await axios.post(getMastersListByType, { sourceName });
       console.log('dropresponse', response)
       return response.data.masterList.map(item => ({ id: item.sourceId, title: item.sourceType }));
 
@@ -210,7 +220,7 @@ const Incident = () => {
 
   const getIncidentCountDetails = async () => {
     try {
-      const response = await axios.post(BASE_API_URL + 'incident/getIncidentCountDetails', {
+      const response = await axios.post(getIncidentCountDetails1, {
         "orgId": 1,
         "userId": 1
       });
@@ -245,7 +255,7 @@ const Incident = () => {
           sourceType: newValue.inputValue
         };
         console.log('Payload:', payload);
-        const response = await axios.post(BASE_API_URL + "incident/addMasterByType", payload);
+        const response = await axios.post(addMasterByType, payload);
 
         if (response && response.data && response.data.masterSource && response.data.masterSource.sourceId) {
           id = response.data.masterSource.sourceId;
@@ -304,8 +314,17 @@ const Incident = () => {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
-  const createincidenthandler = () => {
-    navigate('/incident/create')
+  const createincidenthandlerwithAiPrompt = async () => {
+    try {
+      const response = await axios.post(addIncidentWithAI, {
+        userPrompt: prompt
+      });
+      const data = response.data
+      navigate('/incident/create', { state: data })
+    } catch (error) {
+      console.log('Error creating incident with ai prompt:', error)
+    }
+
   }
 
 
@@ -315,7 +334,7 @@ const Incident = () => {
   return (
 
     <div className='border-0'>
-      <div className='row' style={{ marginBottom: "15px" }}>
+      <div className='row mb-3'>
         <div className='col-md-6 route-head incident_mbl'>
           <h3 className='mb-0'>Incidents</h3>
           <div>
@@ -366,7 +385,7 @@ const Incident = () => {
                 <div class="card-body">
                   <div class="d-flex justify-content-between mb-3">
                     <div>
-                      <span class="d-block" style={{ fontWeight: "600" }}>Total Incidents</span>
+                      <span class="card-head">Total Incidents</span>
                     </div>
 
                     <div>
@@ -374,7 +393,7 @@ const Incident = () => {
                     </div>
                   </div>
                   {/* <h3 class="mb-3 fw-bold">{incidentCount.total}</h3> */}
-                  <h3 class="mb-3 fw-bold">10</h3>
+                  <h3 class="mb-3 fw-bold">{incidentCount ? incidentCount.total : ""}</h3>
                   <div class="progress mb-2" style={{ height: "5px" }}>
                     <div class="progress-bar bg-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"
                       style={{ width: "70%" }}>
@@ -382,11 +401,11 @@ const Incident = () => {
                   </div>
                 </div>
               </div>
-              <div class="card card_incident">
+              <div class="card card_incident ">
                 <div class="card-body">
                   <div class="d-flex justify-content-between mb-3">
                     <div>
-                      <span class="d-block" style={{ fontWeight: "600" }}>Pending Incidents</span>
+                      <span class="card-head">Pending Incidents</span>
                     </div>
                     <div>
                       <span class="text-danger fw-bold">-2.8%</span>
@@ -404,13 +423,13 @@ const Incident = () => {
                 <div class="card-body">
                   <div class="d-flex justify-content-between mb-3">
                     <div>
-                      <span class="d-block" style={{ fontWeight: "600" }}>Resolved Incident</span>
+                      <span class="card-head">Resolved Incident</span>
                     </div>
                     <div>
                       <span class="text-success fw-bold">+12.5%</span>
                     </div>
                   </div>
-                  <h3 class="mb-3 fw-bold">12</h3>
+                  <h3 class="mb-3 fw-bold">{incidentCount ? incidentCount.resolved : ""}</h3>
                   <div class="progress mb-2" style={{ height: "5px" }}>
                     <div class="progress-bar bg-info" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"
                       style={{ width: "70%" }}>
@@ -422,13 +441,13 @@ const Incident = () => {
                 <div class="card-body">
                   <div class="d-flex justify-content-between mb-3">
                     <div>
-                      <span class="d-block" style={{ fontWeight: "600" }}>Open Incidents</span>
+                      <span class="card-head" >Open Incidents</span>
                     </div>
                     <div>
                       <span class="text-danger fw-bold">-75%</span>
                     </div>
                   </div>
-                  <h3 class="mb-3 fw-bold">12</h3>
+                  <h3 class="mb-3 fw-bold">{incidentCount ? incidentCount.open : ""}</h3>
                   <div class="progress mb-2" style={{ height: "5px" }}>
                     <div class="progress-bar bg-primary" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"
                       style={{ width: "70%" }}>
@@ -629,7 +648,7 @@ const Incident = () => {
         </div>
       </div>
       {/* Ai promt diapog */}
-      <Dialog open={aiPromptOpen} onClose={handeClickAiPromptDialog}>
+      <Dialog maxWidth="sm" fullWidth open={aiPromptOpen} onClose={handeClickAiPromptDialog}>
         <DialogTitle className='dialog_head'>Create incident with AI prompt</DialogTitle>
         <DialogContent className='dialog_content'>
           {/* <AiPrompt /> */}
@@ -646,8 +665,9 @@ const Incident = () => {
           />
         </DialogContent>
         <DialogActions className='dialog_content'>
-          <Button className='accordian_submit_btn ' onClick={handeClickAiPromptDialog}>Cancel</Button>
-          <Button className='accordian_cancel_btn' onClick={createincidenthandler} color="primary">OK</Button>
+          <Button className='accordian_submit_btn' onClick={createincidenthandlerwithAiPrompt} color="primary">OK</Button>
+          <Button className=' accordian_cancel_btn' onClick={handeClickAiPromptDialog}>Cancel</Button>
+
         </DialogActions>
       </Dialog>
 
