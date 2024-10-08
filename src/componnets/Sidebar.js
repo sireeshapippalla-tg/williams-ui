@@ -120,6 +120,13 @@ export default function Sidebar() {
     const [open, setOpen] = React.useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
+    const location = useLocation();
+    const { pathname } = location;
+
+    const shouldHideDrawer = pathname === "/login" || pathname === "/forgot/password";
+
+
+
     const handleDrawerOpen = () => {
         setOpen(!open);
     };
@@ -131,8 +138,7 @@ export default function Sidebar() {
         setOpen(false);
     };
 
-    const location = useLocation();
-    const { pathname } = location;
+  
 
 
     const handleSidebarToggle = () => {
@@ -140,75 +146,77 @@ export default function Sidebar() {
         setSidebarOpen(!sidebarOpen);
     };
 
-    return (
+    return !shouldHideDrawer ?  (
         <Box sx={{ display: "flex" }}>
             <CssBaseline />
-            <Header onMenuClick={handleSidebarToggle} />
-            <div className="sidebar_collapse" >
+                    <Header onMenuClick={handleSidebarToggle} />
+                    <div className="sidebar_collapse" >
 
-                <Drawer variant="permanent" open={open} className="">
-                    <IconButton
-                        color="inherit"
-                        aria-label="open drawer"
-                        // onClick={handleDrawerOpen}
-                        onClick={() => setOpen(!open)}
-                        className='sidebar-arrow'
-                        edge="end"
-                    >
-                        {open ? <ChevronLeftIcon style={{ color: "#533529" }} /> : <ChevronRightIcon style={{ color: "#533529" }} />}
-                    </IconButton>
-                    <DrawerHeader />
-                    <Divider />
-                    <List sx={{ height: "100vh", backgroundColor: "#533529" }}>
+                        <Drawer variant="permanent" open={open} className="">
+                            <IconButton
+                                color="inherit"
+                                aria-label="open drawer"
+                                // onClick={handleDrawerOpen}
+                                onClick={() => setOpen(!open)}
+                                className='sidebar-arrow'
+                                edge="end"
+                            >
+                                {open ? <ChevronLeftIcon style={{ color: "#533529" }} /> : <ChevronRightIcon style={{ color: "#533529" }} />}
+                            </IconButton>
+                            <DrawerHeader />
+                            <Divider />
+                            <List sx={{ height: "100vh", backgroundColor: "#533529" }}>
 
-                        {SidebarItems.map((item, index) => (
-                            <div key={index}>
-                                <Link
-                                    to={item.path}
-                                    style={{
-                                        textDecoration: "none"
-                                    }}
-                                >
-                                    <ListItemButton
-                                        className={`side-menubar-text ${pathname === item.path ? "active" : ""}`}
-                                        sx={{
-                                            minHeight: 48,
-                                            justifyContent: open ? "initial" : "center",
-                                            px: 2.5,
-                                            bgcolor: pathname === item.path ? "#A9ECFF" : "transparent",
-                                        }}
-                                        selected={pathname === item.path}
-                                    >
-                                        <ListItemIcon
-                                            sx={{
-                                                minWidth: 0,
-                                                mr: open ? 3 : "auto",
-                                                justifyContent: "center",
-                                                color: pathname === item.path ? "#533529" : "white",
+                                {SidebarItems.map((item, index) => (
+                                    <div key={index}>
+                                        <Link
+                                            to={item.path}
+                                            style={{
+                                                textDecoration: "none"
                                             }}
                                         >
-                                            {item.icon}
-                                        </ListItemIcon>
-                                        <ListItemText
-                                            primary={item.label}
-                                            sx={{
-                                                opacity: open ? 10 : 0,
-                                                color: pathname === item.path ? "#533529" : "white",
-                                            }}
-                                        />
-                                    </ListItemButton>
-                                </Link>
-                            </div>
-                        ))}
-                    </List>
-                    <Divider />
-                </Drawer>
-            </div>
-         
+                                            <ListItemButton
+                                                className={`side-menubar-text ${pathname === item.path ? "active" : ""}`}
+                                                sx={{
+                                                    minHeight: 48,
+                                                    justifyContent: open ? "initial" : "center",
+                                                    px: 2.5,
+                                                    bgcolor: pathname === item.path ? "#A9ECFF" : "transparent",
+                                                }}
+                                                selected={pathname === item.path}
+                                            >
+                                                <ListItemIcon
+                                                    sx={{
+                                                        minWidth: 0,
+                                                        mr: open ? 3 : "auto",
+                                                        justifyContent: "center",
+                                                        color: pathname === item.path ? "#533529" : "white",
+                                                    }}
+                                                >
+                                                    {item.icon}
+                                                </ListItemIcon>
+                                                <ListItemText
+                                                    primary={item.label}
+                                                    sx={{
+                                                        opacity: open ? 10 : 0,
+                                                        color: pathname === item.path ? "#533529" : "white",
+                                                    }}
+                                                />
+                                            </ListItemButton>
+                                        </Link>
+                                    </div>
+                                ))}
+                            </List>
+                            <Divider />
+                        </Drawer>
+                    </div>
+           
             <Box component="main" sx={{ flexGrow: 1, p: 3, }}>
                 <DrawerHeader />
                 <MainRoutes />
             </Box>
         </Box>
+    ): (
+        <MainRoutes />
     );
 }

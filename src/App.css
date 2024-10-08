@@ -393,7 +393,7 @@ ul {
   background: #fff;
   border-radius: 5px;
   box-shadow: 0 4px 24px 0 hsla(0, 0%, 74%, .251);
-  padding:1px 12px 8px 12px;
+  padding: 1px 12px 8px 12px;
 }
 
 .attached-files-info .attached-files ul li {
@@ -416,7 +416,7 @@ ul {
 
 .history_bg {
   align-items: center;
-  background:#83472f;
+  background: #83472f;
   border-radius: 50%;
   display: flex;
   flex-shrink: 0;
@@ -573,8 +573,9 @@ input {
   background-color: #533529 !important;
   color: white !important;
 }
-.accordian_tbl_txt{
-  color:brown !important;
+
+.accordian_tbl_txt {
+  color: brown !important;
   font-weight: 600 !important;
   font-family: "Montserrat", sans-serif !important;
   text-align: center !important;
@@ -592,7 +593,8 @@ input {
   line-height: 21px !important;
   cursor: pointer !important;
 }
-.accordian_row{
+
+.accordian_row {
   display: flex;
   align-items: baseline;
 }
@@ -658,7 +660,8 @@ div.modal_bg_body .modal-body {
 .calendar_align .css-z3c6am-MuiFormControl-root-MuiTextField-root {
   width: 100%;
 }
-.calendar_align .css-nxo287-MuiInputBase-input-MuiOutlinedInput-input{
+
+.calendar_align .css-nxo287-MuiInputBase-input-MuiOutlinedInput-input {
   padding: 12.5px 14px;
 }
 
@@ -739,44 +742,59 @@ div.modal_bg_body .modal-body {
 .accordian_arrow {
   color: white;
 }
-.checkbox_color{
-  color:brown !important
+
+.checkbox_color {
+  color: brown !important
 }
+
 .dialog_head {
   background-color: #533529;
   color: white;
 }
-.dialog_content{
+
+.dialog_content {
   background-color: #f6f6f6;
 }
+
 .custom-textfield {
-  font-size: 12px; /* Adjust the font size as needed */
+  font-size: 12px;
+  /* Adjust the font size as needed */
 }
 
 .custom-input .MuiInputBase-input {
-  height: 37px; /* Adjust the height as needed */
+  height: 37px;
+  /* Adjust the height as needed */
   display: flex;
-  align-items: center; /* Center text vertically */
-  padding: 6px 10px !important; /* Adjust the padding as needed */
+  align-items: center;
+  /* Center text vertically */
+  padding: 6px 10px !important;
+  /* Adjust the padding as needed */
 }
+
 .custom-input-drop .MuiInputBase-input {
-  height: 16px; /* Adjust the height as needed */
+  height: 16px;
+  /* Adjust the height as needed */
   display: flex;
-  align-items: center; /* Center text vertically */
-  padding: 6px 10px !important; /* Adjust the padding as needed */
+  align-items: center;
+  /* Center text vertically */
+  padding: 6px 10px !important;
+  /* Adjust the padding as needed */
 }
+
 .brown-menu .MuiPaper-root {
-  background-color: #FFF8DC; /* Cornsilk color */
+  background-color: #FFF8DC;
+  /* Cornsilk color */
   color: #8B4513;
 }
 
 .brown-menu-item:hover {
-  background-color: #533529 !important; 
+  background-color: #533529 !important;
   color: white;
 }
 
 .brown-bg {
-  background-color: #533529; /* SaddleBrown color */
+  background-color: #533529;
+  /* SaddleBrown color */
   color: white;
 }
 
@@ -788,7 +806,8 @@ div.modal_bg_body .modal-body {
 
 
 .modal-bg-body {
-  background-color: #d8ccbb; /* Cornsilk color */
+  background-color: #d8ccbb;
+  /* Cornsilk color */
 }
 
 
@@ -797,48 +816,61 @@ div.modal_bg_body .modal-body {
   flex-direction: column;
   height: 100%;
 }
+
 .drawer-header {
-  background-color: #533529; /* Brown color */
+  background-color: #533529;
+  /* Brown color */
 }
+
 .drawer-body {
   flex-grow: 1;
   overflow-y: auto;
 }
+
 .drawer-footer {
   background-color: #f4f4f4;
   display: flex;
   justify-content: flex-end;
 }
+
 .modal-bg-body {
   background-color: #fff8f0;
 }
-.ticket-chat .ticket-chat-body .created-tickets-info li .ticket-created-user .user-name h5{
+
+.ticket-chat .ticket-chat-body .created-tickets-info li .ticket-created-user .user-name h5 {
   font-size: 15px;
   font-weight: 500;
 }
-.ticket-chat .ticket-chat-body .created-tickets-info li .ticket-created-user .user-name h5 span{
+
+.ticket-chat .ticket-chat-body .created-tickets-info li .ticket-created-user .user-name h5 span {
   font-weight: 600;
 }
-.ticket-chat .ticket-chat-body .created-tickets-info li .ticket-created-info h6{
+
+.ticket-chat .ticket-chat-body .created-tickets-info li .ticket-created-info h6 {
   margin-bottom: 5px;
 }
+
 .ticket-chat .ticket-chat-body .created-tickets-info li .ticket-created-info p {
   font-size: 14px;
   margin-bottom: 10px;
 }
+
 .ticket-chat .ticket-chat-body .created-tickets-info li .ticket-created-info .comment-text {
   color: #fc6075;
 }
+
 a {
 
   cursor: pointer;
   outline: none;
   text-decoration: none;
 }
+
 .ticket-chat .ticket-chat-body .created-tickets-info li .details-text {
   font-size: 14px;
   margin-top: 10px;
 }
+
 .attached-files ul {
   list-style-type: none;
   padding: 0;
@@ -867,25 +899,30 @@ a {
   text-decoration: underline;
 }
 
-.close_icon{
+.close_icon {
   color: red
 }
-.dynamic-addicon{
+
+.dynamic-addicon {
   height: 25px;
   width: 25px;
   background-color: #533529 !important;
   color: white !important;
   top: 10px;
 }
+
 .vertical-line {
   display: inline-block;
   width: 1px;
-  height: 24px; /* Adjust height as needed */
-  background-color: #000; /* Adjust color as needed */
+  height: 24px;
+  /* Adjust height as needed */
+  background-color: #000;
+  /* Adjust color as needed */
   margin-left: 10px;
   margin-right: 10px;
   vertical-align: middle;
 }
+
 .adduser-card-main {
   display: flex;
   width: 100%;
@@ -894,6 +931,7 @@ a {
   align-items: center;
   justify-content: center;
 }
+
 .adduser-card {
   padding: 0px;
   max-width: 800px;
@@ -903,7 +941,7 @@ a {
   border-radius: 24px !important;
 }
 
-hr{
+hr {
   border: 1px solid #ffffff !important;
 }
 
@@ -913,10 +951,34 @@ hr{
   justify-content: space-between;
   align-items: center;
 }
+
 .file-left-content {
   display: flex;
   align-items: center;
 }
-.upload-file-border{
+
+.upload-file-border {
   border: 1px solid #eee;
+}
+
+
+.wraper{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100%;
+
+}
+.login {
+  width: 400px;
+  height: min-content;
+  border-radius: 5px;
+  padding: 20px;
+
+}
+.login h5 {
+  text-align: center;
+  color: rgb(83 53 41);
+  font-weight: 600;
 }

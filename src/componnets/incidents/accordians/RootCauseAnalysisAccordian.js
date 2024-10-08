@@ -67,10 +67,11 @@ const RootCauseAnalysisAccordian = () => {
     const [message, setMessage] = useState('');
     const [severity, setSeverity] = useState('success');
     const [open, setOpen] = useState(false);
-    const [fetchedFiles, setFitchedFiles] = useState([])
+    const [fetchedFiles, setFetchedFiles] = useState([])
     const [selectedFileUrl, setSelectedFileUrl] = useState(null);
     const [rootCauseId, setRootCauseId] = useState()
     const [problemStageId, setProblemStageId] = useState()
+    const [filePreview, setFilePreview] = useState(null)
 
 
     const handleClose = (event, reason) => {
@@ -107,29 +108,8 @@ const RootCauseAnalysisAccordian = () => {
         updatedInputs[index].value[subIndex] = value;
         setWhyInputs(updatedInputs);
     };
-    const handleDrop = (event) => {
-        event.preventDefault();
-        const files = Array.from(event.dataTransfer.files);
-        setRootSelectedFiles((prevFiles) => [...prevFiles, ...files]);
-    };
-    const rootHandleFileChange = (e) => {
-        setRootSelectedFiles([...e.target.files]);
-    };
-    const rootHandleRemoveFile = (index) => {
-        setRootSelectedFiles(rootSelectedFiles.filter((_, i) => i !== index));
-    };
-    const handleDragOver = (event) => {
-        event.preventDefault();
-    };
 
-    const handleFileSelect = (event) => {
-        const files = Array.from(event.target.files);
-        setRootSelectedFiles((prevFiles) => [...prevFiles, ...files]);
-    };
 
-    const rootcauseHandleRemoveFile = (index) => {
-        setRootSelectedFiles(rootSelectedFiles.filter((_, i) => i !== index));
-    };
 
 
 
@@ -189,13 +169,50 @@ const RootCauseAnalysisAccordian = () => {
 
             console.log(response)
 
-            if(response?.data?.statusResponse?.responseCode === 200) {
+            if (response?.data?.statusResponse?.responseCode === 201) {
                 setMessage("Root cause analysis created Successfully");
                 setSeverity('success');
                 setOpen(true);
                 setRootSelectedFiles([])
+
+                const fetchedRootFiles = response.data.rootCauseFiles || [];
+                if (fetchedRootFiles && fetchedRootFiles.length > 0) {
+                    const newFiles = fetchedRootFiles.map((file) => ({
+                        documentId: file.documentId,
+                        documentName: file.documentName,
+                        documentSize: file.documentSize,
+                        documentUrl: file.documentUrl,
+                        documentType: file.documentType,
+                        uploadDate: file.uploadDate
+                    }));
+                    setFetchedFiles(prevFiles => [...prevFiles, ...newFiles])
+                }
+
+                fetch_rootcause_analysis();
+
+            } else if (response?.data?.statusResponse?.responseCode === 200) {
+                setMessage("Root cause analysis Updated Successfully");
+                setSeverity('success');
+                setOpen(true);
+
+                setRootSelectedFiles([])
+
+                const newFiles = response?.data?.rootCauseFiles?.map((file) => ({
+                    documentId: file.documentId,
+                    documentName: file.documentName,
+                    documentSize: file.documentSize,
+                    documentUrl: file.documentUrl,
+                    documentType: file.documentType,
+                    uploadDate: file.uploadDate
+                }))
+                setFetchedFiles(prevFile => [...prevFile, newFiles])
+                fetch_rootcause_analysis()
+            } else {
+                setMessage("Failed to add Preventive action.");
+                setSeverity('error');
+                setOpen(true);
             }
-         
+
 
         } catch (error) {
             console.log(error)
@@ -223,13 +240,13 @@ const RootCauseAnalysisAccordian = () => {
             // Set problem description and summary
             setProblemDescription(data.problemDescription)
             setSummary(data.rootCauseSummary)
-            setFitchedFiles(response.data.rootCauseFiles)
+            setFetchedFiles(response.data.rootCauseFiles)
             setRootCauseId(data.rootCauseId)
 
 
             // Map root cause details to whyInputs
             const detailsData = response.data.rootCauseDetails.map((details) => ({
-                label: `${details.stage} why`,
+                label: `${details.stage}`,
                 value: [details.occur, details.undetected, details.prevented],
                 id: details.problemStageId
             }))
@@ -243,7 +260,7 @@ const RootCauseAnalysisAccordian = () => {
     }
 
     const handleFilePreview = (fileUrl) => {
-        setSelectedFileUrl(fileUrl); // Set the selected file URL
+        setFilePreview(fileUrl); // Set the selected file URL
     };
 
     const downloadFile = (url, fileName) => {
@@ -254,6 +271,16 @@ const RootCauseAnalysisAccordian = () => {
         link.click(); // Trigger the download
         document.body.removeChild(link); // Clean up
     };
+
+    const handleFileSelect = (event) => {
+        const files = Array.from(event.target.files);
+        setRootSelectedFiles((prevFiles) => [...prevFiles, ...files]);
+    };
+
+    const rootcauseHandleRemoveFile = (index) => {
+        setRootSelectedFiles(rootSelectedFiles.filter((_, i) => i !== index));
+    };
+
     return (
         <div>
             <Accordion className='mb-2 accordian_arrow'>
@@ -440,78 +467,78 @@ const RootCauseAnalysisAccordian = () => {
                                 <span style={{ marginLeft: "10px" }}> {rootSelectedFiles.length > 0 ? `${rootSelectedFiles.length} file(s) selected` : 'No file chosen'}</span>
                             </div>
                         </div>
-
-
-                        <div className='row accordian_row'>
-
-                            {rootSelectedFiles.length > 0 && (
-                                rootSelectedFiles.map((file, index) => (
-                                    <div className="row attached-files-info mt-3">
-                                        <div className="col-xxl-6">
-                                            <div className="attached-files">
-                                                <ul>
-                                                    <li key={index} className='mt-2'>
-                                                        <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
-                                                            <div className="d-flex align-items-center">
-                                                                <span className="file-icon">
-                                                                    <TextSnippetIcon style={{ color: "#533529" }} />
-                                                                </span>
-                                                                <p className="mb-0 ms-2">{file.name}</p>
-                                                            </div>
-                                                            <div className="file-actions d-flex align-items-center">
-                                                                <IconButton
-                                                                    edge='end'
-                                                                    aria-label='delete'
-                                                                    onClick={() => rootcauseHandleRemoveFile(index)}
-                                                                >
-                                                                    <CloseIcon className='close_icon' />
-                                                                </IconButton>
-                                                            </div>
+                        {rootSelectedFiles.length > 0 && (
+                            rootSelectedFiles.map((file, index) => (
+                                <div className="row attached-files-info mt-3">
+                                    <div className="col-xxl-6">
+                                        <div className="attached-files">
+                                            <ul>
+                                                <li key={index} className='mt-2'>
+                                                    <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
+                                                        <div className="d-flex align-items-center">
+                                                            <span className="file-icon">
+                                                                <TextSnippetIcon style={{ color: "#533529" }} />
+                                                            </span>
+                                                            <p className="mb-0 ms-2">{file.name}</p>
                                                         </div>
-                                                    </li>
-                                                </ul>
-                                            </div>
+                                                        <div className="file-actions d-flex align-items-center">
+                                                            <IconButton
+                                                                edge='end'
+                                                                aria-label='delete'
+                                                                onClick={() => rootcauseHandleRemoveFile(index)}
+                                                            >
+                                                                <CloseIcon className='close_icon' />
+                                                            </IconButton>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </ul>
                                         </div>
                                     </div>
-                                ))
-                            )}
-
-                            {fetchedFiles && fetchedFiles.length > 0 && (
-                                <div className='col-md-12 mb-3'>
-                                    {/* <h5 style={{ fontWeight: "600" }}>Incident Files</h5> */}
-                                    <ul>
-                                        {fetchedFiles.map((file, index) => (
-                                            <li key={index} className='mt-2'>
-                                                <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
-                                                    <div className="d-flex align-items-center">
-                                                        <span className="file-icon">
-                                                            <TextSnippetIcon style={{ color: "#533529" }} />
-                                                        </span>
-                                                        <p className="mb-0 ms-2">
-                                                            <a href={file.documentUrl} target="_blank" rel="noopener noreferrer">
-                                                                {file.documentName}
-                                                            </a> ({(file.documentSize / 1024).toFixed(2)} KB)
-                                                        </p>
-                                                    </div>
-                                                    <div className="file-actions d-flex align-items-center">
-                                                        <div className="file-download me-2">
-                                                            <ArrowDownwardIcon
-                                                                style={{ marginRight: "5px", cursor: 'pointer' }}
-                                                                onClick={() => downloadFile(file.documentUrl, file.documentName)}
-                                                            />
-                                                        </div>
-                                                        <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
-                                                            <VisibilityIcon />
-                                                        </IconButton>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ul>
                                 </div>
-                            )}
+                            ))
+                        )}
 
+                        {fetchedFiles && fetchedFiles.length > 0 && (
+                            <div className="row attached-files-info mt-3">
+                                <div className="col-xxl-6">
+                                    <div className="attached-files">
+                                        {/* <h5 style={{ fontWeight: "600" }}>Incident Files</h5> */}
+                                        <ul>
+                                            {fetchedFiles.map((file, index) => (
+                                                <li key={index} className='mt-2'>
+                                                    <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
+                                                        <div className="d-flex align-items-center">
+                                                            <span className="file-icon">
+                                                                <TextSnippetIcon style={{ color: "#533529" }} />
+                                                            </span>
+                                                            <p className="mb-0 ms-2">
+                                                                <a href={file.documentUrl} target="_blank" rel="noopener noreferrer">
+                                                                    {file.documentName}
+                                                                </a> ({(file.documentSize / 1024).toFixed(2)} KB)
+                                                            </p>
+                                                        </div>
+                                                        <div className="file-actions d-flex align-items-center">
+                                                            <div className="file-download me-2">
+                                                                <ArrowDownwardIcon
+                                                                    style={{ marginRight: "5px", cursor: 'pointer' }}
+                                                                    onClick={() => downloadFile(file.documentUrl, file.documentName)}
+                                                                />
+                                                            </div>
+                                                            <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
+                                                                <VisibilityIcon />
+                                                            </IconButton>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
+                        <div className='row accordian_row'>
                             <div className='d-flex justify-content-end gap-3 mt-3'>
                                 <Button className='accordian_submit_btn  ' style={{ float: "none", marginRight: "15px" }} onClick={handleRootCauseSubmit}>Submit</Button>
                                 {/* <Button className='accordian_cancel_btn'>Close</Button> */}
@@ -523,8 +550,8 @@ const RootCauseAnalysisAccordian = () => {
 
 
             <Dialog
-                open={Boolean(selectedFileUrl)} // Open the dialog if a file is selected
-                onClose={() => setSelectedFileUrl(null)} // Close the dialog
+                open={Boolean(filePreview)} // Open the dialog if a file is selected
+                onClose={() => setFilePreview(null)} // Close the dialog
                 fullWidth // This makes the dialog take the full width of its container
                 maxWidth="xl" // Options: 'xs', 'sm', 'md', 'lg', 'xl'
                 sx={{
@@ -535,9 +562,9 @@ const RootCauseAnalysisAccordian = () => {
                 }}
             >
                 <DialogContent>
-                    {selectedFileUrl && (
+                    {filePreview && (
                         <iframe
-                            src={selectedFileUrl}
+                            src={filePreview}
                             width="100%"
                             height="500px"
                             style={{ border: 'none' }}
@@ -546,7 +573,7 @@ const RootCauseAnalysisAccordian = () => {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setSelectedFileUrl(null)} className='accordian_submit_btn' >
+                    <Button onClick={() => setFilePreview(null)} className='accordian_submit_btn' >
                         Close
                     </Button>
                 </DialogActions>

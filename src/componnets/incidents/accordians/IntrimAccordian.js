@@ -6,15 +6,10 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
 import { styled } from '@mui/material/styles';
-import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import CloseIcon from '@mui/icons-material/Close';
 import IconButton from '@mui/material/IconButton';
 import Form from 'react-bootstrap/Form';
-import { BASE_API_URL } from '../../../api';
 import axios from 'axios';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
@@ -51,18 +46,6 @@ const IntrimAccordian = () => {
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [selectedFileUrl, setSelectedFileUrl] = useState(null);
 
-    const handleDrop = (event) => {
-        event.preventDefault();
-        const files = Array.from(event.dataTransfer.files);
-        setInterimSelectedFiles((prevFiles) => [...prevFiles, ...files]);
-    };
-    const handleDragOver = (event) => {
-        event.preventDefault();
-    };
-    const interimHandleFileChange = (event) => {
-        const files = Array.from(event.target.files);
-        setInterimSelectedFiles((prevFiles) => [...prevFiles, ...files]);
-    };
     const interimHandleRemoveFile = (index) => {
         setInterimSelectedFiles(interimSelectedFiles.filter((_, i) => i !== index));
     };
@@ -78,6 +61,7 @@ const IntrimAccordian = () => {
     }, [])
 
     const submit_Intirm_Investagation = async () => {
+        console.log(interimId)
         try {
             const requestBody = {
                 findings: intrimFindings,
@@ -124,7 +108,7 @@ const IntrimAccordian = () => {
                 setInterimSelectedFiles([])
 
                 const interimFiles = response.data.interimFiles || [];
-
+                console.log(interimFiles)
                 if (interimFiles.length > 0) {
                     const newFiles = interimFiles.map((file) => ({
                         documentId: file.documentId,
@@ -136,13 +120,13 @@ const IntrimAccordian = () => {
                     }));
                     setSelectedFiles(prevFiles => [...prevFiles, ...newFiles]);
                 }
-
+                fetchIntrimInvestigation();
             } else if (response?.data?.statusResponse?.responseCode === 200) {
                 setMessage("Interim investigation Updated Successfully");
                 setSeverity('success');
                 setOpen(true);
                 setInterimSelectedFiles([])
-                const newFiles = response.data.map((file) => ({
+                const newFiles = response?.data?.interimFiles?.map((file) => ({
                     documentId: file.documentId,
                     documentName: file.documentName,
                     documentSize: file.documentSize,
@@ -151,6 +135,7 @@ const IntrimAccordian = () => {
                     uploadDate: file.uploadDate
                 }))
                 setSelectedFiles(prevFiles => [...prevFiles, ...newFiles])
+                fetchIntrimInvestigation()
             } else {
                 setMessage("Failed to add Interim investigation.");
                 setSeverity('error');

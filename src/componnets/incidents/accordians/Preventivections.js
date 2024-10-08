@@ -21,6 +21,9 @@ import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
 import { savePreventiveAction, getPreventiveActionDetails } from '../../../api';
 
 const VisuallyHiddenInput = styled('input')({
@@ -37,14 +40,15 @@ const VisuallyHiddenInput = styled('input')({
 
 const Preventivections = () => {
     const { id } = useParams();
-    const[preventiveActionData, setPreventiveActionData] = useState('')
+    const [preventiveActionData, setPreventiveActionData] = useState('')
     const [preventiveFindings, setPreventiveFindings] = useState('')
     const [preventiveId, setPreventiveId] = useState()
-    const [preventingList, setPreventingList] = useState()
     const [preventiveSelectedFiles, setPreventiveSelectedFiles] = useState([]);
     const [open, setOpen] = useState(false);
     const [severity, setSeverity] = useState('success');
     const [message, setMessage] = useState('');
+    const [preventiveFiles, setPreventiveFiles] = useState([])
+    const [filePreview, setFilePreview] = useState(null)
 
     const preventiveHandleFileChange = (e) => {
         setPreventiveSelectedFiles([...e.target.files]);
@@ -53,14 +57,6 @@ const Preventivections = () => {
         setPreventiveSelectedFiles(preventiveSelectedFiles.filter((_, i) => i !== index));
     };
 
-    const handleDrop = (event) => {
-        event.preventDefault();
-        const files = Array.from(event.dataTransfer.files);
-        setPreventiveSelectedFiles((prevFiles) => [...prevFiles, ...files]);
-    };
-    const handleDragOver = (event) => {
-        event.preventDefault();
-    };
     const handleClose = (event, reason) => {
         if (reason === 'clickaway') {
             return;
@@ -94,7 +90,7 @@ const Preventivections = () => {
 
             const formData = new FormData();
             formData.append('preventive', JSON.stringify(requestBody))
-            if(preventiveSelectedFiles && preventiveSelectedFiles.length > 0) {
+            if (preventiveSelectedFiles && preventiveSelectedFiles.length > 0) {
                 preventiveSelectedFiles.forEach((file, index) => {
                     formData.append('files', file)
                 })
@@ -112,12 +108,37 @@ const Preventivections = () => {
                 setOpen(true);
                 setPreventiveSelectedFiles([])
 
+                const preventiveActionFiles = response.data.preventiveFileDetails || [];
+                console.log(preventiveActionFiles)
+                if (preventiveActionFiles && preventiveActionFiles.length > 0) {
+                    const newFiles = preventiveFiles.map((file) => ({
+                        documentId: file.documentId,
+                        documentName: file.documentName,
+                        documentSize: file.documentSize,
+                        documentUrl: file.documentUrl,
+                        documentType: file.documentType,
+                        uploadDate: file.uploadDate
+                    }));
+                    setPreventiveFiles(prevFiles => [...prevFiles, ...newFiles])
+                }
+                fetch_preventive_Action()
             } else if (response.data.statusResponse.responseCode === 200) {
                 setMessage("Preventive action Updated Successfully");
                 setSeverity('success');
                 setOpen(true);
 
                 setPreventiveSelectedFiles([])
+
+                const newFiles = response?.data?.preventiveFileDetails?.map((file) => ({
+                    documentId: file.documentId,
+                    documentName: file.documentName,
+                    documentSize: file.documentSize,
+                    documentUrl: file.documentUrl,
+                    documentType: file.documentType,
+                    uploadDate: file.uploadDate
+                }))
+                setPreventiveFiles(prevFile => [...prevFile, newFiles])
+                fetch_preventive_Action()
             } else {
                 setMessage("Failed to add Preventive action.");
                 setSeverity('error');
@@ -141,11 +162,13 @@ const Preventivections = () => {
             const response = await axios.post(getPreventiveActionDetails, requestBody)
             console.log('response', response);
             const preventiveData = response.data.preventiveActionDetails;
+            const pFiles = response.data.preventiveActionFiles
+            setPreventiveFiles(pFiles);
             console.log(preventiveData)
             setPreventiveActionData(preventiveData);
             setPreventiveId(preventiveData.preventiveId)
             console.log(preventiveId)
-            if(preventiveData) {
+            if (preventiveData) {
                 setPreventiveFindings(preventiveData.findings)
                 console.log(preventiveFindings)
             }
@@ -153,6 +176,20 @@ const Preventivections = () => {
             console.log('Failed to fetch preventive action details:', error)
         }
     }
+
+    const handleFilePreview = (fileUrl) => {
+        console.log("fileclik")
+        setFilePreview(fileUrl); // Set the selected file URL
+    };
+    
+    const downloadFile = (url, fileName) => {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName; // Set the file name for the download
+        document.body.appendChild(link); // Append to body
+        link.click(); // Trigger the download
+        document.body.removeChild(link); // Clean up
+    };
 
     return (
         <div>
@@ -194,7 +231,7 @@ const Preventivections = () => {
                             {/* <div className='col-md-12  file_upload'>
                                 <input class="form-control" type="file" id="formFileMultiple" multiple onChange={preventiveHandleFileChange} />
                             </div> */}
-                               <Button
+                            <Button
                                 component='label'
 
                                 style={{ color: "black" }}
@@ -213,7 +250,88 @@ const Preventivections = () => {
 
                         </div>
                     </div>
-                    <div className='row accordian_row'>
+
+                    {preventiveSelectedFiles.length > 0 && (
+                            preventiveSelectedFiles.map((file, index) => (
+                                <div className="row attached-files-info mt-3">
+                                    <div className="col-xxl-6">
+                                        <div className="attached-files">
+                                            <ul>
+                                                <li key={index} className='mt-2'>
+                                                    <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
+                                                        <div className="d-flex align-items-center">
+                                                            <span className="file-icon">
+                                                                <TextSnippetIcon style={{ color: "#533529" }} />
+                                                            </span>
+                                                            <p className="mb-0 ms-2">{file.name}</p>
+                                                        </div>
+                                                        <div className="file-actions d-flex align-items-center">
+                                                            <IconButton
+                                                                edge='end'
+                                                                aria-label='delete'
+                                                                onClick={() => preventiveHandleRemoveFile(index)}
+                                                            >
+                                                                <CloseIcon className='close_icon' />
+                                                            </IconButton>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                        {Array.isArray(preventiveFiles)  && preventiveFiles.length > 0 && (
+                            <div className="row attached-files-info mt-3">
+                                <div className="col-xxl-6">
+                                    <div className="attached-files">
+                                        <ul>
+                                            {preventiveFiles.map((file, index) => (
+                                                <li key={index} className='mt-2'>
+                                                    <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
+                                                        <div className="d-flex align-items-center">
+                                                            <span className="file-icon">
+                                                                <TextSnippetIcon style={{ color: "#533529" }} />
+                                                            </span>
+                                                            <p className="mb-0 ms-2">
+                                                                <a href={file.documentUrl} target="_blank" rel="noopener noreferrer">
+                                                                    {file.documentName}
+                                                                </a> ({(file.documentSize / 1024).toFixed(2)} KB)
+                                                            </p>
+                                                        </div>
+                                                        <div className="file-actions d-flex align-items-center">
+                                                            <div className="file-download me-2">
+                                                                <ArrowDownwardIcon
+                                                                    style={{ marginRight: "5px", cursor: 'pointer' }}
+                                                                    onClick={() => downloadFile(file.documentUrl, file.documentName)}
+                                                                />
+                                                            </div>
+                                                            <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
+                                                                <VisibilityIcon />
+                                                            </IconButton>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className='d-flex justify-content-end gap-3 mt-3'>
+                            <Button className='accordian_submit_btn'
+                                onClick={submit_Preventive_Action}
+                            // onClick={handleSubmit}
+                            >Submit</Button>
+                            {/* <Button
+                                className='accordian_cancel_btn'
+                            >
+                                Close
+                            </Button> */}
+                        </div>
+                    {/* <div className='row accordian_row'>
 
                         <div className='col-md-8 ps-0 attached-files-info mt-3'>
                             <div className="row">
@@ -257,13 +375,7 @@ const Preventivections = () => {
                             </div>
 
                         </div>
-                        {/* <div className='col-md-2' >
-                            <Button className='accordian_submit_btn' style={{ float: "none" }}>Submit</Button>
-
-                        </div>
-                        <div className='col-md-2'>
-                            <Button className='accordian_cancel_btn'>Close</Button>
-                        </div> */}
+                      
                         <div className='col-md-4 float-end mt-3 '>
                             <div className='d-flex justify-content-end gap-3 '>
                                 <Button className='accordian_submit_btn' onClick={submit_Preventive_Action}>Submit</Button>
@@ -274,7 +386,7 @@ const Preventivections = () => {
                                 </Button>
                             </div>
                         </div>
-                    </div>
+                    </div> */}
                 </AccordionDetails>
             </Accordion>
             <Snackbar open={open} autoHideDuration={2000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
@@ -282,6 +394,36 @@ const Preventivections = () => {
                     {message}
                 </Alert>
             </Snackbar>
+
+            <Dialog
+                open={Boolean(filePreview)} // Open the dialog if a file is selected
+                onClose={() => filePreview(null)} // Close the dialog
+                fullWidth // This makes the dialog take the full width of its container
+                maxWidth="xl" // Options: 'xs', 'sm', 'md', 'lg', 'xl'
+                sx={{
+                    '& .MuiDialog-paper': {
+                        width: '80vw',
+                        maxWidth: 'none',
+                    }
+                }}
+            >
+                <DialogContent>
+                    {filePreview && (
+                        <iframe
+                            src={filePreview}
+                            width="100%"
+                            height="500px"
+                            style={{ border: 'none' }}
+                            title="File Preview"
+                        />
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setFilePreview(null)} className='accordian_submit_btn' >
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     )
 }
