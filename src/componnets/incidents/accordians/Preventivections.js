@@ -111,7 +111,7 @@ const Preventivections = () => {
                 const preventiveActionFiles = response.data.preventiveFileDetails || [];
                 console.log(preventiveActionFiles)
                 if (preventiveActionFiles && preventiveActionFiles.length > 0) {
-                    const newFiles = preventiveFiles.map((file) => ({
+                    const newFiles = preventiveActionFiles.map((file) => ({
                         documentId: file.documentId,
                         documentName: file.documentName,
                         documentSize: file.documentSize,
@@ -119,7 +119,7 @@ const Preventivections = () => {
                         documentType: file.documentType,
                         uploadDate: file.uploadDate
                     }));
-                    setPreventiveFiles(prevFiles => [...prevFiles, ...newFiles])
+                    setPreventiveFiles(newFiles)
                 }
                 fetch_preventive_Action()
             } else if (response.data.statusResponse.responseCode === 200) {
