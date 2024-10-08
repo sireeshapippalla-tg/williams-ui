@@ -40,7 +40,8 @@ import {
     getAllUserByDepartment,
     getIncidentChats,
     saveIncidentChart,
-    uploadDocuments
+    uploadDocuments,
+    getAllUsers
 } from '../../api';
 
 
@@ -72,6 +73,7 @@ const IncidentDetails = (props) => {
     const [incidentDetails, setIncidentDetails] = useState(null);
     const [isIncidentDetailsFetched, setIsIncidentDetailsFetched] = useState(false);
     const [summary, setSummary] = useState('')
+    const [allUsers, setAllUsers] = useState([])
 
     const handleDrawerOpen = () => setDrawerOpen(true);
     const handleDrawerClose = () => setDrawerOpen(false);
@@ -104,6 +106,7 @@ const IncidentDetails = (props) => {
 
         fetchIncidentDetailsById()
         fetchIncidentCharts()
+        fetchAllUsers()
     }, [id]);
 
     useEffect(() => {
@@ -272,6 +275,31 @@ const IncidentDetails = (props) => {
             console.log(`Error in fetching the Departments:`, error)
         }
     }
+
+
+    //fetch all users 
+
+    const fetchAllUsers = async() => {
+        try {
+            const payload = {
+                orgId:1,
+                flag:'A',
+                departmentId:0
+            }
+            console.log(payload)
+            const response = await axios.post(getAllUsers, payload)
+            console.log("uuu", response)
+            const alUsersList = response.data.users.map((user) => ({
+                id:user.userId,
+                title:user.fullName
+            }))
+
+            setAllUsers(alUsersList)
+        } catch (error) {
+            console.log(`Error in fetching all users:`, error)
+        }
+    }
+    
     // Get all users by department
 
     const fetchUsersByDept = async (departmentID) => {
@@ -707,7 +735,7 @@ const IncidentDetails = (props) => {
                                     <div className='resolve-drop'>
                                         <Autocomplete
                                             style={{ padding: "0px" }}
-                                            options={users}
+                                            options={allUsers}
                                             value={selectedUser}
                                             // value={users.find((user) => user.id === incidentDetails.assignedUserId) || selectedUser}
                                             onChange={handleUserChange}
@@ -1123,7 +1151,8 @@ const IncidentDetails = (props) => {
                                         </form>
                                     </div>
                                 </div>
-                                <div className="ticket-chat-body" style={{ minHeight: "270px", maxHeight: "270px", overflowY: "auto" }}>
+                                {/* {incidentChats.map(chat => ( */}
+                                <div className="ticket-chat-body" style={{  maxHeight: "215px", overflowY: "auto" }}>
                                     <ul className="created-tickets-info">
                                         {incidentChats.map(chat => (
                                             <React.Fragment key={chat.incidentChatId}>
@@ -1189,6 +1218,7 @@ const IncidentDetails = (props) => {
 
                                     </ul> */}
                                 </div>
+                                {/* ))} */}
                             </div>
                         </div>
                     </div>

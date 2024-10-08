@@ -24,5 +24,6 @@ export const deleteUser = BASE_API_URL + 'users/deleteUser'
 export const getUsersById = BASE_API_URL + 'users/getUsersById'
 export const saveRootCause = BASE_API_URL + 'incident/saveRootCause'
 export const getRootCauseDetails = BASE_API_URL + 'incident/getRootCauseDetails'
+export const saveIncidentAssign = BASE_API_URL + 'incident/saveIncidentAssign';
 
 export const config = 'IAssure'

@@ -5,6 +5,7 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import EmailIcon from '@mui/icons-material/Email';
 import Email from '@mui/icons-material/Email';
+// import logoo from '../../assets/images/wi'
 
 
 
@@ -18,12 +19,15 @@ const Login = () => {
     }
 
     const handleSubmit = () => {
-        navigate('/dashboard')
+        navigate('/incident')
     }
     return (
         <div className='wraper'>
             <div className='login card'>
-                <h5 className='mb-3'>Login</h5>
+                {/* <h5 className='mb-3'>Login</h5> */}
+                <div className='logo'>
+                {/* <div className='logo'><img src={logoo} alt="Logo" /></div> */}
+                </div>
                 <form>
                     <div className='mb-2'>
                         <label htmlFor='email'>Email Address</label>
