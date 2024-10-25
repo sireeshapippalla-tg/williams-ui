@@ -22,9 +22,10 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Dialog from '@mui/material/Dialog';
+import {DialogContentText,DialogTitle} from '@mui/material';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import { savePreventiveAction, getPreventiveActionDetails } from '../../../api';
+import { savePreventiveAction, getPreventiveActionDetails,downloadFile,deleteFile } from '../../../api';
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -49,6 +50,9 @@ const Preventivections = () => {
     const [message, setMessage] = useState('');
     const [preventiveFiles, setPreventiveFiles] = useState([])
     const [filePreview, setFilePreview] = useState(null)
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [fileToDelete, setFileToDelete] = useState(null);
+    const [fileToDeleteIndex, setFileToDeleteIndex] = useState(null);
 
     const storedUser = JSON.parse(localStorage.getItem('userDetails'));
     const userId = storedUser ? storedUser.userId : null;
@@ -56,10 +60,51 @@ const Preventivections = () => {
     console.log(userId);
 
     const preventiveHandleFileChange = (e) => {
-        setPreventiveSelectedFiles([...e.target.files]);
+        const files = Array.from(e.target.files);
+        setPreventiveSelectedFiles((prevFiles) => [...prevFiles, ...files]);
     };
-    const preventiveHandleRemoveFile = (index) => {
-        setPreventiveSelectedFiles(preventiveSelectedFiles.filter((_, i) => i !== index));
+    const openDeleteDialog = (file, index) => {
+        setFileToDelete(file);
+        setFileToDeleteIndex(index);
+        setDeleteDialogOpen(true);
+    };
+
+    const closeDeleteDialog = () => {
+        setDeleteDialogOpen(false);
+        setFileToDelete(null);
+        setFileToDeleteIndex(null);
+    };
+
+    const confirmDeleteFile = async () => {
+        if (!fileToDelete) return;
+        try {
+            const payload = {
+                documentId: fileToDelete.documentId,
+                documentName: fileToDelete.documentName
+            };
+
+            const response = await axios.post(deleteFile, payload);
+
+            if (response.status === 200) {
+                setPreventiveFiles(preventiveFiles.filter(file => file.documentId !== fileToDelete.documentId));
+                setPreventiveSelectedFiles(preventiveSelectedFiles.filter(file => file.documentId !== fileToDelete.documentId));
+            
+                setMessage("File deleted successfully.");
+                setSeverity('success');
+                setOpen(true);
+            } else {
+                setMessage("Failed to delete the file.");
+                setSeverity('error');
+                setOpen(true);
+            }
+        } catch (error) {
+            console.error("Error deleting the file:", error);
+            setMessage("An error occurred while deleting the file.");
+            setSeverity('error');
+            setOpen(true);
+        } finally {
+            closeDeleteDialog();
+        }
     };
 
     const handleClose = (event, reason) => {
@@ -187,13 +232,22 @@ const Preventivections = () => {
         setFilePreview(fileUrl); // Set the selected file URL
     };
     
-    const downloadFile = (url, fileName) => {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = fileName; // Set the file name for the download
-        document.body.appendChild(link); // Append to body
-        link.click(); // Trigger the download
-        document.body.removeChild(link); // Clean up
+    const download = async (url,fileName) => {
+        try {
+            const payload = { documentName: fileName };
+            const response = await axios.post(downloadFile, payload, { responseType: 'blob' });
+            const blob = new Blob([response.data], { type: response.headers['content-type'] });
+            const link = document.createElement('a');
+            const url = window.URL.createObjectURL(blob);
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error in downloading file:', error);
+        }
     };
 
     return (
@@ -271,13 +325,9 @@ const Preventivections = () => {
                                                             <p className="mb-0 ms-2">{file.name}</p>
                                                         </div>
                                                         <div className="file-actions d-flex align-items-center">
-                                                            <IconButton
-                                                                edge='end'
-                                                                aria-label='delete'
-                                                                onClick={() => preventiveHandleRemoveFile(index)}
-                                                            >
-                                                                <CloseIcon className='close_icon' />
-                                                            </IconButton>
+                                                        <IconButton edge='end' onClick={() => setPreventiveSelectedFiles(preventiveSelectedFiles.filter((_, i) => i !== index))}>
+                                                <CloseIcon className='close_icon' />
+                                            </IconButton>
                                                         </div>
                                                     </div>
                                                 </li>
@@ -300,7 +350,7 @@ const Preventivections = () => {
                                                                 <TextSnippetIcon style={{ color: "#533529" }} />
                                                             </span>
                                                             <p className="mb-0 ms-2">
-                                                                <a href={file.documentUrl} target="_blank" rel="noopener noreferrer">
+                                                                <a target="_blank" rel="noopener noreferrer">
                                                                     {file.documentName}
                                                                 </a> ({(file.documentSize / 1024).toFixed(2)} KB)
                                                             </p>
@@ -309,12 +359,15 @@ const Preventivections = () => {
                                                             <div className="file-download me-2">
                                                                 <ArrowDownwardIcon
                                                                     style={{ marginRight: "5px", cursor: 'pointer' }}
-                                                                    onClick={() => downloadFile(file.documentUrl, file.documentName)}
+                                                                    onClick={() => download(file.documentUrl, file.documentName)}
                                                                 />
                                                             </div>
                                                             <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
                                                                 <VisibilityIcon />
                                                             </IconButton>
+                                                            <IconButton edge='end' onClick={() => openDeleteDialog(file, index)}>
+                                                    <CloseIcon className='close_icon' />
+                                                </IconButton>
                                                         </div>
                                                     </div>
                                                 </li>
@@ -399,6 +452,16 @@ const Preventivections = () => {
                     {message}
                 </Alert>
             </Snackbar>
+            <Dialog open={deleteDialogOpen} onClose={closeDeleteDialog}>
+                <DialogTitle>Delete Confirmation</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>Are you sure you want to delete the file "{fileToDelete?.documentName}"?</DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={closeDeleteDialog} color="primary">Cancel</Button>
+                    <Button onClick={confirmDeleteFile} color="secondary">Delete</Button>
+                </DialogActions>
+            </Dialog>
 
             <Dialog
                 open={Boolean(filePreview)} // Open the dialog if a file is selected

@@ -29,9 +29,10 @@ import { Snackbar } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import axios from 'axios';
 import Dialog from '@mui/material/Dialog';
+import {DialogContentText,DialogTitle} from '@mui/material';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import { saveRootCause, getRootCauseDetails } from '../../../api';
+import { saveRootCause, getRootCauseDetails,downloadFile,deleteFile } from '../../../api';
 
 
 const VisuallyHiddenInput = styled('input')({
@@ -72,6 +73,9 @@ const RootCauseAnalysisAccordian = () => {
     const [rootCauseId, setRootCauseId] = useState()
     const [problemStageId, setProblemStageId] = useState()
     const [filePreview, setFilePreview] = useState(null)
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [fileToDelete, setFileToDelete] = useState(null);
+    const [fileToDeleteIndex, setFileToDeleteIndex] = useState(null);
 
 
     const storedUser = JSON.parse(localStorage.getItem('userDetails'));
@@ -268,13 +272,22 @@ const RootCauseAnalysisAccordian = () => {
         setFilePreview(fileUrl); // Set the selected file URL
     };
 
-    const downloadFile = (url, fileName) => {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = fileName; // Set the file name for the download
-        document.body.appendChild(link); // Append to body
-        link.click(); // Trigger the download
-        document.body.removeChild(link); // Clean up
+    const download = async (url,fileName) => {
+        try {
+            const payload = { documentName: fileName };
+            const response = await axios.post(downloadFile, payload, { responseType: 'blob' });
+            const blob = new Blob([response.data], { type: response.headers['content-type'] });
+            const link = document.createElement('a');
+            const url = window.URL.createObjectURL(blob);
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error in downloading file:', error);
+        }
     };
 
     const handleFileSelect = (event) => {
@@ -282,9 +295,50 @@ const RootCauseAnalysisAccordian = () => {
         setRootSelectedFiles((prevFiles) => [...prevFiles, ...files]);
     };
 
-    const rootcauseHandleRemoveFile = (index) => {
-        setRootSelectedFiles(rootSelectedFiles.filter((_, i) => i !== index));
+    const openDeleteDialog = (file, index) => {
+        setFileToDelete(file);
+        setFileToDeleteIndex(index);
+        setDeleteDialogOpen(true);
     };
+
+    const closeDeleteDialog = () => {
+        setDeleteDialogOpen(false);
+        setFileToDelete(null);
+        setFileToDeleteIndex(null);
+    };
+
+    const confirmDeleteFile = async () => {
+        if (!fileToDelete) return;
+        try {
+            const payload = {
+                documentId: fileToDelete.documentId,
+                documentName: fileToDelete.documentName
+            };
+
+            const response = await axios.post(deleteFile, payload);
+
+            if (response.status === 200) {
+                setFetchedFiles(fetchedFiles.filter(file => file.documentId !== fileToDelete.documentId));
+                setRootSelectedFiles(rootSelectedFiles.filter(file => file.documentId !== fileToDelete.documentId));
+            
+                setMessage("File deleted successfully.");
+                setSeverity('success');
+                setOpen(true);
+            } else {
+                setMessage("Failed to delete the file.");
+                setSeverity('error');
+                setOpen(true);
+            }
+        } catch (error) {
+            console.error("Error deleting the file:", error);
+            setMessage("An error occurred while deleting the file.");
+            setSeverity('error');
+            setOpen(true);
+        } finally {
+            closeDeleteDialog();
+        }
+    };
+
 
     return (
         <div>
@@ -490,7 +544,7 @@ const RootCauseAnalysisAccordian = () => {
                                                             <IconButton
                                                                 edge='end'
                                                                 aria-label='delete'
-                                                                onClick={() => rootcauseHandleRemoveFile(index)}
+                                                                onClick={() =>  setRootSelectedFiles(rootSelectedFiles.filter((_, i) => i !== index))}
                                                             >
                                                                 <CloseIcon className='close_icon' />
                                                             </IconButton>
@@ -518,7 +572,7 @@ const RootCauseAnalysisAccordian = () => {
                                                                 <TextSnippetIcon style={{ color: "#533529" }} />
                                                             </span>
                                                             <p className="mb-0 ms-2">
-                                                                <a href={file.documentUrl} target="_blank" rel="noopener noreferrer">
+                                                                <a  target="_blank" rel="noopener noreferrer">
                                                                     {file.documentName}
                                                                 </a> ({(file.documentSize / 1024).toFixed(2)} KB)
                                                             </p>
@@ -527,12 +581,15 @@ const RootCauseAnalysisAccordian = () => {
                                                             <div className="file-download me-2">
                                                                 <ArrowDownwardIcon
                                                                     style={{ marginRight: "5px", cursor: 'pointer' }}
-                                                                    onClick={() => downloadFile(file.documentUrl, file.documentName)}
+                                                                    onClick={() => download(file.documentUrl, file.documentName)}
                                                                 />
                                                             </div>
                                                             <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
                                                                 <VisibilityIcon />
                                                             </IconButton>
+                                                            <IconButton edge='end' onClick={() => openDeleteDialog(file, index)}>
+                                                    <CloseIcon className='close_icon' />
+                                                </IconButton>
                                                         </div>
                                                     </div>
                                                 </li>
@@ -581,6 +638,16 @@ const RootCauseAnalysisAccordian = () => {
                     <Button onClick={() => setFilePreview(null)} className='accordian_submit_btn' >
                         Close
                     </Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog open={deleteDialogOpen} onClose={closeDeleteDialog}>
+                <DialogTitle>Delete Confirmation</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>Are you sure you want to delete the file "{fileToDelete?.documentName}"?</DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={closeDeleteDialog} color="primary">Cancel</Button>
+                    <Button onClick={confirmDeleteFile} color="secondary">Delete</Button>
                 </DialogActions>
             </Dialog>
 
