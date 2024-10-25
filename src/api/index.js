@@ -36,5 +36,6 @@ export const addTasksWithAI = BASE_API_URL + 'incident/addTasksWithAI'
 export const closeIncident = BASE_API_URL + 'incident/closeIncident'
 export const downloadFile = BASE_API_URL + 'incident/downloadFile'
 export const deleteFile = BASE_API_URL + 'incident/deleteFile'
+export const getNotifications = BASE_API_URL + 'incident/getNotifications'
 
 export const config = 'IAssure'

@@ -944,6 +944,9 @@ a {
 hr {
   border: 1px solid #ffffff !important;
 }
+.notifications hr {
+  border: 1px solid black !important;
+}
 
 
 .selectedFiles {

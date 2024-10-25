@@ -32,7 +32,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material
 
 
 import { getMastersListByType, addMasterByType, saveTasksForCap, getTasksForIncident, saveCorrectiveAction, getIncidentCAPDetails, addTasksWithAI } from '../../../api';
-import { Flag } from '@mui/icons-material';
+import DoneIcon from '@mui/icons-material/Done';
 
 
 
@@ -716,12 +716,21 @@ const CorrectiveAction = ({ invokeHistory }) => {
                                                             }}
                                                         />
                                                     </IconButton>
-                                                    <Button
+                                                    <IconButton onClick={() => handleTaskSave(row)}>
+                                                        <DoneIcon
+                                                         style={{
+                                                            fontSize: '20px',
+                                                            color: "green"
+                                                        }}
+                                                        />
+
+                                                    </IconButton>
+                                                    {/* <Button
                                                         color='success'
                                                         style={{ fontWeight: "600" }}
                                                         // variant='contained'
                                                         onClick={() => handleTaskSave(row)}
-                                                    >Save</Button>
+                                                    >Save</Button> */}
                                                 </div>
                                             </TableCell>
                                         </TableRow>
