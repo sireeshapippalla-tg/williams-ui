@@ -34,5 +34,7 @@ export const saveCorrectiveAction = BASE_API_URL + 'incident/saveCorrectiveActio
 export const getIncidentCAPDetails = BASE_API_URL + 'incident/getIncidentCAPDetails'
 export const addTasksWithAI = BASE_API_URL + 'incident/addTasksWithAI'
 export const closeIncident = BASE_API_URL + 'incident/closeIncident'
+export const downloadFile = BASE_API_URL + 'incident/downloadFile'
+export const deleteFile = BASE_API_URL + 'incident/deleteFile'
 
 export const config = 'IAssure'
