@@ -7,26 +7,62 @@ import User from '../pages/users/User';
 import AddUser from '../pages/users/AddUser';
 import Login from '../pages/auth/Login';
 import Forgot from '../pages/auth/Forgot';
-
-
-
+import ProtectedRoute from './ProtectedRoute ';
 
 
 const MainRoutes = () => {
   return (
     <div>
         <Routes>
-          {/* <Route path="/" element={<IncidentDashboard />} /> */}
-          <Route path='/incident' element={<Incident/>}/>
-          <Route path='/incident/create' element={<CreateIncident/>}/>
-          <Route  path='/incident/details/:id' element={<IncidentDetails/>}/>
-          <Route  path='/users' element={<User/>}/>
-          <Route  path='/users/adduser' element={<AddUser/>}/>
+          {/* Protected Routes */}
+          <Route 
+            path='/incident' 
+            element={
+              <ProtectedRoute>
+                <Incident/>
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path='/incident/create' 
+            element={
+              <ProtectedRoute>
+                <CreateIncident/>
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path='/incident/details/:id' 
+            element={
+              <ProtectedRoute>
+                <IncidentDetails/>
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path='/users' 
+            element={
+              <ProtectedRoute>
+                <User/>
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path='/users/adduser' 
+            element={
+              <ProtectedRoute>
+                <AddUser/>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Public Routes */}
           <Route path='/login' element={<Login/>}/>
           <Route path='/forgot/password' element={<Forgot/>}/>
         </Routes>
     </div>
   )
 }
+
 
 export default MainRoutes

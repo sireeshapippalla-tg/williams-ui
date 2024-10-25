@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -22,9 +21,20 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import AddIcon from '@mui/icons-material/Add';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { TextField, Autocomplete, Alert } from '@mui/material';
+import { TextField, Autocomplete, Alert, Snackbar } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
+import axios from 'axios';
+import { useParams } from 'react-router-dom';
+import TextSnippetIcon from '@mui/icons-material/TextSnippet';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
 
+
+import { getMastersListByType, addMasterByType, saveTasksForCap, getTasksForIncident, saveCorrectiveAction, getIncidentCAPDetails } from '../../../api';
+import { Flag } from '@mui/icons-material';
 
 
 
@@ -41,28 +51,66 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 const CorrectiveAction = () => {
+    const { id } = useParams();
+    console.log(id)
+
     const [correctiveRows, setCorrectiveRows] = useState([
-        { id: 1, task: '', dueDate: '', comment: '', resolved: false },
+        { id: 1, task: '', taskId: '', dueDate: '', resolved: false },
     ]);
     const [tableCorrectveSelectedFiles, setTableCorectiveSelectedFiles] = useState([]);
     const [correctiveShowAlert, setCorrectieShowAlert] = useState(false);
     const [correctiveSelectedFiles, setCorrectiveSelectecFiles] = useState([]);
+    const [taskOptions, setTaskOptions] = useState([])
+    const [severity, setSeverity] = useState('success');
+    const [open, setOpen] = useState(false);
+    const [message, setMessage] = useState('');
+    const [incidentTaskId, setIncidentTaskId] = useState([])
+    const [comments, setComments] = useState();
+    const [correctiveId, setCorrectiveId] = useState()
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [selectedFileUrl, setSelectedFileUrl] = useState(null);
 
-    const options = [
-        { label: 'Cleaned properly', value: 'Cleaned properly' },
-        { label: 'Clean the Floor and sink', value: 'Clean the Floor and sink' },
-        { label: 'Wash Again', value: 'Wash Again' },
-        { label: 'Cleaned the walls again', value: 'Cleaned the walls again' },
-    ];
+    const storedUser = JSON.parse(localStorage.getItem('userDetails'));
+    const userId = storedUser ? storedUser.userId : null;
+
+    console.log(userId);
+
+    
+
+
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpen(false);
+    };
+
+    const handleFileSelect = (event) => {
+        const files = Array.from(event.target.files);
+        setCorrectiveSelectecFiles((prevFiles) => [...prevFiles, ...files]);
+    };
+
+
+    const handleFilePreview = (fileUrl) => {
+        setSelectedFileUrl(fileUrl); // Set the selected file URL
+    };
+
     const CorrectivehandleAddRow = () => {
         const newRow = {
-            id: correctiveRows.length + 1,
+            id: "",
             task: '',
+            taskId: '',
             dueDate: '',
-            comment: '',
             resolved: false,
+            capTaskId: "",
         };
         setCorrectiveRows([...correctiveRows, newRow]);
+
+        // Initialize an empty array for selected files for the new row
+        setTableCorectiveSelectedFiles(prevState => ({
+            ...prevState,
+            [newRow.id]: [] // Initialize an empty array for files specific to the new row
+        }));
     };
 
     const correctivehandleDeleteRow = (id) => {
@@ -71,7 +119,9 @@ const CorrectiveAction = () => {
             setCorrectieShowAlert(true);
         } else {
             const updatedRows = correctiveRows.filter((row) => row.id !== id);
+            console.log("updatedRows", updatedRows)
             setCorrectiveRows(updatedRows);
+            // setCorrectiveRows(updatedRows.length > 0 ? updatedRows : [{ id: 1, task: "", taskId: "", dueDate: "", resolved: false }]);
         }
     };
 
@@ -79,31 +129,332 @@ const CorrectiveAction = () => {
         setCorrectiveSelectecFiles([...e.target.files]);
     };
 
+    const correctiveHandleRemoveFile = (index) => {
+        setCorrectiveSelectecFiles(correctiveSelectedFiles.filter((_, i) => i !== index));
+    };
+
     const correctiveHandleCloseAlert = () => {
         setCorrectieShowAlert(false);
     };
 
 
-    const correctiveRowshandleChange = (id, field, value) => {
+    const correctiveRowshandleChange = (rowId, field, value) => {
         const updatedRows = correctiveRows.map((row) =>
-            row.id === id ? { ...row, [field]: value } : row
+            row.id === rowId ? { ...row, [field]: value } : row
         );
         setCorrectiveRows(updatedRows);
     };
-    const tableCorrectiveHandleFileChange = (e) => {
-        setTableCorectiveSelectedFiles([...e.target.files]);
+    const tableCorrectiveHandleFileChange = (e, rowId) => {
+        const selectedFiles = [...e.target.files];
+        setTableCorectiveSelectedFiles(prevState => ({
+            ...prevState,
+            [rowId]: selectedFiles // Store files for the specific row by rowId
+        }));
+
     };
-    const tableCorrectiveHandleRemoveFile = (index) => {
-        setTableCorectiveSelectedFiles(tableCorrectveSelectedFiles.filter((_, i) => i !== index));
+    const tableCorrectiveHandleRemoveFile = (rowId, fileIndex) => {
+        setTableCorectiveSelectedFiles(prevState => {
+            const updatedFiles = prevState[rowId].filter((_, index) => index !== fileIndex);
+            return {
+                ...prevState,
+                [rowId]: updatedFiles
+            };
+        });
+        // setTableCorectiveSelectedFiles(tableCorrectveSelectedFiles.filter((_, i) => i !== index));
     };
-    const handleDrop = (event) => {
-        event.preventDefault();
-        const files = Array.from(event.dataTransfer.files);
-        setCorrectiveSelectecFiles((prevFiles) => [...prevFiles, ...files]);
+
+    useEffect(() => {
+        fetchTaskDropdown();
+        fetchTaskIncident();
+        fetchCorrectiveAction();
+    }, [])
+
+    const fetchTaskDropdown = async () => {
+        try {
+            const payload = {
+                sourceName: "Incident Task"
+            }
+            const response = await axios.post(getMastersListByType, payload)
+            console.log(response)
+
+            const taskOption = response.data.masterList.map((task) => ({
+                id: task.sourceId,
+                title: task.sourceType
+            }));
+            setTaskOptions(taskOption);
+
+        } catch (error) {
+            console.log('Failed to fetch Task dropdown options:', error)
+        }
+
+    }
+
+    const handleTaskDropdownChange = async (newValue) => {
+        if (newValue && newValue.inputValue) {
+            try {
+                const payload = {
+                    sourceName: "Incident Task",
+                    sourceType: newValue.inputValue
+                }
+                const response = await axios.post(addMasterByType, payload);
+
+                if (response && response.data && response.data.masterSource && response.data.masterSource.sourceId) {
+                    const newTaskOption = { title: newValue.inputValue, id: response.data.masterSource.sourceId };
+                    setTaskOptions(prev => [...prev, newTaskOption]);
+                    console.error("Failed to add new task option: ID not returned.");
+
+                    setMessage('Option added successfully!');
+                    setSeverity('success')
+                    setOpen(true);
+                } else {
+                    setMessage("Failed to add option: ID not returned.");
+                    setSeverity('error');
+                    setOpen(true);
+                }
+            } catch (error) {
+                console.error("Error adding new task:", error);
+                setMessage("Failed to add option.");
+                setSeverity('error');
+                setOpen(true);
+            }
+        }
+    }
+
+    const handleTaskSave = async (row) => {
+        try {
+            const formData = new FormData();
+            const payload = {
+                createdBy: 1,
+                flag: row.capTaskId ? 'U' : 'I',
+                incidentId: id,
+                capTaskId: row.capTaskId ? row.capTaskId : 0 ,
+                taskId: row.taskId,
+                dueDate: row.dueDate || '',
+                resolvedFlag: row.resolved ? 1 : 0,
+
+            }
+            console.log(payload)
+            formData.append('tasks', JSON.stringify(payload));
+
+            const selectedFiles = tableCorrectveSelectedFiles[row.id];
+            if (selectedFiles && Array.isArray(selectedFiles) && selectedFiles.length > 0) {
+                selectedFiles.forEach((file) => {
+                    formData.append('files', file);
+                });
+            }
+
+            const response = await axios.post(saveTasksForCap, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            })
+
+            console.log("correction action table data:", response)
+            if (response.data.statusResponse.responseCode === 201) {
+                fetchTaskIncident();
+                setMessage('Task created sucessfully');
+                setSeverity('success')
+                setOpen(true)
+            } else if (response.data.statusResponse.responseCode === 200) {
+                fetchTaskIncident();
+                setMessage('Task Updated sucessfully');
+                setSeverity('success')
+                setOpen(true)
+            } else {
+                setMessage("Failed to assign task.");
+                setSeverity('error');
+                setOpen(true);
+            }
+        } catch (error) {
+            console.log('Error in assigning the task:', error)
+            setMessage("Failed to submit Task assigning. Error: " + error.message);
+            setSeverity('error');
+            setOpen(true);
+        }
+    }
+
+    const fetchTaskIncident = async () => {
+        try {
+            const payload = {
+                incidentId: id,
+                orgId: 1
+            };
+            const response = await axios.post(getTasksForIncident, payload);
+            console.log(response);
+
+            const data = response.data.taskListDetails;
+            console.log(data);
+
+            const taskIds = data.map(task => task.capTaskId);
+            setIncidentTaskId(taskIds);
+            console.log(incidentTaskId)
+
+            const taskData = data.map((task) => ({
+                id: task.capTaskId || 0, // Use capTaskId for the task id
+                task: task.taskName || '',
+                taskId: task.taskID || '',
+                dueDate: task.dueDate ? task.dueDate.split(' ')[0] : '',
+                resolved: task.resolvedFlag === 1,
+                capTaskId: task.capTaskId
+            }));
+            console.log("taskData", taskData)
+            if(taskData && taskData.length > 0) {
+                setCorrectiveRows(taskData);
+
+            } else {
+                setCorrectiveRows([{ id: 1, task: '', taskId: '', dueDate: '', resolved: false, capTaskId: "" },])
+            }
+
+            console.log(correctiveRows);
+
+            // Map files to tasks
+            const files = response.data.taskFileDetails;
+            console.log(files);
+
+            const taskFilesMap = {}; // Create a map to hold files for each task
+
+            files.forEach(file => {
+                const taskId = file.entityId2; // Use entityId2 for mapping
+                if (!taskFilesMap[taskId]) {
+                    taskFilesMap[taskId] = []; // Initialize if not present
+                }
+                taskFilesMap[taskId].push(file); // Add the file to the corresponding task
+            });
+
+            setTableCorectiveSelectedFiles(taskFilesMap); // Set the mapped files in the state
+        } catch (error) {
+            console.log('Error in fetching task details', error);
+        }
     };
-    const handleDragOver = (event) => {
-        event.preventDefault();
-    };
+
+
+    const submit_corrective_action = async () => {
+        // {
+        //     "flag":"U",
+        //         "incidentId":15,
+        //         "incidentActionPlanId":1, 
+        //         "comments":"This is test for CAP  comments updated",
+        //         "userId":1
+
+        //     }
+
+        try {
+            const requestBody = {
+                incidentId: id,
+                flag: correctiveId ? 'U' : 'I',
+                userId: userId,
+                comments: comments,
+                incidentActionPlanId: correctiveId ? correctiveId : '0'
+            }
+
+            console.log(requestBody)
+
+
+            if (correctiveSelectedFiles > 10) {
+                console.log("Cannot upload more than 10 files");
+                setMessage("Cannot upload more than 10 files..");
+                setSeverity('error');
+                setOpen(true);
+                return;
+            }
+
+
+            const formData = new FormData();
+            formData.append('corrective', JSON.stringify(requestBody));
+
+
+            if (correctiveSelectedFiles && correctiveSelectedFiles.length > 0) {
+                correctiveSelectedFiles.forEach((file, index) => {
+                    formData.append('files', file)
+                })
+            }
+
+            console.log("Submitting investigation:", requestBody);
+
+
+            const response = await axios.post(saveCorrectiveAction, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            })
+            console.log("corrective action data:", response)
+
+            if (response?.data?.statusResponse?.responseCode === 201) {
+                setMessage("corrective action created Successfully");
+                setSeverity('success');
+                setOpen(true);
+                setCorrectiveSelectecFiles([])
+
+                const correctiveFiles = response.data.correctiveFiles || [];
+                console.log(correctiveFiles)
+                if (correctiveFiles.length > 0) {
+                    const newFiles = correctiveFiles.map((file) => ({
+                        documentId: file.documentId,
+                        documentName: file.documentName,
+                        documentSize: file.documentSize,
+                        documentUrl: file.documentUrl,
+                        documentType: file.documentType,
+                        uploadDate: file.uploadDate
+                    }));
+                    setSelectedFiles(prevFiles => [...prevFiles, ...newFiles]);
+                }
+                fetchCorrectiveAction();
+            } else if (response?.data?.statusResponse?.responseCode === 200) {
+                setMessage("corrective action Updated Successfully");
+                setSeverity('success');
+                setOpen(true);
+                setCorrectiveSelectecFiles([])
+                const newFiles = response?.data?.correctiveFiles?.map((file) => ({
+                    documentId: file.documentId,
+                    documentName: file.documentName,
+                    documentSize: file.documentSize,
+                    documentUrl: file.documentUrl,
+                    documentType: file.documentType,
+                    uploadDate: file.uploadDate
+                }))
+                setSelectedFiles(prevFiles => [...prevFiles, ...newFiles])
+                fetchCorrectiveAction()
+            } else {
+                setMessage("Failed to add corrective action.");
+                setSeverity('error');
+                setOpen(true);
+            }
+        } catch (error) {
+            console.log('Error in saving the corrective action:', error)
+            setMessage("Failed to submit corrective action. Error: " + error.message);
+            setSeverity('error');
+            setOpen(true);
+        }
+    }
+
+    const fetchCorrectiveAction = async () => {
+        try {
+            const requestBody = {
+                orgId: 1,
+                incidentId: id,
+                userId: userId
+            }
+            console.log(requestBody)
+            const response = await axios.post(getIncidentCAPDetails, requestBody)
+            console.log(response)
+
+            const correctiveData = response.data.incidentCorrectiveActionPlanDetails
+            // setIntrimInvestigationData(intrimData)
+            setCorrectiveId(correctiveData.incidentActionPlanId)
+            console.log(correctiveId)
+
+            setSelectedFiles(response.data.capFileDetails)
+            console.log(selectedFiles)
+            console.log("intrimCorrectiveAction", correctiveData)
+            if (correctiveData) {
+                setComments(correctiveData.comments)
+                console.log(correctiveData.comments);
+            }
+        } catch (error) {
+            console.log('Failed to fetch Intrim investigation details:', error)
+        }
+    }
+
 
     return (
         <div>
@@ -125,6 +476,7 @@ const CorrectiveAction = () => {
                 </AccordionSummary>
                 <AccordionDetails>
                     <div className='pb-3'>
+                    <Button variant='contained' className='mb-3' style={{float:"right"}}>Create Task with AI Prompt </Button>
                         <TableContainer className='border tbl_scrool'>
                             <Table >
                                 <TableHead>
@@ -143,25 +495,20 @@ const CorrectiveAction = () => {
                                         <TableCell className='accordian_tbl_txt'>
                                             Due Date
                                         </TableCell>
-                                        <TableCell className='accordian_tbl_txt'>
-                                            Tentative Date
-                                        </TableCell>
-                                        {/* <TableCell className='accordian_tbl_txt'>
-                                            AI Prompt
-                                        </TableCell> */}
-                                        {/* <TableCell className='text-center fs-6 fw-bold text-white'>Comment</TableCell> */}
+
                                         <TableCell
                                             className='accordian_tbl_txt'
 
                                         >
                                             Is Resolved
                                         </TableCell>
-                                        {/* <TableCell className='text-center fs-6 fw-bold text-white' style={{ width: "250px" }}>Supporting Document</TableCell> */}
+
                                         <TableCell className='accordian_tbl_txt'>
                                             Action
                                         </TableCell>
                                     </TableRow>
                                 </TableHead>
+                                {console.log("correctiveRows", correctiveRows)}
                                 <TableBody>
                                     {correctiveRows.map((row) => (
                                         <TableRow
@@ -173,74 +520,88 @@ const CorrectiveAction = () => {
                                             <TableCell
                                                 style={{ margin: 'auto', textAlign: 'center', minWidth: "200px" }}
                                             >
-                                                {/* <select
-                                                    value={row.task}
-                                                    onChange={(e) =>
-                                                        correctiveRowshandleChange(
-                                                            row.id,
-                                                            'task',
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    className='form-select'
-                                                    aria-label='Default select example'
-                                                    style={{ padding: "5px", fontSize: "14px" }}
-                                                >
-                                                    <option value=''>Please Select</option>
-                                                    <option value='Cleaned properly'>
-                                                        Cleaned properly
-                                                    </option>
-                                                    <option value='Clean the Floor and sink'>
-                                                        Clean the Floor and sink
-                                                    </option>
-                                                    <option value='Wash Again'>Wash Again</option>
-                                                    <option value='Cleaned the walls again'>
-                                                        Cleaned the walls again
-                                                    </option>
-                                                </select> */}
 
                                                 <Autocomplete
-                                                    value={options.find((option) => option.value === row.task) || null}
-                                                    onChange={(event, newValue) => {
-                                                        correctiveRowshandleChange(row.id, 'task', newValue ? newValue.value : '');
+                                                    value={taskOptions.find((option) => option.id === row.taskId) || null}
+                                                    onChange={async (event, newValue) => {
+                                                        if (newValue) {
+                                                            if (newValue.inputValue) {
+                                                                // If newValue contains inputValue (i.e., a new task is being added)
+                                                                await handleTaskDropdownChange(newValue);  // Call handleTaskChange to add the new task
+                                                            } else {
+                                                                // If existing task is selected
+                                                                correctiveRowshandleChange(row.id, 'taskId', newValue.id); // Set task id for selected task
+                                                            }
+                                                        } else {
+                                                            correctiveRowshandleChange(row.id, 'taskId', ''); // Clear the value if no task is selected
+                                                        }
                                                     }}
-                                                    options={options}
-                                                    getOptionLabel={(option) => option.label}
+                                                    filterOptions={(options, params) => {
+                                                        const { inputValue } = params;
+                                                        const filtered = options.filter(option =>
+                                                            option.title.toLowerCase().includes(inputValue.toLowerCase())
+                                                        );
+
+                                                        const isExisting = options.some(option => inputValue === option.title);
+
+                                                        if (inputValue !== '' && !isExisting) {
+                                                            filtered.push({
+                                                                inputValue,
+                                                                title: `"${inputValue}"`,
+                                                                addOption: true
+                                                            });
+                                                        }
+                                                        return filtered;
+                                                    }}
+                                                    selectOnFocus
+                                                    clearOnBlur
+                                                    handleHomeEndKeys
+                                                    options={taskOptions}
+                                                    getOptionLabel={(option) => {
+                                                        if (typeof option === 'string') {
+                                                            return option;
+                                                        }
+                                                        if (option.inputValue) {
+                                                            return option.inputValue;
+                                                        }
+                                                        return option.title;
+                                                    }}
+                                                    renderOption={(props, option) => (
+                                                        <li {...props}>
+                                                            {option.addOption ? (
+                                                                <>
+                                                                    {option.inputValue} <AddIcon />
+                                                                </>
+                                                            ) : (
+                                                                option.title
+                                                            )}
+                                                        </li>
+                                                    )}
                                                     renderInput={(params) => (
                                                         <TextField {...params} label="Task" variant="outlined" />
                                                     )}
+
                                                 />
                                             </TableCell>
                                             <TableCell
                                                 style={{ margin: 'auto', textAlign: 'center', minWidth: "200px" }}
                                             >
 
-                                                <Button
-                                                    component='label'
-                                                    variant='contained'
-                                                    style={{ textTransform: 'capitalize', padding: "12px 29px", backgroundColor: '#533529' }}
-                                                // startIcon={<CloudUploadIcon />}
-                                                >
-                                                    Upload file
-                                                    <VisuallyHiddenInput
-                                                        type='file'
-                                                        multiple
-                                                        style={{ display: 'none' }}
-                                                        onChange={tableCorrectiveHandleFileChange}
-                                                    />
-                                                </Button>
+                                                {tableCorrectveSelectedFiles[row.id] && tableCorrectveSelectedFiles[row.id].length > 0
+                                                    ?
+                                                    <List className='p-0 corrective-list'>
+                                                        {tableCorrectveSelectedFiles[row.id].map((file, index) => (
+                                                            <ListItem key={index} className='p-0 file-name'>
+                                                                {console.log("FILE", file)}
+                                                                <ListItemText className='p-0 ' primary={file.name ? file.name : file.documentName} style={{ textDecoration: 'none' }} />
 
 
-                                                {tableCorrectveSelectedFiles.length > 0 && (
-                                                    <List style={{ marginLeft: 20, padding: 0 }}>
-                                                        {tableCorrectveSelectedFiles.map((file, index) => (
-                                                            <ListItem key={index} style={{ padding: '0 0px' }}>
-                                                                <ListItemText primary={file.name} style={{ textDecoration: 'none' }} />
+
                                                                 <ListItemSecondaryAction>
                                                                     <IconButton
                                                                         edge='end'
                                                                         aria-label='delete'
-                                                                        onClick={() => tableCorrectiveHandleRemoveFile(index)}
+                                                                        onClick={() => tableCorrectiveHandleRemoveFile(row.id, index)}
                                                                     >
                                                                         <CloseIcon />
                                                                     </IconButton>
@@ -248,7 +609,23 @@ const CorrectiveAction = () => {
                                                             </ListItem>
                                                         ))}
                                                     </List>
-                                                )}
+                                                    :
+                                                    <Button
+                                                        component='label'
+                                                        variant='contained'
+                                                        style={{ textTransform: 'capitalize', padding: "12px 29px", backgroundColor: '#533529' }}
+                                                        startIcon={<CloudUploadIcon />}
+                                                    >
+                                                        Upload file
+                                                        <VisuallyHiddenInput
+                                                            type='file'
+                                                            multiple
+                                                            style={{ display: 'none' }}
+                                                            onChange={(e) => tableCorrectiveHandleFileChange(e, row.id)}
+                                                        />
+                                                    </Button>
+                                                }
+
                                             </TableCell>
                                             <TableCell
                                                 style={{ margin: 'auto', textAlign: 'center' }}
@@ -268,41 +645,13 @@ const CorrectiveAction = () => {
 
                                                 />
                                             </TableCell>
-                                            <TableCell
-                                                style={{ margin: 'auto', textAlign: 'center' }}
-                                            >
-                                                <TextField
-                                                    value={row.dueDate}
-                                                    onChange={(e) =>
-                                                        correctiveRowshandleChange(
-                                                            row.id,
-                                                            'dueDate',
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    type='date'
-                                                    variant='outlined'
-                                                    className='date-bg'
-
-                                                />
-                                            </TableCell>
-                                            {/* <TableCell
-                                                style={{ margin: 'auto', textAlign: 'center', minWidth:"200px" }}
-                                            >
-                                                <TextField
-                                                    type='text'
-                                                    variant='outlined'
-                                                    className='date-bg'
-
-                                                />
-                                            </TableCell> */}
 
                                             <TableCell
                                                 style={{ margin: 'auto', textAlign: 'center' }}
                                             >
                                                 <Checkbox
                                                     className='checkbox_color'
-                                                    checked={correctiveRows.resolved}
+                                                    checked={row.resolved}
                                                     onChange={(e) =>
                                                         correctiveRowshandleChange(
                                                             row.id,
@@ -313,29 +662,31 @@ const CorrectiveAction = () => {
                                                 />
                                             </TableCell>
 
-                                            <TableCell
-                                                className='d-flex'
-                                                style={{
-                                                    textAlign: 'center',
-                                                    justifyContent: 'center',
-                                                }}
-                                            >
-                                                <IconButton
-                                                    onClick={() =>
-                                                        correctivehandleDeleteRow(row.id)
-                                                    }
-                                                >
-                                                    <CloseIcon style={{ color: 'red', fontSize: '18px', }} />
-                                                </IconButton>
-                                                <IconButton onClick={CorrectivehandleAddRow}>
-                                                    <AddIcon
+                                            <TableCell >
+                                                <div className='d-flex'>
+                                                    <IconButton
+                                                        onClick={() =>
+                                                            correctivehandleDeleteRow(row.id)
+                                                        }
+                                                    >
+                                                        <CloseIcon style={{ color: 'red', fontSize: '18px', }} />
+                                                    </IconButton>
+                                                    <IconButton onClick={CorrectivehandleAddRow}>
+                                                        <AddIcon
 
-                                                        style={{
-                                                            fontSize: '20px',
-                                                            color: "blue"
-                                                        }}
-                                                    />
-                                                </IconButton>
+                                                            style={{
+                                                                fontSize: '20px',
+                                                                color: "blue"
+                                                            }}
+                                                        />
+                                                    </IconButton>
+                                                    <Button
+                                                        color='success'
+                                                        style={{ fontWeight: "600" }}
+                                                        // variant='contained'
+                                                        onClick={() => handleTaskSave(row)}
+                                                    >Save</Button>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -363,11 +714,13 @@ const CorrectiveAction = () => {
                                     as='textarea'
                                     rows={2}
                                     placeholder='Write the comment'
+                                    value={comments}
+                                    onChange={(e) => setComments(e.target.value)}
                                 />
                             </Form.Group>
                         </div>
                         <div className='col-md-6 pe-3'>
-                            <Form.Group
+                            {/* <Form.Group
                                 className='mb-0'
                                 controlId='exampleForm.ControlTextarea1'
                             >
@@ -375,14 +728,33 @@ const CorrectiveAction = () => {
                                     className='input_border'
                                     as='textarea'
                                     rows={2}
-                                    placeholder='Create Incident with AI Prompt'
+                                    placeholder='Create Task with AI Prompt'
                                     style={{ backgroundColor: "#f1f0ef" }}
                                 />
-                            </Form.Group>
+                            </Form.Group> */}
+                            {/* <Button variant='contained'>Create Task with AI Prompt </Button> */}
+
                         </div>
                         <div className='row accordian_row'>
-                            <div className='col-md-8 ps-0'>
-                                <div className='col-md-12 file_upload'>
+                            <div className='col-md-8 ps-0 file_upload upload-file-border'>
+                                <Button
+                                    component='label'
+
+                                    style={{ color: "black" }}
+
+                                >
+                                    Choose file
+                                    <VisuallyHiddenInput
+                                        type='file'
+                                        multiple
+                                        style={{ display: 'none' }}
+                                        onChange={handleFileSelect}
+                                    />
+                                </Button>
+                                <span className='vertical-line'></span>
+                                <span style={{ marginLeft: "10px" }}> {correctiveSelectedFiles.length > 0 ? `${correctiveSelectedFiles.length} file(s) selected` : 'No file chosen'}</span>
+
+                                {/* <div className='col-md-12 file_upload'>
                                     <input class="form-control" type="file" id="formFileMultiple" multiple onChange={correctiveHandleFileChange} />
                                 </div>
                                 {correctiveSelectedFiles.length > 0 && (
@@ -402,18 +774,14 @@ const CorrectiveAction = () => {
                                             </ListItem>
                                         ))}
                                     </List>
-                                )}
+                                )} */}
                             </div>
-                            {/* <div className='col-md-2' >
-                                <Button className='accordian_submit_btn' style={{ float: "none" }}>Submit</Button>
 
-                            </div>
-                            <div className='col-md-2'>
-                                <Button className='accordian_cancel_btn'>Close</Button>
-                            </div> */}
-                           <div className='col-md-4 float-end mt-3 p-0'>
+
+
+                            <div className='col-md-4 float-end mt-3 p-0'>
                                 <div className='d-flex justify-content-end gap-3 '>
-                                    <Button className='accordian_submit_btn' >Submit</Button>
+                                    <Button className='accordian_submit_btn' onClick={submit_corrective_action}>Submit</Button>
                                     <Button
                                         className='accordian_cancel_btn'
                                     >
@@ -421,12 +789,117 @@ const CorrectiveAction = () => {
                                     </Button>
                                 </div>
                             </div>
+
+                            {correctiveSelectedFiles.length > 0 && (
+                                correctiveSelectedFiles.map((file, index) => (
+                                    <div className="row attached-files-info mt-3">
+                                        <div className="col-md-8">
+                                            <div className="attached-files">
+                                                <ul>
+                                                    <li key={index} className='mt-2'>
+                                                        <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
+                                                            <div className="d-flex align-items-center">
+                                                                <span className="file-icon">
+                                                                    <TextSnippetIcon style={{ color: "#533529" }} />
+                                                                </span>
+                                                                <p className="mb-0 ms-2">{file.name}</p>
+                                                            </div>
+                                                            <div className="file-actions d-flex align-items-center">
+                                                                <IconButton
+                                                                    edge='end'
+                                                                    aria-label='delete'
+                                                                    onClick={() => correctiveHandleRemoveFile(index)}
+                                                                >
+                                                                    <CloseIcon className='close_icon' />
+                                                                </IconButton>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                            {selectedFiles && selectedFiles.length > 0 && (
+                                <div className="row attached-files-info mt-3">
+                                    <div className="col-md-8">
+                                        <div className="attached-files">
+                                            <ul>
+                                                {selectedFiles.map((file, index) => (
+                                                    <li key={index} className='mt-2'>
+                                                        <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
+                                                            <div className="d-flex align-items-center">
+                                                                <span className="file-icon">
+                                                                    <TextSnippetIcon style={{ color: "#533529" }} />
+                                                                </span>
+                                                                <p className="mb-0 ms-2">
+                                                                    <a href={file.documentUrl} target="_blank" rel="noopener noreferrer">
+                                                                        {file.documentName}
+                                                                    </a> ({(file.documentSize / 1024).toFixed(2)} KB)
+                                                                </p>
+                                                            </div>
+                                                            <div className="file-actions d-flex align-items-center">
+                                                                <div className="file-download me-2">
+                                                                    <ArrowDownwardIcon
+                                                                        style={{ marginRight: "5px", cursor: 'pointer' }}
+                                                                        // onClick={() => downloadFile(file.documentUrl, file.documentName)}
+                                                                    />
+                                                                </div>
+                                                                <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
+                                                                    <VisibilityIcon />
+                                                                </IconButton>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                     </div>
 
                 </AccordionDetails>
             </Accordion>
+
+            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert onClose={handleClose} severity={severity}>
+                    {message}
+                </Alert>
+            </Snackbar>
+
+            <Dialog
+                open={Boolean(selectedFileUrl)} // Open the dialog if a file is selected
+                onClose={() => setSelectedFileUrl(null)} // Close the dialog
+                fullWidth // This makes the dialog take the full width of its container
+                maxWidth="xl" // Options: 'xs', 'sm', 'md', 'lg', 'xl'
+                sx={{
+                    '& .MuiDialog-paper': {
+                        width: '80vw',
+                        maxWidth: 'none',
+                    }
+                }}
+            >
+                <DialogContent>
+                    {selectedFileUrl && (
+                        <iframe
+                            src={selectedFileUrl}
+                            width="100%"
+                            height="500px"
+                            style={{ border: 'none' }}
+                            title="File Preview"
+                        />
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setSelectedFileUrl(null)} className='accordian_submit_btn' >
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     )
 }

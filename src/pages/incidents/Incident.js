@@ -125,6 +125,13 @@ const Incident = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+ // Get the user details from localStorage
+const storedUser = JSON.parse(localStorage.getItem('userDetails'));
+const userId = storedUser ? storedUser.userId : null;
+
+console.log(userId); 
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -159,7 +166,7 @@ const Incident = () => {
         const response = await axios.post(fetchIncidentDetailsDashboard, {
           orgId: 1,
           incidentStatusId: 34,
-          userId: 1
+          userId: userId
         });
         console.log(response)
         const incidentData = response.data.dashboardList;
@@ -222,7 +229,7 @@ const Incident = () => {
     try {
       const response = await axios.post(getIncidentCountDetails1, {
         "orgId": 1,
-        "userId": 1
+        "userId": userId
       });
       const count = response.data.incidentCount;
       setIncidentCount(count);
@@ -388,9 +395,9 @@ const Incident = () => {
                       <span class="card-head">Total Incidents</span>
                     </div>
 
-                    <div>
+                    {/* <div>
                       <span class="text-success fw-bold">+10%</span>
-                    </div>
+                    </div> */}
                   </div>
                   {/* <h3 class="mb-3 fw-bold">{incidentCount.total}</h3> */}
                   <h3 class="mb-3 fw-bold">{incidentCount ? incidentCount.total : ""}</h3>
@@ -407,9 +414,9 @@ const Incident = () => {
                     <div>
                       <span class="card-head">Pending Incidents</span>
                     </div>
-                    <div>
+                    {/* <div>
                       <span class="text-danger fw-bold">-2.8%</span>
-                    </div>
+                    </div> */}
                   </div>
                   <h3 class="mb-3 fw-bold">100</h3>
                   <div class="progress mb-2" style={{ height: "5px" }}>
@@ -425,9 +432,9 @@ const Incident = () => {
                     <div>
                       <span class="card-head">Resolved Incident</span>
                     </div>
-                    <div>
+                    {/* <div>
                       <span class="text-success fw-bold">+12.5%</span>
-                    </div>
+                    </div> */}
                   </div>
                   <h3 class="mb-3 fw-bold">{incidentCount ? incidentCount.resolved : ""}</h3>
                   <div class="progress mb-2" style={{ height: "5px" }}>
@@ -443,9 +450,9 @@ const Incident = () => {
                     <div>
                       <span class="card-head" >Open Incidents</span>
                     </div>
-                    <div>
+                    {/* <div>
                       <span class="text-danger fw-bold">-75%</span>
-                    </div>
+                    </div> */}
                   </div>
                   <h3 class="mb-3 fw-bold">{incidentCount ? incidentCount.open : ""}</h3>
                   <div class="progress mb-2" style={{ height: "5px" }}>

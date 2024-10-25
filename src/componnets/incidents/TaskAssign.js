@@ -427,7 +427,7 @@ import CorrectiveAction from './accordians/CorrectiveAction';
 import Preventivections from './accordians/Preventivections';
 import { useParams } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
-import { getEmployeesAndManager, getAllUsers, saveIncidentAssign } from '../../api';
+import { getEmployeesAndManager, getAllUsers, saveIncidentAssign, getIncidentAssignDetails } from '../../api';
 
 // Mapping section names to their respective IDs
 const SECTION_IDS = {
@@ -470,7 +470,14 @@ const TaskAssign = ({ selectedDepartment }) => {
   const [message, setMessage] = useState('');
   const [severity, setSeverity] = useState('success');
   const [open, setOpen] = useState(false);
+  const [loadingOptions, setLoadingOptions] = useState(false);
+  const[assigningId, setAssigningId] = useState()
 
+
+  const storedUser = JSON.parse(localStorage.getItem('userDetails'));
+  const userId = storedUser ? storedUser.userId : null;
+
+  console.log(userId);
 
   const handleClose = (event, reason) => {
     if (reason === 'clickaway') {
@@ -487,21 +494,6 @@ const TaskAssign = ({ selectedDepartment }) => {
     setSelectedSection(sectionId);
   };
 
-  // const handleFieldChange = (sectionId, field, value) => {
-  //   switch (sectionId) {
-  //     case SECTION_IDS.interimInvestigation:
-  //       setInterimInvestigation({ ...interimInvestigation, [field]: value });
-  //       break;
-  //     case SECTION_IDS.correctiveAction:
-  //       setCorrectiveAction({ ...correctiveAction, [field]: value });
-  //       break;
-  //     case SECTION_IDS.preventiveAction:
-  //       setPreventiveAction({ ...preventiveAction, [field]: value });
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // };
 
   const handleFieldChange = (sectionId, field, value) => {
     if (sectionId === SECTION_IDS.interimInvestigation) {
@@ -525,14 +517,34 @@ const TaskAssign = ({ selectedDepartment }) => {
 
   useEffect(() => {
     fetchAllCC();
+    fetchAssignToTask();
   }, []);
 
+  // useEffect(() => {
+  //   if (selectedDepartment) {
+  //     fetchAssignToOptions(selectedDepartment.id);
+  //     fetchCcOptions(selectedDepartment.id);
+  //   }
+  // }, [selectedDepartment]);
   useEffect(() => {
-    if (selectedDepartment) {
-      fetchAssignToOptions(selectedDepartment.id);
-      fetchCcOptions(selectedDepartment.id);
+    if (selectedDepartment && assignToOptions.length === 0) { // Ensure it's only called when options are empty
+      setLoadingOptions(true); // Start loading
+      Promise.all([
+        fetchAssignToOptions(selectedDepartment.id), // Fetch based on department
+        fetchAllCC() // Fetch all CC options (without department filter)
+      ]).then(() => setLoadingOptions(false)) // Mark loading as complete
+      .catch((error) => {
+        console.error('Error while loading options:', error);
+        setLoadingOptions(false); // Reset loading even if there was an error
+      });
     }
   }, [selectedDepartment]);
+
+  useEffect(() => {
+    if (!loadingOptions && assignToOptions.length > 0 && allCcOptions.length > 0) {
+      fetchAssignToTask(); // Call fetchAssignToTask only when options are loaded
+    }
+  }, [loadingOptions, assignToOptions, allCcOptions]);
 
   const fetchAssignToOptions = async (departmentId) => {
     try {
@@ -578,6 +590,7 @@ const TaskAssign = ({ selectedDepartment }) => {
         departmentId: 0,
       };
       const response = await axios.post(getAllUsers, requestBody);
+      console.log(response)
       const allCc = response.data.users.map((user) => ({
         id: user.userId,
         title: user.fullName,
@@ -588,14 +601,151 @@ const TaskAssign = ({ selectedDepartment }) => {
     }
   };
 
+
+  // const fetchAssignTo = async () => {
+  //   console.log(id)
+  //   try {
+  //     const response = await axios.post(getIncidentAssignDetails, { incidentId: id })
+  //     console.log(response)
+  //     const assignToDetails = response.data.incidentAssignDetails;
+
+
+  //     const assignToUser = assignToOptions.find(option => option.id === assignToDetails.assignTo);
+  //     const ccUser = allCcOptions.find(option => option.id === assignToDetails.ccUserId);
+
+  //     console.log('Assign To Details:', assignToDetails);
+  //     console.log('Assign To Options:', assignToOptions);
+  //     console.log('CC Options:', allCcOptions);
+
+
+  //     if (assignToDetails.assignTypeId === SECTION_IDS.interimInvestigation) {
+  //       setInterimInvestigation({
+  //         assignTo: assignToUser || '',
+  //         cc: ccUser || '',
+  //         redo: assignToDetails.redoFlag === 1,
+  //       });
+  //     } else if (assignToDetails.assignTypeId === SECTION_IDS.correctiveAction) {
+  //       setCorrectiveAction({
+  //         assignTo: assignToUser || '',
+  //         cc: ccUser || '',
+  //         redo: assignToDetails.redoFlag === 1,
+  //       });
+
+  //     } else if (assignToDetails.assignTypeId === SECTION_IDS.preventiveAction) {
+  //       setPreventiveAction({
+  //         assignTo: assignToUser || '',
+  //         cc: ccUser || '',
+  //         redo: assignToDetails.redoFlag === 1,
+  //       });
+  //     }
+
+  //     setComments(assignToDetails.comments)
+  //   } catch (error) {
+  //     console.log(error, 'failed to fecth Asign To ')
+  //   }
+  // }
+
+
+  // const fetchAssignToTask = async () => {
+  //   try {
+  //     const response = await axios.post(getIncidentAssignDetails, { incidentId: id });
+  //     const assignToDetails = response.data.incidentAssignDetails;
+
+  //     console.log('Assign To Details:', assignToDetails);
+  //     console.log('Assign To Options:', assignToOptions);
+  //     console.log('CC Options:', allCcOptions);
+
+  //     // Find the corresponding assignTo and cc from options
+  //     const assignToUser = assignToOptions.find(option => option.id === assignToDetails.assignTo);
+  //     const ccUser = allCcOptions.find(option => option.id === assignToDetails.ccUserId);
+
+  //     // Update state based on assignTypeId
+  //     if (assignToDetails.assignTypeId === SECTION_IDS.interimInvestigation) {
+  //       handleSectionChange(SECTION_IDS.interimInvestigation);
+  //       setInterimInvestigation({
+  //         assignTo: assignToUser || '',
+  //         cc: ccUser || '',
+  //         redo: assignToDetails.redoFlag === 1,
+  //       });
+  //     } else if (assignToDetails.assignTypeId === SECTION_IDS.correctiveAction) {
+  //       handleSectionChange(SECTION_IDS.correctiveAction);
+  //       setCorrectiveAction({
+  //         assignTo: assignToUser || '',
+  //         cc: ccUser || '',
+  //         redo: assignToDetails.redoFlag === 1,
+  //       });
+  //     } else if (assignToDetails.assignTypeId === SECTION_IDS.preventiveAction) {
+  //       handleSectionChange(SECTION_IDS.preventiveAction); 
+  //       setPreventiveAction({
+  //         assignTo: assignToUser || '',
+  //         cc: ccUser || '',
+  //         redo: assignToDetails.redoFlag === 1,
+  //       });
+  //     }
+
+  //     setComments(assignToDetails.comments);
+  //   } catch (error) {
+  //     console.log(error, 'Failed to fetch Assign To task');
+  //   }
+  // };
+
+
+
+  const fetchAssignToTask = async () => {
+    try {
+      const response = await axios.post(getIncidentAssignDetails, { incidentId: id });
+      const assignToDetails = response.data.incidentAssignDetails;
+      console.log(assignToDetails.assigningId)
+      setAssigningId(assignToDetails.assigningId)
+      console.log(assigningId)
+
+      if (!loadingOptions) {
+        // Find the assignTo and cc users from the options
+        const assignToUser = assignToOptions.find(option => option.id === assignToDetails.assignTo);
+        const ccUser = allCcOptions.find(option => option.id === assignToDetails.ccUserId); // Fetch from all CC options
+
+        if (assignToDetails.assignTypeId === SECTION_IDS.interimInvestigation) {
+          handleSectionChange(SECTION_IDS.interimInvestigation);
+          setInterimInvestigation({
+            assignTo: assignToUser || '',
+            cc: ccUser || '',
+            redo: assignToDetails.redoFlag === 1,
+          });
+        } else if (assignToDetails.assignTypeId === SECTION_IDS.correctiveAction) {
+          handleSectionChange(SECTION_IDS.correctiveAction);
+          setCorrectiveAction({
+            assignTo: assignToUser || '',
+            cc: ccUser || '',
+            redo: assignToDetails.redoFlag === 1,
+          });
+        } else if (assignToDetails.assignTypeId === SECTION_IDS.preventiveAction) {
+          handleSectionChange(SECTION_IDS.preventiveAction);
+          setPreventiveAction({
+            assignTo: assignToUser || '',
+            cc: ccUser || '',
+            redo: assignToDetails.redoFlag === 1,
+          });
+        }
+
+        setComments(assignToDetails.comments);
+      } else {
+        console.error('Options are not loaded yet.');
+      }
+    } catch (error) {
+      console.log(error, 'Failed to fetch Assign To task');
+    }
+  };
+
   const handleSubmitTaskAssign = async () => {
     try {
       console.log('Selected Section ID:', selectedSection);
       console.log('incidentId', id)
+      console.log('assigningId', assigningId)
+      const incidentIdNumber = Number(id);
       const requestBody = {
-        incidentId: id,
-        flag: 'I',
-        assigningId: 0,
+        incidentId: incidentIdNumber,
+        flag: assigningId ? 'U' : 'I',
+        assigningId: assigningId ? assigningId : '0',
         assignTypeId: selectedSection,
         assignTo: selectedSection === SECTION_IDS.interimInvestigation
           ? interimInvestigation.assignTo?.id
@@ -618,7 +768,13 @@ const TaskAssign = ({ selectedDepartment }) => {
       const response = await axios.post(saveIncidentAssign, requestBody)
       console.log(response)
       if (response?.data?.statusResponse?.responseCode === 201) {
+        fetchAssignToTask()
         setMessage("Task assigned Successfully");
+        setSeverity('success');
+        setOpen(true);
+      } else if (response?.data?.statusResponse?.responseCode === 200) {
+        fetchAssignToTask()
+        setMessage("Task Updated Successfully");
         setSeverity('success');
         setOpen(true);
       } else {
@@ -638,143 +794,153 @@ const TaskAssign = ({ selectedDepartment }) => {
     <div>
       <div className='ticket-purpose'>
         <h5 className='subhead_lbl mb-3 fw-bold'>Task assigning</h5>
-        <Row>
-          <Col md={4} sm={12}>
-            <label className='text_color' style={{ fontWeight: '500' }}>
-              Interim investigation
-              <Checkbox
-                checked={selectedSection === SECTION_IDS.interimInvestigation}
-                onChange={() => handleSectionChange(SECTION_IDS.interimInvestigation)}
-              />
-            </label>
-          </Col>
-          <Col md={4} sm={12}>
-            <label className='text_color ml-3' style={{ fontWeight: '500' }}>
-              Corrective action
-              <Checkbox
-                checked={selectedSection === SECTION_IDS.correctiveAction}
-                onChange={() => handleSectionChange(SECTION_IDS.correctiveAction)}
-              />
-            </label>
-          </Col>
-          <Col md={4} sm={12}>
-            <label className='text_color ml-3' style={{ fontWeight: '500' }}>
-              Preventive Action
-              <Checkbox
-                checked={selectedSection === SECTION_IDS.preventiveAction}
-                onChange={() => handleSectionChange(SECTION_IDS.preventiveAction)}
-              />
-            </label>
-          </Col>
-        </Row>
-        <hr />
-        {selectedSection && (
-          <div className='mb-3'>
-            <div className='col-md-9'>
-              <div className='row assigntask_row'>
-                <div className='col-md-4'>
-                  <Form.Group controlId='assignTo'>
-                    <Autocomplete
-                      options={assignToOptions}
-                      value={
-                        selectedSection === SECTION_IDS.interimInvestigation
-                          ? interimInvestigation.assignTo
-                          : selectedSection === SECTION_IDS.correctiveAction
-                            ? correctiveAction.assignTo
-                            : preventiveAction.assignTo
-                      }
-                      onChange={(event, newValue) =>
-                        handleFieldChange(selectedSection, 'assignTo', newValue)
-                      }
-                      getOptionLabel={(option) => option.title || ''}
-                      renderInput={(params) => (
-                        <TextField {...params}
-                          label={`Assign To ${selectedSection}`}
-                          variant='outlined'
-                        // InputProps={{
-                        //   ...params.InputProps,
-                        //   className: 'custom-input-drop' 
-                        // }} 
+        {loadingOptions ? (
+          <div>Loading...</div>
+        ) : (
+          <>
+            <Row>
+              <Col md={4} sm={12}>
+                <label className='text_color' style={{ fontWeight: '500' }}>
+                  Interim investigation
+                  <Checkbox
+                    checked={selectedSection === SECTION_IDS.interimInvestigation}
+                    onChange={() => handleSectionChange(SECTION_IDS.interimInvestigation)}
+                  />
+                </label>
+              </Col>
+              <Col md={4} sm={12}>
+                <label className='text_color ml-3' style={{ fontWeight: '500' }}>
+                  Corrective action
+                  <Checkbox
+                    checked={selectedSection === SECTION_IDS.correctiveAction}
+                    onChange={() => handleSectionChange(SECTION_IDS.correctiveAction)}
+                  />
+                </label>
+              </Col>
+              <Col md={4} sm={12}>
+                <label className='text_color ml-3' style={{ fontWeight: '500' }}>
+                  Preventive Action
+                  <Checkbox
+                    checked={selectedSection === SECTION_IDS.preventiveAction}
+                    onChange={() => handleSectionChange(SECTION_IDS.preventiveAction)}
+                  />
+                </label>
+              </Col>
+            </Row>
+            < hr />
+            {selectedSection && (
+              <div className='mb-3'>
+                <div className='col-md-9'>
+                  <div className='row assigntask_row'>
+                    <div className='col-md-4'>
+                      <Form.Group controlId='assignTo'>
+                        <Autocomplete
+                          options={assignToOptions}
+                          value={
+                            selectedSection === SECTION_IDS.interimInvestigation
+                              ? interimInvestigation.assignTo
+                              : selectedSection === SECTION_IDS.correctiveAction
+                                ? correctiveAction.assignTo
+                                : preventiveAction.assignTo
+                          }
+                          // loading={assignToOptions.length === 0}
+                          onChange={(event, newValue) =>
+                            handleFieldChange(selectedSection, 'assignTo', newValue)
+                          }
+                          getOptionLabel={(option) => option.title || ''}
+                          renderInput={(params) => (
+                            <TextField {...params}
+                              label={`Assign To ${selectedSection}`}
+                              variant='outlined'
+                            // InputProps={{
+                            //   ...params.InputProps,
+                            //   className: 'custom-input-drop' 
+                            // }} 
+                            />
+                          )}
                         />
-                      )}
-                    />
-                  </Form.Group>
-                </div>
-                {/* Similar setup for the CC and Redo fields */}
+                      </Form.Group>
+                    </div>
+                    {/* Similar setup for the CC and Redo fields */}
 
-                <div className='col-md-4'>
-                  <Form.Group controlId='cc'>
-                    <Autocomplete
-                      options={allCcOptions}
-                      getOptionLabel={(option) => option.title || ''}
-                      value={
-                        selectedSection === SECTION_IDS.interimInvestigation
-                          ? interimInvestigation.cc
-                          : selectedSection === SECTION_IDS.correctiveAction
-                            ? correctiveAction.cc
-                            : preventiveAction.cc
-                      }
-                      onChange={(event, newValue) =>
-                        handleFieldChange(selectedSection, 'cc', newValue)
-                      }
-                      renderInput={(params) => (
-                        <TextField {...params}
-                          className='input_border custom-textfield'
-                          label={`CC ${selectedSection}`}
-                          variant='outlined'
-                        // InputProps={{
-                        //   ...params.InputProps,
-                        //   className: 'custom-input-drop' // Apply the custom class
-                        // }}
+                    <div className='col-md-4'>
+                      <Form.Group controlId='cc'>
+                        <Autocomplete
+                          options={allCcOptions}
+                          getOptionLabel={(option) => option.title || ''}
+                          value={
+                            selectedSection === SECTION_IDS.interimInvestigation
+                              ? interimInvestigation.cc
+                              : selectedSection === SECTION_IDS.correctiveAction
+                                ? correctiveAction.cc
+                                : preventiveAction.cc
+                          }
+                          onChange={(event, newValue) =>
+                            handleFieldChange(selectedSection, 'cc', newValue)
+                          }
+                          renderInput={(params) => (
+                            <TextField {...params}
+                              className='input_border custom-textfield'
+                              label={`CC ${selectedSection}`}
+                              variant='outlined'
+                            // InputProps={{
+                            //   ...params.InputProps,
+                            //   className: 'custom-input-drop' // Apply the custom class
+                            // }}
+                            />
+                          )}
                         />
-                      )}
-                    />
-                  </Form.Group>
-                </div>
+                      </Form.Group>
+                    </div>
 
-                <div className='col-md-3'>
-                  <Form.Group className='mt-2' controlId='redo'>
-                    <Form.Label className='text_color'>
-                      Redo
-                    </Form.Label>
-                    <Checkbox
-                      label='Redo'
-                      id='redoCheckbox'
-                      checked={
-                        selectedSection === SECTION_IDS.interimInvestigation
-                          ? interimInvestigation.redo
-                          : selectedSection === SECTION_IDS.correctiveAction
-                            ? correctiveAction.redo
-                            : preventiveAction.redo
-                      }
-                      onChange={(e) =>
-                        handleFieldChange(selectedSection, 'redo', e.target.checked)
-                      }
-                    />
-                  </Form.Group>
+                    <div className='col-md-3'>
+                      <Form.Group className='mt-2' controlId='redo'>
+                        <Form.Label className='text_color'>
+                          Redo
+                        </Form.Label>
+                        <Checkbox
+                          label='Redo'
+                          id='redoCheckbox'
+                          checked={
+                            selectedSection === SECTION_IDS.interimInvestigation
+                              ? interimInvestigation.redo
+                              : selectedSection === SECTION_IDS.correctiveAction
+                                ? correctiveAction.redo
+                                : preventiveAction.redo
+                          }
+                          onChange={(e) =>
+                            handleFieldChange(selectedSection, 'redo', e.target.checked)
+                          }
+                        />
+                      </Form.Group>
+                    </div>
+                  </div>
                 </div>
               </div>
+            )}
+            <div className='row'>
+              <div className='col-md-9'>
+                <Form.Group controlId='exampleForm.ControlTextarea1'>
+                  <Form.Label className='text_color mb-0'>Comments</Form.Label>
+                  <Form.Control
+                    as='textarea'
+                    rows={2}
+                    placeholder='Write your comments'
+                    value={comments}
+                    onChange={(e) => setComments(e.target.value)} />
+                </Form.Group>
+              </div>
+              <div className='mb-3 col-md-12 float-right'>
+                <Button className='close_incident_btn' onClick={handleSubmitTaskAssign}>
+                  Submit
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
-        <div className='row'>
-          <div className='col-md-9'>
-            <Form.Group controlId='exampleForm.ControlTextarea1'>
-              <Form.Label className='text_color mb-0'>Comments</Form.Label>
-              <Form.Control
-                as='textarea'
-                rows={2}
-                placeholder='Write your comments'
-                value={comments}
-                onChange={(e) => setComments(e.target.value)} />
-            </Form.Group>
-          </div>
-          <div className='mt-3 col-md-12 float-right'>
-            <Button className='close_incident_btn' onClick={handleSubmitTaskAssign}>
-              Submit
-            </Button>
-          </div>
-        </div>
+          </>
+        )
+        }
+
+
 
         {/* Accordians */}
         <div className='accordian_s'>

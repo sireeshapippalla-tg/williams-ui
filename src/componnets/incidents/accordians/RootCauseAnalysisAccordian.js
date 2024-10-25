@@ -74,6 +74,11 @@ const RootCauseAnalysisAccordian = () => {
     const [filePreview, setFilePreview] = useState(null)
 
 
+    const storedUser = JSON.parse(localStorage.getItem('userDetails'));
+    const userId = storedUser ? storedUser.userId : null;
+
+    console.log(userId);
+
     const handleClose = (event, reason) => {
         if (reason === 'clickaway') {
             return;
@@ -134,7 +139,7 @@ const RootCauseAnalysisAccordian = () => {
             const requestBody = {
                 "orgId": 1,
                 "flag": rootCauseId ? "U" : "I",
-                "userId": 1,
+                "userId": userId,
                 "incidentId": id,
                 "rootCauseId": rootCauseId ? rootCauseId : 0,
                 "problemDescription": problemDescription,
@@ -229,7 +234,7 @@ const RootCauseAnalysisAccordian = () => {
             const requestBody = {
                 "orgId": 1,
                 "incidentId": id,
-                "userId": 0
+                "userId": userId
             }
             const response = await axios.post(getRootCauseDetails, requestBody);
             console.log(response)

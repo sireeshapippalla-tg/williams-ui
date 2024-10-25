@@ -25,5 +25,12 @@ export const getUsersById = BASE_API_URL + 'users/getUsersById'
 export const saveRootCause = BASE_API_URL + 'incident/saveRootCause'
 export const getRootCauseDetails = BASE_API_URL + 'incident/getRootCauseDetails'
 export const saveIncidentAssign = BASE_API_URL + 'incident/saveIncidentAssign';
+export const getIncidentAssignDetails = BASE_API_URL + 'incident/getIncidentAssignDetails';
+export const saveTasksForCap = BASE_API_URL + 'incident/saveTasksForCap'
+export const getIncidentHistory = BASE_API_URL + 'incident/getIncidentHistory'
+export const login = BASE_API_URL + 'users/login'
+export const getTasksForIncident = BASE_API_URL + 'incident/getTasksForIncident'
+export const saveCorrectiveAction = BASE_API_URL + 'incident/saveCorrectiveAction'
+export const getIncidentCAPDetails = BASE_API_URL + 'incident/getIncidentCAPDetails'
 
 export const config = 'IAssure'

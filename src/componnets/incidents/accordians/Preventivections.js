@@ -50,6 +50,11 @@ const Preventivections = () => {
     const [preventiveFiles, setPreventiveFiles] = useState([])
     const [filePreview, setFilePreview] = useState(null)
 
+    const storedUser = JSON.parse(localStorage.getItem('userDetails'));
+    const userId = storedUser ? storedUser.userId : null;
+
+    console.log(userId);
+
     const preventiveHandleFileChange = (e) => {
         setPreventiveSelectedFiles([...e.target.files]);
     };
@@ -157,7 +162,7 @@ const Preventivections = () => {
             const requestBody = {
                 orgId: 1,
                 incidentId: id,
-                userId: 1
+                userId: userId
             }
             const response = await axios.post(getPreventiveActionDetails, requestBody)
             console.log('response', response);

@@ -33,6 +33,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { formatDistanceToNow } from 'date-fns';
+import { CircularProgress } from '@mui/material';
 import { format, toZonedTime, formatInTimeZone } from 'date-fns-tz';
 import {
     getIncidentDetailsById,
@@ -41,7 +42,8 @@ import {
     getIncidentChats,
     saveIncidentChart,
     uploadDocuments,
-    getAllUsers
+    getAllUsers,
+    getIncidentHistory
 } from '../../api';
 
 
@@ -60,6 +62,8 @@ const VisuallyHiddenInput = styled('input')({
 
 const IncidentDetails = (props) => {
     const { id } = useParams();
+    const [loading, setLoading] = useState(false);
+    const [historyLoading, setHistoryLoading] = useState(false)
     const [message, setMessage] = useState('');
     const [selectedSection, setSelectedSection] = useState('Interim Investigation');
     const [caseDescription, setCaseDescription] = useState('');
@@ -100,6 +104,15 @@ const IncidentDetails = (props) => {
     const [chatData, setChatData] = useState('')
     const [incidentFiles, setIncidentFiles] = useState([])
     const [selectedFileUrl, setSelectedFileUrl] = useState(null);
+    const [history, setHistory] = useState([])
+
+
+    const storedUser = JSON.parse(localStorage.getItem('userDetails'));
+    const userId = storedUser ? storedUser.userId : null;
+
+    console.log(userId);
+
+
     useEffect(() => {
         fetchDepartments()
         fetchDropdowns();
@@ -107,6 +120,7 @@ const IncidentDetails = (props) => {
         fetchIncidentDetailsById()
         fetchIncidentCharts()
         fetchAllUsers()
+        fetchHistory();
     }, [id]);
 
     useEffect(() => {
@@ -279,19 +293,19 @@ const IncidentDetails = (props) => {
 
     //fetch all users 
 
-    const fetchAllUsers = async() => {
+    const fetchAllUsers = async () => {
         try {
             const payload = {
-                orgId:1,
-                flag:'A',
-                departmentId:0
+                orgId: 1,
+                flag: 'A',
+                departmentId: 0
             }
             console.log(payload)
             const response = await axios.post(getAllUsers, payload)
             console.log("uuu", response)
             const alUsersList = response.data.users.map((user) => ({
-                id:user.userId,
-                title:user.fullName
+                id: user.userId,
+                title: user.fullName
             }))
 
             setAllUsers(alUsersList)
@@ -299,7 +313,7 @@ const IncidentDetails = (props) => {
             console.log(`Error in fetching all users:`, error)
         }
     }
-    
+
     // Get all users by department
 
     const fetchUsersByDept = async (departmentID) => {
@@ -485,11 +499,12 @@ const IncidentDetails = (props) => {
 
     //incident deatils by id
     const fetchIncidentDetailsById = async () => {
+        setLoading(true);
         try {
             const payload = {
                 "orgId": 1,
                 "incidentId": id,
-                "userId": 0
+                "userId":userId
             }
             console.log(payload)
             const response = await axios.post(getIncidentDetailsById, payload)
@@ -521,6 +536,8 @@ const IncidentDetails = (props) => {
             setIsIncidentDetailsFetched(true);
         } catch (error) {
             console.error('Error fetching incident details:', error);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -571,7 +588,7 @@ const IncidentDetails = (props) => {
         e.preventDefault();
         try {
             const payload = {
-                userId: 5,
+                userId: userId,
                 incidentId: id,
                 comments: chatData
             }
@@ -611,6 +628,29 @@ const IncidentDetails = (props) => {
         document.body.removeChild(link); // Clean up
     };
 
+    const fetchHistory = async () => {
+        setHistoryLoading(true)
+        try {
+            const response = await axios.post(getIncidentHistory, { incidentId: id })
+            console.log(response)
+            const historyData = response.data.incidentHistories;
+            const formattedHistory = historyData.map((data) => ({
+                id: data.incidentHistoryId,
+                incidentId: data.incidentId,
+                method: data.method,
+                comments: data.comments,
+                createdBy: data.createdBy,
+                createdAt: data.createdAt,
+            }))
+            setHistory(formattedHistory);
+        } catch (error) {
+            console.log('failed to fetch history:', error)
+        } finally {
+            setHistoryLoading(false);
+        }
+
+    }
+
     return (
         <div>
             <div className="page-header">
@@ -624,317 +664,289 @@ const IncidentDetails = (props) => {
             <div className='row'>
                 <div className="ticket-detail-head">
                     <div className='row'>
-
-                        {/* <CreateIncident
-                            isCreateNewFieldHide={true}
-                            isCraeteNewIncidentButton={true}
-                            isCreateDynamicFields={false}
-                            isCraeteIncidentHeading={true}
-                            // isSummaryVisible={true}
-                            isRightContentVisible = {true}
-                        /> */}
                         <div className='col-md-8 '>
-                            <Row>
-                                {Object.entries(inputs).map(([name, { value, options }], index) => (
-                                    <Col key={index} md={4} sm={4} className="mb-3">
-                                        <div className='resolve-drop'>
-                                            <Autocomplete
-                                                style={{ padding: "0px" }}
-                                                value={value}
-                                                onChange={handleChange(name)}
-                                                filterOptions={(options, params) => {
-                                                    const filtered = options.filter(option =>
-                                                        option.title.toLowerCase().includes(params.inputValue.toLowerCase())
-                                                    );
-                                                    const { inputValue } = params;
-                                                    const isExisting = options.some(option => inputValue === option.title);
-                                                    if (inputValue !== '' && !isExisting) {
-                                                        filtered.push({
-                                                            inputValue,
-                                                            title: `"${inputValue}"`,
-                                                            addOption: true
-                                                        });
-                                                    }
-                                                    return filtered;
-                                                }}
-                                                selectOnFocus
-                                                clearOnBlur
-                                                handleHomeEndKeys
-                                                id={`${name}-autocomplete`}
-                                                open={handleToggleOpen[name]}
-                                                onOpen={() => setHandleToggleOpen(prev => ({ ...prev, [name]: true }))}
-                                                onClose={() => setHandleToggleOpen(prev => ({ ...prev, [name]: false }))}
-                                                options={options}
-                                                getOptionLabel={(option) => {
-                                                    if (typeof option === 'string') {
-                                                        return option;
-                                                    }
-                                                    if (option.inputValue) {
-                                                        return option.inputValue;
-                                                    }
-                                                    return option.title;
-                                                }}
-                                                renderOption={(props, option) => (
-                                                    <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
-                                                        {option.addOption ? (
-                                                            <>
-                                                                {option.title}
-                                                                <AddIcon style={{ marginLeft: "10px" }} />
-                                                            </>
-                                                        ) : (
-                                                            option.title
-                                                        )}
-                                                    </li>
-                                                )}
-                                                renderInput={(params) => (
-                                                    <TextField {...params}
-                                                        label={`${name}`}
-                                                        variant="outlined"
-                                                        InputProps={{
-                                                            ...params.InputProps,
-                                                            className: 'custom-input-drop' // Apply the custom class
+                            {loading ? (
+                                // Show a spinner or loading message when data is being fetched
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: "20px" }}>
+                                    {/* <CircularProgress /> */}
+                                    ...Loading
+                                </div>
+                            ) : (
+                                <>
+                                    <Row>
+                                        {Object.entries(inputs).map(([name, { value, options }], index) => (
+                                            <Col key={index} md={4} sm={4} className="mb-3">
+                                                <div className='resolve-drop'>
+                                                    <Autocomplete
+                                                        style={{ padding: "0px" }}
+                                                        value={value}
+                                                        onChange={handleChange(name)}
+                                                        filterOptions={(options, params) => {
+                                                            const filtered = options.filter(option =>
+                                                                option.title.toLowerCase().includes(params.inputValue.toLowerCase())
+                                                            );
+                                                            const { inputValue } = params;
+                                                            const isExisting = options.some(option => inputValue === option.title);
+                                                            if (inputValue !== '' && !isExisting) {
+                                                                filtered.push({
+                                                                    inputValue,
+                                                                    title: `"${inputValue}"`,
+                                                                    addOption: true
+                                                                });
+                                                            }
+                                                            return filtered;
                                                         }}
-                                                        className="custom-textfield"
+                                                        selectOnFocus
+                                                        clearOnBlur
+                                                        handleHomeEndKeys
+                                                        id={`${name}-autocomplete`}
+                                                        open={handleToggleOpen[name]}
+                                                        onOpen={() => setHandleToggleOpen(prev => ({ ...prev, [name]: true }))}
+                                                        onClose={() => setHandleToggleOpen(prev => ({ ...prev, [name]: false }))}
+                                                        options={options}
+                                                        getOptionLabel={(option) => {
+                                                            if (typeof option === 'string') {
+                                                                return option;
+                                                            }
+                                                            if (option.inputValue) {
+                                                                return option.inputValue;
+                                                            }
+                                                            return option.title;
+                                                        }}
+                                                        renderOption={(props, option) => (
+                                                            <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
+                                                                {option.addOption ? (
+                                                                    <>
+                                                                        {option.title}
+                                                                        <AddIcon style={{ marginLeft: "10px" }} />
+                                                                    </>
+                                                                ) : (
+                                                                    option.title
+                                                                )}
+                                                            </li>
+                                                        )}
+                                                        renderInput={(params) => (
+                                                            <TextField {...params}
+                                                                label={`${name}`}
+                                                                variant="outlined"
+                                                                InputProps={{
+                                                                    ...params.InputProps,
+                                                                    className: 'custom-input-drop' // Apply the custom class
+                                                                }}
+                                                                className="custom-textfield"
+                                                            />
+                                                        )}
                                                     />
-                                                )}
-                                            />
-                                        </div>
-                                    </Col>
-                                ))}
+                                                </div>
+                                            </Col>
+                                        ))}
 
-                                <Col md={4} sm={4} className="mb-3">
-                                    <div className='resolve-drop'>
-                                        <Autocomplete
-                                            style={{ padding: "0px" }}
-                                            options={departments}
-                                            value={selectedDepartment}
-                                            // value={departments.find((dept) => dept.id === incidentDetails.departmentId) || selectedDepartment}
-                                            onChange={handleDepartmentChange}
-                                            getOptionLabel={(option) => option.title}
-                                            renderOption={(props, option) => (
-                                                <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
-                                                    {option.title}
-                                                </li>
-                                            )}
-                                            renderInput={(params) => (
-                                                <TextField {...params}
-                                                    label="Department"
-                                                    variant="outlined"
-                                                    InputProps={{
-                                                        ...params.InputProps,
-                                                        className: 'custom-input-drop' // Apply the custom class
-                                                    }}
-                                                    className="custom-textfield"
-                                                />
-                                            )}
-                                        />
-                                    </div>
-                                </Col>
-
-                                <Col md={4} sm={4} className="mb-3">
-                                    <div className='resolve-drop'>
-                                        <Autocomplete
-                                            style={{ padding: "0px" }}
-                                            options={allUsers}
-                                            value={selectedUser}
-                                            // value={users.find((user) => user.id === incidentDetails.assignedUserId) || selectedUser}
-                                            onChange={handleUserChange}
-                                            getOptionLabel={(option) => option.title}
-                                            renderOption={(props, option) => (
-                                                <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
-                                                    {option.title}
-                                                </li>
-                                            )}
-                                            renderInput={(params) => (
-                                                <TextField {...params}
-                                                    label="Assign To"
-                                                    variant="outlined"
-                                                    InputProps={{
-                                                        ...params.InputProps,
-                                                        className: 'custom-input-drop' // Apply the custom class
-                                                    }}
-                                                    className="custom-textfield"
-                                                />
-                                            )}
-                                        />
-                                    </div>
-                                </Col>
-
-                                <Col md={4} sm={4} className="mb-3">
-                                    <div className='resolve-drop'>
-                                        <Form.Group className='mb-0' controlId='exampleForm.ControlTextarea1'>
-                                            <TextField
-                                                id="outlined-basic"
-                                                InputProps={{ className: 'custom-input' }}
-                                                className='w-100 custom-textfield'
-                                                placeholder='Subject...'
-                                                label='Subject'
-                                                variant="outlined"
-                                                value={incidentDetails ? incidentDetails.title : ''}
-                                                onChange={(e) => setSubject(e.target.value)}
-                                            />
-                                        </Form.Group>
-                                    </div>
-                                </Col>
-
-                                <Col md={12} sm={6} className='mb-3'>
-                                    <div className='resolve-drop'>
-                                        <Form.Group className='mb-0' controlId='exampleForm.ControlTextarea1'>
-                                            <TextField
-                                                id="outlined-basic"
-                                                label="Description"
-                                                className='w-100'
-                                                multiline={true}
-                                                variant="outlined"
-                                                minRows={3}
-                                                style={{ backgroundColor: "white", borderRadius: "6px" }}
-                                                value={incidentDetails ? incidentDetails.description : ''}
-                                                onChange={(e) => setCaseDescription(e.target.value)}
-                                            />
-                                        </Form.Group>
-                                    </div>
-                                </Col>
-                            </Row>
-
-                            <div className="attached-files-info mb-3">
-                                <Row>
-                                    {/* <Col md={12} className='file_upload'>
-
-                                    <input class="form-control"
-                                        type="file"
-                                        id="formFileMultiple"
-                                        multiple
-                                        onChange={handleFileSelect}
-                                        value={selectedFiles.length ? `${selectedFiles.length} file(s) selected` : ''}
-                                    />
-                                </Col> */}
-                                    <Col md={12} >
-                                        <div className='file_upload'>
-                                            <Button
-                                                component='label'
-                                                style={{ color: "black" }}
-                                            >
-                                                Choose file
-                                                <VisuallyHiddenInput
-                                                    type='file'
-                                                    multiple
-                                                    style={{ display: 'none' }}
-                                                    onChange={handleFileSelect}
-                                                />
-                                            </Button>
-                                            <span className='vertical-line'></span>
-                                            <span style={{ marginLeft: "10px" }}> {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : 'No file chosen'}</span>
-                                        </div>
-                                    </Col>
-                                    {/* <Col md={3}>
-                                        <Button
-                                            variant='outlined'
-                                            className='accordian_submit_btn mt-2 '
-                                            onClick={incidentFileSubmit}
-                                        >
-                                            Upload File
-                                        </Button>
-                                    </Col> */}
-
-                                </Row>
-                                <Row>
-                                    <Col md={12} >
-
-                                        {selectedFiles && selectedFiles.length > 0 ?
-                                            <div className="attached-files mt-3">
-                                                <ul>
-                                                    {selectedFiles.map((file, index) => (
-                                                        <li key={index} className='mt-2'>
-                                                            <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
-                                                                <div className="d-flex align-items-center">
-                                                                    <span className="file-icon">
-                                                                        <TextSnippetIcon style={{ color: "#533529" }} />
-                                                                    </span>
-                                                                    <p className="mb-0 ms-2">{file.name}</p>
-                                                                </div>
-                                                                <div className="file-actions d-flex align-items-center">
-                                                                    {/* <div className="file-download me-2">
-                                                                        <a href="#">
-                                                                            <ArrowDownwardIcon style={{ marginRight: "5px" }} />
-                                                                        </a>
-                                                                    </div>
-                                                                    <IconButton>
-                                                                        <VisibilityIcon />
-                                                                    </IconButton> */}
-                                                                    <IconButton edge='end' aria-label='delete' onClick={() => handleRemoveFile(index)}>
-                                                                        <CloseIcon className='close_icon' />
-                                                                    </IconButton>
-                                                                </div>
-                                                            </div>
+                                        <Col md={4} sm={4} className="mb-3">
+                                            <div className='resolve-drop'>
+                                                <Autocomplete
+                                                    style={{ padding: "0px" }}
+                                                    options={departments}
+                                                    value={selectedDepartment}
+                                                    // value={departments.find((dept) => dept.id === incidentDetails.departmentId) || selectedDepartment}
+                                                    onChange={handleDepartmentChange}
+                                                    getOptionLabel={(option) => option.title}
+                                                    renderOption={(props, option) => (
+                                                        <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
+                                                            {option.title}
                                                         </li>
-                                                    ))}
-                                                </ul>
+                                                    )}
+                                                    renderInput={(params) => (
+                                                        <TextField {...params}
+                                                            label="Department"
+                                                            variant="outlined"
+                                                            InputProps={{
+                                                                ...params.InputProps,
+                                                                className: 'custom-input-drop' // Apply the custom class
+                                                            }}
+                                                            className="custom-textfield"
+                                                        />
+                                                    )}
+                                                />
                                             </div>
-                                            : ""
-                                        }
-                                    </Col>
-                                </Row>
-                            </div>
-
-                            {incidentFiles && incidentFiles.length > 0 && (
-                                <Accordion className='mb-2 accordian_arrow'>
-                                    <AccordionSummary
-                                        style={{
-                                            // color: '#0c63e4',
-                                            backgroundColor: '#533529',
-                                            boxShadow: 'inset 0 -1px 0 rgba(0, 0, 0, .125);',
-                                            padding: '0px 20px',
-                                        }}
-                                        expandIcon={<ExpandMoreIcon className='accordian_arrow' />}
-                                        aria-controls='panel3-content'
-                                        id='panel3-header'
-                                    >
-                                        <Typography className='accord_typo'>
-                                            Incident Files &nbsp;({`${incidentFiles.length} files`})
-                                        </Typography>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-                                        {/* {incidentFiles && incidentFiles.length > 0 && ( */}
-                                        <Col md={12} className=' mb-3'>
-                                            {/* <h5 style={{ fontWeight: "600" }}>Incident Files</h5> */}
-                                            <ul>
-                                                {incidentFiles.map((file, index) => (
-                                                    <li key={index} className='mt-2'>
-                                                        <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
-                                                            <div className="d-flex align-items-center">
-                                                                <span className="file-icon">
-                                                                    <TextSnippetIcon style={{ color: "#533529" }} />
-                                                                </span>
-                                                                <p className="mb-0 ms-2">
-                                                                    <a href={file.documentUrl} target="_blank" rel="noopener noreferrer">
-                                                                        {file.documentName}
-                                                                    </a> ({(file.documentSize / 1024).toFixed(2)} KB)
-                                                                </p>
-                                                            </div>
-                                                            <div className="file-actions d-flex align-items-center">
-                                                                <div className="file-download me-2">
-                                                                    <ArrowDownwardIcon
-                                                                        style={{ marginRight: "5px", cursor: 'pointer' }}
-                                                                        onClick={() => downloadFile(file.documentUrl, file.documentName)}
-                                                                    />
-                                                                </div>
-                                                                <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
-                                                                    <VisibilityIcon />
-                                                                </IconButton>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                ))}
-                                            </ul>
                                         </Col>
-                                        {/* )} */}
 
-                                    </AccordionDetails>
+                                        <Col md={4} sm={4} className="mb-3">
+                                            <div className='resolve-drop'>
+                                                <Autocomplete
+                                                    style={{ padding: "0px" }}
+                                                    options={allUsers}
+                                                    value={selectedUser}
+                                                    // value={users.find((user) => user.id === incidentDetails.assignedUserId) || selectedUser}
+                                                    onChange={handleUserChange}
+                                                    getOptionLabel={(option) => option.title}
+                                                    renderOption={(props, option) => (
+                                                        <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
+                                                            {option.title}
+                                                        </li>
+                                                    )}
+                                                    renderInput={(params) => (
+                                                        <TextField {...params}
+                                                            label="Assign To"
+                                                            variant="outlined"
+                                                            InputProps={{
+                                                                ...params.InputProps,
+                                                                className: 'custom-input-drop' // Apply the custom class
+                                                            }}
+                                                            className="custom-textfield"
+                                                        />
+                                                    )}
+                                                />
+                                            </div>
+                                        </Col>
 
+                                        <Col md={4} sm={4} className="mb-3">
+                                            <div className='resolve-drop'>
+                                                <Form.Group className='mb-0' controlId='exampleForm.ControlTextarea1'>
+                                                    <TextField
+                                                        id="outlined-basic"
+                                                        InputProps={{ className: 'custom-input' }}
+                                                        className='w-100 custom-textfield'
+                                                        placeholder='Subject...'
+                                                        label='Subject'
+                                                        variant="outlined"
+                                                        value={incidentDetails ? incidentDetails.title : ''}
+                                                        onChange={(e) => setSubject(e.target.value)}
+                                                    />
+                                                </Form.Group>
+                                            </div>
+                                        </Col>
 
+                                        <Col md={12} sm={6} className='mb-3'>
+                                            <div className='resolve-drop'>
+                                                <Form.Group className='mb-0' controlId='exampleForm.ControlTextarea1'>
+                                                    <TextField
+                                                        id="outlined-basic"
+                                                        label="Description"
+                                                        className='w-100'
+                                                        multiline={true}
+                                                        variant="outlined"
+                                                        minRows={3}
+                                                        style={{ backgroundColor: "white", borderRadius: "6px" }}
+                                                        value={incidentDetails ? incidentDetails.description : ''}
+                                                        onChange={(e) => setCaseDescription(e.target.value)}
+                                                    />
+                                                </Form.Group>
+                                            </div>
+                                        </Col>
+                                    </Row>
 
-                                </Accordion>
-                            )}
+                                    <div className="attached-files-info mb-3">
+                                        <Row>
+                                            <Col md={12} >
+                                                <div className='file_upload'>
+                                                    <Button
+                                                        component='label'
+                                                        style={{ color: "black" }}
+                                                    >
+                                                        Choose file
+                                                        <VisuallyHiddenInput
+                                                            type='file'
+                                                            multiple
+                                                            style={{ display: 'none' }}
+                                                            onChange={handleFileSelect}
+                                                        />
+                                                    </Button>
+                                                    <span className='vertical-line'></span>
+                                                    <span style={{ marginLeft: "10px" }}> {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : 'No file chosen'}</span>
+                                                </div>
+                                            </Col>
+
+                                        </Row>
+                                        <Row>
+                                            <Col md={12} >
+
+                                                {selectedFiles && selectedFiles.length > 0 ?
+                                                    <div className="attached-files mt-3">
+                                                        <ul>
+                                                            {selectedFiles.map((file, index) => (
+                                                                <li key={index} className='mt-2'>
+                                                                    <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
+                                                                        <div className="d-flex align-items-center">
+                                                                            <span className="file-icon">
+                                                                                <TextSnippetIcon style={{ color: "#533529" }} />
+                                                                            </span>
+                                                                            <p className="mb-0 ms-2">{file.name}</p>
+                                                                        </div>
+                                                                        <div className="file-actions d-flex align-items-center">
+                                                                            <IconButton edge='end' aria-label='delete' onClick={() => handleRemoveFile(index)}>
+                                                                                <CloseIcon className='close_icon' />
+                                                                            </IconButton>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                    : ""
+                                                }
+                                            </Col>
+                                        </Row>
+                                    </div>
+
+                                    {incidentFiles && incidentFiles.length > 0 && (
+                                        <Accordion className='mb-2 accordian_arrow'>
+                                            <AccordionSummary
+                                                style={{
+                                                    // color: '#0c63e4',
+                                                    backgroundColor: '#533529',
+                                                    boxShadow: 'inset 0 -1px 0 rgba(0, 0, 0, .125);',
+                                                    padding: '0px 20px',
+                                                }}
+                                                expandIcon={<ExpandMoreIcon className='accordian_arrow' />}
+                                                aria-controls='panel3-content'
+                                                id='panel3-header'
+                                            >
+                                                <Typography className='accord_typo'>
+                                                    Incident Files &nbsp;({`${incidentFiles.length} files`})
+                                                </Typography>
+                                            </AccordionSummary>
+                                            <AccordionDetails>
+
+                                                <Col md={12} className=' mb-3'>
+                                                    <ul>
+                                                        {incidentFiles.map((file, index) => (
+                                                            <li key={index} className='mt-2'>
+                                                                <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
+                                                                    <div className="d-flex align-items-center">
+                                                                        <span className="file-icon">
+                                                                            <TextSnippetIcon style={{ color: "#533529" }} />
+                                                                        </span>
+                                                                        <p className="mb-0 ms-2">
+                                                                            <a href={file.documentUrl} target="_blank" rel="noopener noreferrer">
+                                                                                {file.documentName}
+                                                                            </a> ({(file.documentSize / 1024).toFixed(2)} KB)
+                                                                        </p>
+                                                                    </div>
+                                                                    <div className="file-actions d-flex align-items-center">
+                                                                        <div className="file-download me-2">
+                                                                            <ArrowDownwardIcon
+                                                                                style={{ marginRight: "5px", cursor: 'pointer' }}
+                                                                                onClick={() => downloadFile(file.documentUrl, file.documentName)}
+                                                                            />
+                                                                        </div>
+                                                                        <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
+                                                                            <VisibilityIcon />
+                                                                        </IconButton>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </Col>
+                                                {/* )} */}
+
+                                            </AccordionDetails>
+                                        </Accordion>
+                                    )}
+                                </>
+                            )
+                            }
+
 
                             <Accordion className='mb-2 accordian_arrow'>
                                 <AccordionSummary
@@ -1049,7 +1061,7 @@ const IncidentDetails = (props) => {
                                                                 variant="outlined"
                                                                 name={field.label}
                                                                 value={field.value || ''}
-                                                                onChange={(e) => handleFieldValueChange(index, e.target.value)}
+                                                                // onChange={(e) => handleFieldValueChange(index, e.target.value)}
                                                             />
                                                         </Form.Group>
 
@@ -1059,7 +1071,7 @@ const IncidentDetails = (props) => {
                                                                 style={{ width: '100%' }}
                                                                 options={field.options}
                                                                 value={field.value || null}
-                                                                onChange={(event, newValue) => handleFieldValueChange(index, newValue)}
+                                                                // onChange={(event, newValue) => handleFieldValueChange(index, newValue)}
                                                                 renderInput={(params) => (
                                                                     <TextField
                                                                         {...params}
@@ -1088,7 +1100,7 @@ const IncidentDetails = (props) => {
 
                             </Accordion>
 
-                            {/* render component */}
+                            {/* Task assigning component */}
                             <div className='row dynamic_below'>
                                 <div className='task_assigning'>
                                     <TaskAssign selectedDepartment={selectedDepartment} />
@@ -1116,16 +1128,40 @@ const IncidentDetails = (props) => {
                             </div>
                             <div className="ticket-chat attached-files mb-3" style={{ minHeight: "160px", maxHeight: "160px", overflowY: "auto" }}>
                                 <h5 style={{ fontWeight: "600" }}>History</h5>
-                                <div className="d-flex align-items-center mb-3">
-                                    <span className="history_bg">
-                                        sp
-                                    </span> changed the &nbsp; <span style={{ fontWeight: "600" }}>task</span>&nbsp; 2 days ago
-                                </div>
-                                <div className="d-flex align-items-center">
+
+                                {/* <div className="d-flex align-items-center">
                                     <span className="history_bg">
                                         sp
                                     </span> created new &nbsp; <span style={{ fontWeight: "600" }}>incident</span>&nbsp; 2 days ago
-                                </div>
+                                </div> */}
+                                {historyLoading ? (
+                                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                        Loading...
+                                    </div>
+                                ) : (
+                                    history.length > 0 ? (
+                                        history.map((entry) => {
+                                            // Split the 'createdBy' to get the first name
+                                            const firstName = entry.createdBy.split(' ')[0];
+
+                                            return (
+                                                <div key={entry.id} className="d-flex align-items-center mb-3">
+                                                    <span className="history_bg">
+                                                        {firstName ? firstName.charAt(0).toUpperCase() : "?"}
+                                                    </span>
+                                                    {/* <span> {firstName}</span> &nbsp; */}
+                                                    <span style={{ fontWeight: "600", fontSize: "14px" }}> {entry.comments}</span> &nbsp;
+                                                    <span> {new Date(entry.createdAt).toLocaleDateString()}</span>
+                                                </div>
+                                            );
+                                        })
+                                    ) : (
+                                        <p>No history available.</p>
+                                    )
+                                )}
+
+
+
                             </div>
                             <div className="ticket-chat ">
                                 <div className="ticket-chat-head">
@@ -1152,7 +1188,7 @@ const IncidentDetails = (props) => {
                                     </div>
                                 </div>
                                 {/* {incidentChats.map(chat => ( */}
-                                <div className="ticket-chat-body" style={{  maxHeight: "215px", overflowY: "auto" }}>
+                                <div className="ticket-chat-body" style={{ maxHeight: "215px", overflowY: "auto" }}>
                                     <ul className="created-tickets-info">
                                         {incidentChats.map(chat => (
                                             <React.Fragment key={chat.incidentChatId}>
@@ -1162,15 +1198,16 @@ const IncidentDetails = (props) => {
                                                             <AccountCircle />
                                                         </span>
                                                         <div className="user-name">
-                                                            <h5><span>{chat.username}</span> posted a status</h5>
-                                                            <span>{getTimeAgoInIST(chat.createdOn)}</span> {/* Show formatted date */}
+                                                            <h5><span>{chat.username}</span> posted a comment</h5>
+                                                            {/* <span>{getTimeAgoInIST(chat.createdOn)}</span>  */}
+                                                            <span>{chat.createdOn}</span>
                                                         </div>
                                                     </div>
                                                 </li>
                                                 <li className="mt-2">
                                                     <div className="ticket-created-info">
-                                                        <h6>Impact on Work</h6>
-                                                        <p>{chat.comments}</p>
+                                                        <h6>{chat.comments}</h6>
+                                                        
                                                     </div>
                                                 </li>
                                                 <hr />
@@ -1342,14 +1379,14 @@ const IncidentDetails = (props) => {
                                                 label={field.label}
                                                 name={field.label}
                                                 value={field.value || ''}
-                                                onChange={(e) => handleFieldValueChange(index, e.target.value)}
+                                                // onChange={(e) => handleFieldValueChange(index, e.target.value)}
                                                 fullWidth
                                             />
                                         ) : (
                                             <Autocomplete
                                                 options={field.options}
                                                 value={field.value || null}
-                                                onChange={(event, newValue) => handleFieldValueChange(index, newValue)}
+                                                // onChange={(event, newValue) => handleFieldValueChange(index, newValue)}
                                                 renderInput={(params) => (
                                                     <TextField
                                                         {...params}

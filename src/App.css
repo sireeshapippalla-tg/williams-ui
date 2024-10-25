@@ -982,3 +982,20 @@ hr {
   color: rgb(83 53 41);
   font-weight: 600;
 }
+
+.corrective-list li {
+  padding: 0px !important;
+}
+ .file-name span{
+  color: rgb(121, 69, 48);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.css-1d3z3hw-MuiOutlinedInput-notchedOutline {
+  border-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.css-1jy569b-MuiFormLabel-root-MuiInputLabel-root{
+  font-weight: 700 !important;
+}

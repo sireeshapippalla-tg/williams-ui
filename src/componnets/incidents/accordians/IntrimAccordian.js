@@ -46,6 +46,11 @@ const IntrimAccordian = () => {
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [selectedFileUrl, setSelectedFileUrl] = useState(null);
 
+    const storedUser = JSON.parse(localStorage.getItem('userDetails'));
+    const userId = storedUser ? storedUser.userId : null;
+
+    console.log(userId);
+
     const interimHandleRemoveFile = (index) => {
         setInterimSelectedFiles(interimSelectedFiles.filter((_, i) => i !== index));
     };
@@ -155,7 +160,7 @@ const IntrimAccordian = () => {
             const requestBody = {
                 orgId: 1,
                 incidentId: id,
-                userId: 1
+                userId: userId
             }
             console.log(requestBody)
             const response = await axios.post(getIncidentInterimDetails, requestBody)
@@ -408,6 +413,15 @@ const IntrimAccordian = () => {
                                                             <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
                                                                 <VisibilityIcon />
                                                             </IconButton>
+                                                            <div className="file-actions d-flex align-items-center">
+                                                            <IconButton
+                                                                edge='end'
+                                                                aria-label='delete'
+                                                                // onClick={() => interimHandleRemoveFile(index)}
+                                                            >
+                                                                <CloseIcon className='close_icon' />
+                                                            </IconButton>
+                                                        </div>
                                                         </div>
                                                     </div>
                                                 </li>
