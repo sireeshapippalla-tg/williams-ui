@@ -47,11 +47,11 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 
 const StyledStatusTableCell = styled(TableCell)(({ theme, status }) => ({
-  color: status === 'closed' ? 'green' : 'red',
+  color: status === 'Resolved' ? 'green' : 'red',
 }));
 
 const StyledStatusText = styled('span')(({ theme, status }) => ({
-  backgroundColor: status === 'closed' ? '#d7f9e8' : '#f9d7d7',
+  backgroundColor: status === 'Resolved' ? '#d7f9e8' : '#f9d7d7',
   padding: '4px 8px',
   borderRadius: '8px',
 }));
@@ -59,24 +59,35 @@ const StyledStatusText = styled('span')(({ theme, status }) => ({
 
 const columns = [
   {
-    id: 'id',
-    label: 'Incident id',
+    id:"id",
+    label:"Incident ID",
+    hidden: true,
+
+  },
+  {
+    id: 'incidentRecord',
+    label: 'Incident Record',
+    align: 'center'
   },
   {
     id: 'subject',
     label: 'Subject',
+    align: 'center'
   },
   {
-    id: 'orgName',
-    label: 'Organization name',
+    id: 'departmentName',
+    label: 'Department name',
+    align: 'center'
   },
   {
     id: 'category',
     label: 'Category',
+    align: 'center'
   },
   {
     id: 'severity',
     label: 'Severity',
+    align: 'center'
   },
   {
     id: 'created',
@@ -96,9 +107,9 @@ const columns = [
   }
 ];
 
-function createData(id, subject, orgName, category, severity, created, status, action) {
+function createData(id,incidentRecord, subject, departmentName, category, severity, created, status, action) {
 
-  return { id, subject, orgName, category, severity, created, status, action };
+  return {id, incidentRecord, subject, departmentName, category, severity, created, status, action };
 }
 const getStatusColor = (status) => {
   return status === 'open' ? 'green' : 'red';
@@ -176,8 +187,9 @@ console.log(userId);
         const formattedData = incidentData.map(incident =>
           createData(
             incident.incidentId,
+            incident.incidentRecord,
             incident.subject,
-            incident.organizationName,
+            incident.departmentName,
             incident.category,
             incident.severity,
             incident.createdOn,
@@ -418,7 +430,7 @@ console.log(userId);
                       <span class="text-danger fw-bold">-2.8%</span>
                     </div> */}
                   </div>
-                  <h3 class="mb-3 fw-bold">100</h3>
+                  <h3 class="mb-3 fw-bold">{incidentCount ? incidentCount.inProgress : ""}</h3>
                   <div class="progress mb-2" style={{ height: "5px" }}>
                     <div class="progress-bar bg-warning" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"
                       style={{ width: "70%" }}>
@@ -585,61 +597,62 @@ console.log(userId);
         <div className="mt-2">
 
           <Paper className='tbl' sx={{ width: '100%', overflow: 'hidden' }}>
-            <TableContainer className='tablescroll-mobile'>
-              <Table stickyHeader aria-label="sticky table" sx={{ minWidth: 650 }}>
-                <TableHead>
-                  <TableRow>
-                    {columns.map((column) => (
-                      <TableCell
-                        key={column.id}
-                        align={column.align}
-                        style={{ minWidth: column.minWidth }}
-                      >
-                        {column.label}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                {isLoading ?
-                  <div >Loading...</div>
-                  :
-                  <TableBody>
-
-                    {rows
-                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                      .map((row) => (
-                        <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-                          {columns.map((column) => {
-                            const value = row[column.id];
-                            if (column.id === 'status') {
-                              return (
-                                <StyledStatusTableCell key={column.id} align={column.align} status={row.status}>
-                                  <StyledStatusText status={row.status}>
-                                    {value}
-                                  </StyledStatusText>
-                                </StyledStatusTableCell>
-                              );
-                            }
-                            return (
-                              <TableCell
-                                style={{ cursor: "pointer" }}
-                                key={column.id}
-                                align={column.align}
-                                onClick={() => clickHandlerresolve(row.id)}
-                              >
-                                {column.format && typeof value === 'number'
-                                  ? column.format(value)
-                                  : value}
-                              </TableCell>
-                            );
-                          })}
-                        </StyledTableRow>
-                      ))}
-                  </TableBody>
+          <TableContainer className='tablescroll-mobile'>
+  <Table stickyHeader aria-label="sticky table" sx={{ minWidth: 650 }}>
+    <TableHead>
+      <TableRow>
+        {columns.map((column) => (
+          !column.hidden && ( // Only render if column is not hidden
+            <TableCell
+              key={column.id}
+              align={column.align}
+              style={{ minWidth: column.minWidth }}
+            >
+              {column.label}
+            </TableCell>
+          )
+        ))}
+      </TableRow>
+    </TableHead>
+    {isLoading ? (
+      <div>Loading...</div>
+    ) : (
+      <TableBody>
+        {rows
+          .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+          .map((row) => (
+            <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code}>
+              {columns.map((column) => {
+                if (column.hidden) return null; // Skip hidden columns
+                const value = row[column.id];
+                if (column.id === 'status') {
+                  return (
+                    <StyledStatusTableCell key={column.id} align={column.align} status={row.status}>
+                      <StyledStatusText status={row.status}>
+                        {value}
+                      </StyledStatusText>
+                    </StyledStatusTableCell>
+                  );
                 }
-
-              </Table>
-            </TableContainer>
+                return (
+                  <TableCell
+                    style={{ cursor: "pointer" }}
+                    key={column.id}
+                    align={column.align}
+                    onClick={() => clickHandlerresolve(row.id)}
+                  >
+                    {column.format && typeof value === 'number'
+                      ? column.format(value)
+                      : value}
+                  </TableCell>
+                );
+              })}
+            </StyledTableRow>
+          ))}
+      </TableBody>
+    )}
+  </Table>
+</TableContainer>
             <div>
               <TablePagination
                 rowsPerPageOptions={[5, 10, 20, 40, 100]}

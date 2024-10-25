@@ -30,6 +30,7 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { DialogContentText } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { formatDistanceToNow } from 'date-fns';
@@ -46,7 +47,9 @@ import {
   getAllUsers,
   getIncidentHistory,
   closeIncident,
-  addIncident
+  addIncident,
+  downloadFile,
+  deleteFile
 } from '../../api';
 
 
@@ -110,6 +113,9 @@ const IncidentDetails = (props) => {
   const [selectedFileUrl, setSelectedFileUrl] = useState(null);
   const [history, setHistory] = useState([])
   const [showModal3, setShowModal3] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState(null);
+  const [fileToDeleteIndex, setFileToDeleteIndex] = useState(null);
 
 
   const storedUser = JSON.parse(localStorage.getItem('userDetails'));
@@ -505,7 +511,49 @@ const IncidentDetails = (props) => {
     name: 'file0702202413.pdf',
     downloadLink: '#'
   };
+  const openDeleteDialog = (file, index) => {
+    setFileToDelete(file);
+    setFileToDeleteIndex(index);
+    setDeleteDialogOpen(true);
+};
 
+const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setFileToDelete(null);
+    setFileToDeleteIndex(null);
+};
+
+const confirmDeleteFile = async () => {
+    if (!fileToDelete) return;
+    try {
+        const payload = {
+            documentId: fileToDelete.documentId,
+            documentName: fileToDelete.documentName
+        };
+
+        const response = await axios.post(deleteFile, payload);
+
+        if (response.status === 200) {
+            setIncidentFiles(incidentFiles.filter(file => file.documentId !== fileToDelete.documentId));
+            setSelectedFiles(selectedFiles.filter(file => file.documentId !== fileToDelete.documentId));
+
+            setMessage("File deleted successfully.");
+            setSeverity('success');
+            setOpen(true);
+        } else {
+            setMessage("Failed to delete the file.");
+            setSeverity('error');
+            setOpen(true);
+        }
+    } catch (error) {
+        console.error("Error deleting the file:", error);
+        setMessage("An error occurred while deleting the file.");
+        setSeverity('error');
+        setOpen(true);
+    } finally {
+        closeDeleteDialog();
+    }
+};
 
   //incident deatils by id
   const fetchIncidentDetailsById = async () => {
@@ -633,14 +681,23 @@ const IncidentDetails = (props) => {
     setSelectedFileUrl(fileUrl); // Set the selected file URL
   };
 
-  const downloadFile = (url, fileName) => {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName; // Set the file name for the download
-    document.body.appendChild(link); // Append to body
-    link.click(); // Trigger the download
-    document.body.removeChild(link); // Clean up
-  };
+  const download = async (url,fileName) => {
+    try {
+        const payload = { documentName: fileName };
+        const response = await axios.post(downloadFile, payload, { responseType: 'blob' });
+        const blob = new Blob([response.data], { type: response.headers['content-type'] });
+        const link = document.createElement('a');
+        const url = window.URL.createObjectURL(blob);
+        link.href = url;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error in downloading file:', error);
+    }
+};
 
   const fetchHistory = async () => {
     console.log("invokeHistory")
@@ -1024,7 +1081,7 @@ const IncidentDetails = (props) => {
                                       <p className="mb-0 ms-2">{file.name}</p>
                                     </div>
                                     <div className="file-actions d-flex align-items-center">
-                                      <IconButton edge='end' aria-label='delete' onClick={() => handleRemoveFile(index)}>
+                                      <IconButton edge='end' aria-label='delete' onClick={() => setSelectedFiles(selectedFiles.filter((_, i) => i !== index))}>
                                         <CloseIcon className='close_icon' />
                                       </IconButton>
                                     </div>
@@ -1077,12 +1134,15 @@ const IncidentDetails = (props) => {
                                     <div className="file-download me-2">
                                       <ArrowDownwardIcon
                                         style={{ marginRight: "5px", cursor: 'pointer' }}
-                                        onClick={() => downloadFile(file.documentUrl, file.documentName)}
+                                        onClick={() => download(file.documentUrl, file.documentName)}
                                       />
                                     </div>
                                     <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
                                       <VisibilityIcon />
                                     </IconButton>
+                                    <IconButton edge='end' onClick={() => openDeleteDialog(file, index)}>
+                                                        <CloseIcon className='close_icon' />
+                                     </IconButton>
                                   </div>
                                 </div>
                               </li>
@@ -1847,7 +1907,17 @@ const IncidentDetails = (props) => {
         </Box>
       </Drawer>
 
-
+      
+      <Dialog open={deleteDialogOpen} onClose={closeDeleteDialog}>
+                <DialogTitle className='dialog_head'>Delete Confirmation</DialogTitle>
+                <DialogContent className='dialog_content'>
+                    <DialogContentText className='mt-4'>Are you sure you want to delete the file "{fileToDelete?.documentName}"?</DialogContentText>
+                </DialogContent>
+                <DialogActions className='dialog_content'>
+                    <Button className='accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button>
+                    <Button className='accordian_submit_btn' onClick={closeDeleteDialog} color="primary">Cancel</Button>
+                </DialogActions>
+            </Dialog>
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
         <Alert onClose={handleClose} severity={severity}>
           {message}

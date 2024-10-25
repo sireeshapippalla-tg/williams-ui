@@ -116,6 +116,9 @@ function Header() {
             <MenuItem>
               <div className='row'>
                 <div className='col-md-2'>
+                  <div>
+                    {notification.incidentRecord}
+                  </div>
                   <span className="history_bg">
                     { notification.createdBy? notification.createdBy.charAt(0).toUpperCase() : "?"}
                   </span>
