@@ -644,13 +644,13 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                 </DialogActions>
             </Dialog>
             <Dialog open={deleteDialogOpen} onClose={closeDeleteDialog}>
-                <DialogTitle>Delete Confirmation</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>Are you sure you want to delete the file "{fileToDelete?.documentName}"?</DialogContentText>
+                <DialogTitle className='dialog_head'>Delete Confirmation</DialogTitle>
+                <DialogContent className='dialog_content'>
+                    <DialogContentText className='mt-4'>Are you sure you want to delete the file "{fileToDelete?.documentName}"?</DialogContentText>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={closeDeleteDialog} color="primary">Cancel</Button>
-                    <Button onClick={confirmDeleteFile} color="secondary">Delete</Button>
+                <DialogActions className='dialog_content'>
+                    <Button className='accordian_submit_btn' onClick={closeDeleteDialog} color="primary">Cancel</Button>
+                    <Button className=' accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button>
                 </DialogActions>
             </Dialog>
 

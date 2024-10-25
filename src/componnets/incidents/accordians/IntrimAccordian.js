@@ -72,7 +72,7 @@ const IntrimAccordian = ({ invokeHistory }) => {
             if (response.status === 200) {
                 setSelectedFiles(selectedFiles.filter(file => file.documentId !== fileToDelete.documentId));
                 setInterimSelectedFiles(interimSelectedFiles.filter(file => file.documentId !== fileToDelete.documentId));
-            
+
                 setMessage("File deleted successfully.");
                 setSeverity('success');
                 setOpen(true);
@@ -273,28 +273,33 @@ const IntrimAccordian = ({ invokeHistory }) => {
                         ))}
                         {selectedFiles.map((file, index) => (
                             <div className="row attached-files-info mt-3" key={index}>
-                                <div className="col-xxl-6">
-                                    <ul><li className='mt-2'>
-                                        <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
-                                            <div className="d-flex align-items-center">
-                                                <TextSnippetIcon style={{ color: "#533529" }} />
-                                                <p className="mb-0 ms-2">
-                                                    <a target="_blank" rel="noopener noreferrer">
-                                                        {file.documentName}
-                                                    </a> ({(file.documentSize / 1024).toFixed(2)} KB)
-                                                </p>
+                                <div className="col-xxl-6"> <div className="attached-files">
+                                    <ul>
+                                        <li className='mt-2'>
+                                            <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
+                                                <div className="d-flex align-items-center">
+                                                <span className="file-icon">
+                                                    <TextSnippetIcon style={{ color: "#533529" }} />
+                                                    </span>
+                                                    <p className="mb-0 ms-2">
+                                                        <a target="_blank" rel="noopener noreferrer">
+                                                            {file.documentName}
+                                                        </a> ({(file.documentSize / 1024).toFixed(2)} KB)
+                                                    </p>
+                                                </div>
+                                                <div className="file-actions d-flex align-items-center">
+                                                    <ArrowDownwardIcon style={{ marginRight: "5px", cursor: 'pointer' }} onClick={() => download(file.documentName)} />
+                                                    <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
+                                                        <VisibilityIcon />
+                                                    </IconButton>
+                                                    <IconButton edge='end' onClick={() => openDeleteDialog(file, index)}>
+                                                        <CloseIcon className='close_icon' />
+                                                    </IconButton>
+                                                </div>
                                             </div>
-                                            <div className="file-actions d-flex align-items-center">
-                                                <ArrowDownwardIcon style={{ marginRight: "5px", cursor: 'pointer' }} onClick={() => download(file.documentName)} />
-                                                <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
-                                                    <VisibilityIcon />
-                                                </IconButton>
-                                                <IconButton edge='end' onClick={() => openDeleteDialog(file, index)}>
-                                                    <CloseIcon className='close_icon' />
-                                                </IconButton>
-                                            </div>
-                                        </div>
-                                    </li></ul>
+                                        </li>
+                                    </ul>
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -317,13 +322,13 @@ const IntrimAccordian = ({ invokeHistory }) => {
                 </DialogActions>
             </Dialog>
             <Dialog open={deleteDialogOpen} onClose={closeDeleteDialog}>
-                <DialogTitle>Delete Confirmation</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>Are you sure you want to delete the file "{fileToDelete?.documentName}"?</DialogContentText>
+                <DialogTitle className='dialog_head'>Delete Confirmation</DialogTitle>
+                <DialogContent className='dialog_content'>
+                    <DialogContentText className='mt-4'>Are you sure you want to delete the file "{fileToDelete?.documentName}"?</DialogContentText>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={closeDeleteDialog} color="primary">Cancel</Button>
-                    <Button onClick={confirmDeleteFile} color="secondary">Delete</Button>
+                <DialogActions className='dialog_content'>
+                    <Button className='accordian_submit_btn' onClick={closeDeleteDialog} color="primary">Cancel</Button>
+                    <Button className=' accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button>
                 </DialogActions>
             </Dialog>
         </div>

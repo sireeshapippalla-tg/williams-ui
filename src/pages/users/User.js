@@ -125,6 +125,7 @@ const User = () => {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [userIds, setUserIds] = useState()
     const [selectDeleteUserId, setSelectDeleteUserId] = useState(null)
+    const [errors, setErrors] = useState({});
 
     // const selectedUserID = userIdRef.current;
 
@@ -139,6 +140,8 @@ const User = () => {
             Title: { value: null, options: [] },
             Gender: { value: null, options: [] },
         });
+
+        setErrors({});
 
     }
 
@@ -357,7 +360,49 @@ const User = () => {
         handleMenuClose(); // Close the menu
     };
 
-    
+    // const validateFields = () => {
+    //     const newErrors = {};
+
+    //     if (!firstName) newErrors.firstName = "First Name is required.";
+    //     if (!lastName) newErrors.lastName = "Last Name is required.";
+    //     if (!email) newErrors.email = "Email is required.";
+    //     else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email is invalid.";
+    //     if (!contactNumber) newErrors.contactNumber = "Contact Number is required.";
+    //     else if (!/^\d{10}$/.test(contactNumber)) newErrors.contactNumber = "Contact Number must be 10 digits.";
+    //     if (!selectedUserType) newErrors.selectedUserType = "User Type is required.";
+    //     if (!selectedDepartment) newErrors.selectedDepartment = "Department is required.";
+
+    //     setErrors(newErrors);
+    //     return Object.keys(newErrors).length === 0;
+    // };
+
+
+    const validateFields = () => {
+        const newErrors = {};
+
+        // Validate individual fields
+        if (!firstName) newErrors.firstName = "First Name is required.";
+        if (!lastName) newErrors.lastName = "Last Name is required.";
+
+        if (!email) newErrors.email = "Email is required.";
+        else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email is invalid.";
+
+        if (!contactNumber) newErrors.contactNumber = "Contact Number is required.";
+        else if (!/^\d{10}$/.test(contactNumber)) newErrors.contactNumber = "Contact Number must be 10 digits.";
+
+        // Validate Autocomplete fields (Title, Gender, UserType, Department)
+        console.log("selectedUserType", selectedUserType)
+        if (!selectedUserType) newErrors.selectedUserType = "User Type is required.";
+        if (!selectedDepartment) newErrors.selectedDepartment = "Department is required.";
+
+        if (!inputs.Title.value) newErrors.Title = "Title is required.";
+        if (!inputs.Gender.value) newErrors.Gender = "Gender is required.";
+
+        // Set errors in state and return validation status
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log("submit")
@@ -365,6 +410,8 @@ const User = () => {
         console.log('Submit user with id:', selectedUserID);
 
         console.log(selectedUserID)
+        if (!validateFields()) return;
+
         try {
 
             const isEditMode = dialogMode === 'edit';
@@ -396,6 +443,7 @@ const User = () => {
                     setMessage(responseMessage);
                     setSeverity('success');
                     setOpenSnackbar(true);
+                    resetFields();
 
                     // Optionally navigate or perform other actions
                     // setTimeout(() => navigate('/users'), 2000);
@@ -406,6 +454,7 @@ const User = () => {
                     resetFields();
                     setMessage(responseMessage || 'Email already exists');
                     setSeverity('error');
+                    resetFields()
                     setOpenSnackbar(true);
 
                 } else {
@@ -436,6 +485,7 @@ const User = () => {
 
     const handleCancel = () => {
         setAddUserdialogOpen(false)
+        resetFields()
     }
     const handleDeleteDialog = (userId) => {
         console.log('Delete user with id:', userId);
@@ -444,7 +494,7 @@ const User = () => {
     };
 
     const handleUserDelete = async () => {
-     
+
         console.log(selectDeleteUserId)
         if (!selectDeleteUserId) {
             console.error('No user selected for deletion');
@@ -486,24 +536,6 @@ const User = () => {
         setAnchorEl(null);
         setSelectedUserId(null);
     };
-
-    // const handleEdit = (user) => {
-    //     console.log('Edit user with id:', selectedUserId);
-    //     // Add your edit logic here
-    //     handleMenuClose();
-    // };
-
-
-
-
-
-    // setInputs({
-    //     Title: { value: null, options: [] }, 
-    //     Gender: { value: null, options: [] },
-    // });
-
-
-
 
 
     const handleCloseDeleteUserDialog = () => {
@@ -548,107 +580,8 @@ const User = () => {
             </div>
 
             <div className="row">
-                {/* <div className="col-sm-6 col-md-6 col-lg-3 col-xl-3 col-12 mb-2">
-                    <TextField
-                        InputProps={{ className: 'custom-input' }}
-                        className="custom-textfield"
-                        id="outlined-basic"
-                        label="Name"
-                        variant="outlined"
-                        style={{ width: "100%" }}
-                    />
-                </div>
-                <div className=" col-sm-6 col-md-6 col-lg-3 col-xl-3 col-12 mb-2">
-                    <div className='resolve-drop'>
-                        <Autocomplete
-                            // value={inputs.Status.value}
-                            // onChange={handleChange('Status')}
-                            selectOnFocus
-                            clearOnBlur
-                            handleHomeEndKeys
-                            id={`Status-autocomplete`}
-                            options={organizations}
-                            getOptionLabel={(option) => {
-                                if (typeof option === 'string') {
-                                    return option;
-                                }
-                                if (option.inputValue) {
-                                    return option.inputValue;
-                                }
-                                return option;
-                            }}
-                            renderOption={(props, option) => (
-                                <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
-                                    {option}
-                                </li>
-                            )}
-
-
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    label={`Organization`}
-                                    variant="outlined"
-                                    InputProps={{
-                                        ...params.InputProps,
-                                        className: 'custom-input-drop' // Apply the custom class
-                                    }}
-                                    className="custom-textfield"
-                                />
-                            )}
-                        />
-                    </div>
-                </div>
-                <div className=" col-sm-6 col-md-6 col-lg-3 col-xl-3 col-12 mb-2">
-                    <div className='resolve-drop'>
-                        <Autocomplete
-                            // value={inputs.Status.value}
-                            // onChange={handleChange('Status')}
-                            selectOnFocus
-                            clearOnBlur
-                            handleHomeEndKeys
-                            id={`Status-autocomplete`}
-                            options={roles}
-                            getOptionLabel={(option) => {
-                                if (typeof option === 'string') {
-                                    return option;
-                                }
-                                if (option.inputValue) {
-                                    return option.inputValue;
-                                }
-                                return option;
-                            }}
-                            renderOption={(props, option) => (
-                                <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
-                                    {option}
-                                </li>
-                            )}
-
-
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    label={`Role`}
-                                    variant="outlined"
-                                    InputProps={{
-                                        ...params.InputProps,
-                                        className: 'custom-input-drop' // Apply the custom class
-                                    }}
-                                    className="custom-textfield"
-                                />
-                            )}
-                        />
-                    </div>
-                </div>
-
-                <div className="col-sm-6 col-md-6 col-lg-3 col-xl-3 col-12 mb-2">
-                    <Button variant="fw-bold " className='search_btn'>Search</Button>
-                </div> */}
-
-
 
                 <div className="mt-2">
-
                     <Paper className='tbl' sx={{ width: '100%', overflow: 'hidden' }}>
                         <TableContainer className='tablescroll-mobile'>
                             <Table stickyHeader aria-label="sticky table" sx={{ minWidth: 650 }}>
@@ -668,74 +601,6 @@ const User = () => {
                                 {isLoading ?
                                     <div >Loading...</div>
                                     :
-                                    // <TableBody>
-
-                                    //     {rows
-                                    //         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                    //         .map((row) => (
-                                    //             <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.userId}>
-                                    //                 {columns.map((column) => {
-                                    //                     const value = row[column.id];
-                                    //                     return (
-                                    //                         <TableCell
-                                    //                             style={{ cursor: "pointer" }}
-                                    //                             key={column.id}
-                                    //                             align={column.align}
-
-                                    //                         >
-                                    //                             {column.format && typeof value === 'number'
-                                    //                                 ? column.format(value)
-                                    //                                 : value}
-                                    //                         </TableCell>
-                                    //                     );
-                                    //                 })}
-                                    //             </StyledTableRow>
-                                    //         ))}
-                                    // </TableBody>
-
-                                    // <TableBody>
-                                    //     {rows
-                                    //         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                    //         .map((row) => (
-                                    //             <TableRow hover role="checkbox" tabIndex={-1} key={row.userId}>
-                                    //                 {columns.map((column) => {
-                                    //                     const value = row[column.id];
-                                    //                     return (
-                                    //                         <TableCell key={column.id} align={column.align}>
-                                    //                             {column.id === 'action' ? (
-                                    //                                 <>
-                                    //                                     <IconButton
-                                    //                                         onClick={(event) => handleMenuClick(event, row.userId)}
-                                    //                                     >
-                                    //                                         <MoreVertIcon />
-                                    //                                     </IconButton>
-                                    //                                     <Menu
-                                    //                                         className='mt-1 brown-menu'
-                                    //                                         anchorEl={anchorEl}
-                                    //                                         open={Boolean(anchorEl) && selectedUserId === row.userId} // Check if the correct row's menu is open
-                                    //                                         onClose={handleMenuClose}
-                                    //                                     >
-                                    //                                         <MenuItem className="brown-menu-item" onClick={() => {
-                                    //                                             setDialogMode('edit');
-                                    //                                             handleEdit(row.userId)
-                                    //                                         }}
-                                    //                                         >Edit</MenuItem>
-                                    //                                         <MenuItem className="brown-menu-item" onClick={handleDelete}>Delete</MenuItem>
-                                    //                                     </Menu>
-                                    //                                 </>
-                                    //                             ) : (
-                                    //                                 column.format && typeof value === 'number'
-                                    //                                     ? column.format(value)
-                                    //                                     : value
-                                    //                             )}
-                                    //                         </TableCell>
-                                    //                     );
-                                    //                 })}
-                                    //             </TableRow>
-                                    //         ))}
-                                    // </TableBody>
-
-
                                     <TableBody>
                                         {rows
                                             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
@@ -797,222 +662,8 @@ const User = () => {
                     </Paper>
                 </div>
             </div>
-            {/* 
-            <BootstrapDialog
-                onClose={handleCloseAddUserDialog}
-                aria-labelledby="customized-dialog-title"
-                open={addUserdialogOpen}
-                maxWidth="md"
-                minWidth="md"
-            >
-                <DialogTitle className='dialog_head' sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-                    {dialogMode === 'add' ? 'Add User' : 'Edit User'}
-                </DialogTitle>
-                <IconButton
-                    aria-label="close"
-                    onClick={handleCloseAddUserDialog}
-                    sx={(theme) => ({
-                        position: 'absolute',
-                        right: 8,
-                        top: 8,
-                        color: theme.palette.grey[500],
-                        color: 'white'
-                    })}
-                >
-                    <CloseIcon />
-                </IconButton>
-                <DialogContent dividers className='dialog_content'>
-                    <div className="row">
-                        <div className="col-sm-6 col-md-6 col-lg-6 col-xl-6 col-12 mb-2">
-                            <TextField
-                                InputProps={{ className: 'custom-input' }}
-                                className="custom-textfield"
-                                id="outlined-basic"
-                                label="First Name"
-                                value={selectedUser ? selectedUser.firstName : ''}
-                                onChange={(e) => handleUserInputChange('firstName', e.target.value)}
-                                variant="outlined"
-                                style={{ width: "100%" }}
-                            />
-                        </div>
-                        <div className="col-sm-6 col-md-6 col-lg-6 col-xl-6 col-12 mb-2">
-                            <TextField
-                                InputProps={{ className: 'custom-input' }}
-                                className="custom-textfield"
-                                id="outlined-basic"
-                                label="Last Name"
-                                value={selectedUser ? selectedUser.lastName : ''}
-                                onChange={(e) => handleUserInputChange('lastName', e.target.value)}
-                                variant="outlined"
-                                style={{ width: "100%" }}
-                            />
-                        </div>
-                        <div className="col-sm-6 col-md-6 col-lg-6 col-xl-6 col-12 mb-2">
-                            <TextField
-                                InputProps={{ className: 'custom-input' }}
-                                className="custom-textfield"
-                                id="outlined-basic"
-                                label="User Name"
-                                value={selectedUser ? selectedUser.userName : ''}
-                                onChange={(e) => handleUserInputChange('userName', e.target.value)}
-                                variant="outlined"
-                                style={{ width: "100%" }}
-                            />
-                        </div>
-                        <div className="col-sm-6 col-md-6 col-lg-6 col-xl-6 col-12 mb-2">
-                            <TextField
-                                InputProps={{ className: 'custom-input' }}
-                                className="custom-textfield"
-                                id="outlined-basic"
-                                label="Email"
-                                value={selectedUser ? selectedUser.email : ''}
-                                onChange={(e) => handleUserInputChange('email', e.target.value)}
-                                variant="outlined"
-                                style={{ width: "100%" }}
-                            />
-                        </div>
-                        <div className="col-sm-6 col-md-6 col-lg-6 col-xl-6 col-12 mb-2">
-                            <TextField
-                                InputProps={{ className: 'custom-input' }}
-                                className="custom-textfield"
-                                id="outlined-basic"
-                                label="Password"
-                                value={selectedUser ? selectedUser.password : ''}
-                                onChange={(e) => handleUserInputChange('password', e.target.value)}
-                                variant="outlined"
-                                style={{ width: "100%" }}
-                            />
-                        </div>
-                        <div className="col-sm-6 col-md-6 col-lg-6 col-xl-6 col-12 mb-2">
-                            <TextField
-                                InputProps={{ className: 'custom-input' }}
-                                className="custom-textfield"
-                                id="outlined-basic"
-                                label="Confirm Password"
-                                value={selectedUser ? selectedUser.confirmPassword : ''}
-                                onChange={(e) => handleUserInputChange('confirmPassword', e.target.value)}
-                                variant="outlined"
-                                style={{ width: "100%" }}
-                            />
-                        </div>
-                        <div className="col-sm-6 col-md-6 col-lg-6 col-xl-6 col-12 mb-2">
-                            <TextField
-                                InputProps={{ className: 'custom-input' }}
-                                className="custom-textfield"
-                                id="outlined-basic"
-                                label="Phone"
-                                value={selectedUser ? selectedUser.phone : ''}
-                                onChange={(e) => handleUserInputChange('phone', e.target.value)}
-                                variant="outlined"
-                                style={{ width: "100%" }}
-                            />
-                        </div>
-                        <div className=" col-sm-6 col-md-6 col-lg-6 col-xl-6 col-12 mb-2">
-                            <div className='resolve-drop'>
-                                <Autocomplete
-                                    value={selectedUser ? selectedUser.role : ''}
-                                    onChange={(e) => handleUserInputChange('role', e.target.value)}
-                                    selectOnFocus
-                                    clearOnBlur
-                                    handleHomeEndKeys
-                                    id={`Status-autocomplete`}
-                                    options={roles}
-                                    getOptionLabel={(option) => {
-                                        if (typeof option === 'string') {
-                                            return option;
-                                        }
-                                        if (option.inputValue) {
-                                            return option.inputValue;
-                                        }
-                                        return option;
-                                    }}
-                                    renderOption={(props, option) => (
-                                        <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
-                                            {option}
-                                        </li>
-                                    )}
 
-
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            label={`Role`}
-                                            variant="outlined"
-                                            InputProps={{
-                                                ...params.InputProps,
-                                                className: 'custom-input-drop' // Apply the custom class
-                                            }}
-                                            className="custom-textfield"
-                                        />
-                                    )}
-                                />
-                            </div>
-                        </div>
-                        <div className=" col-sm-6 col-md-6 col-lg-6 col-xl-6 col-12 mb-2">
-                            <div className='resolve-drop'>
-                                <Autocomplete
-                                    value={selectedUser ? selectedUser.organization : ''}
-                                    onChange={(e) => handleUserInputChange('organization', e.target.value)}
-                                    selectOnFocus
-                                    clearOnBlur
-                                    handleHomeEndKeys
-                                    id={`Status-autocomplete`}
-                                    options={organizations}
-                                    getOptionLabel={(option) => {
-                                        if (typeof option === 'string') {
-                                            return option;
-                                        }
-                                        if (option.inputValue) {
-                                            return option.inputValue;
-                                        }
-                                        return option;
-                                    }}
-                                    renderOption={(props, option) => (
-                                        <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
-                                            {option}
-                                        </li>
-                                    )}
-
-
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            label={`Organization`}
-                                            variant="outlined"
-                                            InputProps={{
-                                                ...params.InputProps,
-                                                className: 'custom-input-drop' // Apply the custom class
-                                            }}
-                                            className="custom-textfield"
-                                        />
-                                    )}
-                                />
-                            </div>
-                        </div>
-                        <div className="col-sm-6 col-md-6 col-lg-6 col-xl-6 col-12 mb-2">
-                            <TextField
-                                InputProps={{ className: 'custom-input' }}
-                                className="custom-textfield"
-                                id="outlined-basic"
-                                label="Employee ID"
-                                value={selectedUser ? selectedUser.employeeId : ''}
-                                onChange={(e) => handleUserInputChange('employeeId', e.target.value)}
-                                variant="outlined"
-                                style={{ width: "100%" }}
-                            />
-                        </div>
-
-                    </div>
-                </DialogContent>
-                <DialogActions className='dialog_content'>
-                    <Button className='accordian_submit_btn' onClick={handleCloseAddUserDialog} color="primary">
-                        {dialogMode === 'add' ? 'Save' : 'Update'}
-                    </Button>
-                    <Button className=' accordian_cancel_btn' onClick={handleCloseAddUserDialog}>Cancel</Button>
-                </DialogActions>
-            </BootstrapDialog> */}
-
-
+            {/* add user drawer */}
 
             <SwipeableDrawer
                 anchor="right"
@@ -1021,21 +672,6 @@ const User = () => {
                 onOpen={toggleDrawer(true)}
             >
                 <Box sx={{ width: 450, padding: 2 }}>
-                    {/* <div className='dialog_head' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                        <h5>{dialogMode === 'add' ? 'Create User' : 'Update User'}</h5>
-                        
-                        <IconButton
-                            aria-label="close"
-                            onClick={toggleDrawer(false)}
-                            style={{
-                                color: 'grey',
-                                padding: 0,
-                            }}
-                        >
-                            <CloseIcon />
-                        </IconButton>
-                    </div> */}
-
                     <form>
                         <Row>
                             <Col md={12} sm={12} className="mb-3">
@@ -1045,6 +681,8 @@ const User = () => {
                                         options={userTypes}
                                         value={selectedUserType}
                                         onChange={handleuserTypeChange}
+                                        error={!!errors.selectedUserType}
+                                        helperText={errors.selectedUserType}
                                         getOptionLabel={(option) => option.title}
                                         renderOption={(props, option) => (
                                             <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
@@ -1149,7 +787,15 @@ const User = () => {
                                     variant="outlined"
                                     style={{ width: "100%" }}
                                     value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)}
+                                    onChange={(e) => {
+                                        setFirstName(e.target.value);
+                                        if (e.target.value) {
+                                            setErrors((prevErrors) => ({ ...prevErrors, firstName: "" }));
+                                        }
+                                    }}
+                                    // onChange={(e) => setFirstName(e.target.value)}
+                                    error={!!errors.firstName}
+                                    helperText={errors.firstName}
                                 />
                             </Col>
                             <Col md={12} sm={12} className="mb-3">
@@ -1168,7 +814,15 @@ const User = () => {
                                     variant="outlined"
                                     style={{ width: "100%" }}
                                     value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)}
+                                    // onChange={(e) => setLastName(e.target.value)}
+                                    onChange={(e) => {
+                                        setLastName(e.target.value);
+                                        if (e.target.value) {
+                                            setErrors((prevErrors) => ({ ...prevErrors, lastName: "" }));
+                                        }
+                                    }}
+                                    error={!!errors.lastName}
+                                    helperText={errors.lastName}
                                 />
                             </Col>
                             <Col md={12} sm={12} className="mb-3">
@@ -1187,7 +841,15 @@ const User = () => {
                                     variant="outlined"
                                     style={{ width: "100%" }}
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    // onChange={(e) => setEmail(e.target.value)}
+                                    onChange={(e) => {
+                                        setEmail(e.target.value);
+                                        if (e.target.value) {
+                                            setErrors((prevErrors) => ({ ...prevErrors, email: "" }));
+                                        }
+                                    }}
+                                    error={!!errors.email}
+                                    helperText={errors.email}
                                 />
                             </Col>
                             <Col md={12} sm={12} className="mb-3">
@@ -1206,7 +868,15 @@ const User = () => {
                                     variant="outlined"
                                     style={{ width: "100%" }}
                                     value={contactNumber}
-                                    onChange={(e) => setContactNumber(e.target.value)}
+                                    // onChange={(e) => setContactNumber(e.target.value)}
+                                    onChange={(e) => {
+                                        setContactNumber(e.target.value);
+                                        if (e.target.value) {
+                                            setErrors((prevErrors) => ({ ...prevErrors, contactNumber: "" }));
+                                        }
+                                    }}
+                                    error={!!errors.contactNumber}
+                                    helperText={errors.contactNumber}
                                 />
                             </Col>
                             <Col md={12} sm={12} className="mb-3">
@@ -1216,6 +886,8 @@ const User = () => {
                                         options={departments}
                                         value={selectedDepartment}
                                         onChange={handleDepartmentChange}
+                                        error={!!errors.selectedDepartment}
+                                        helperText={errors.selectedDepartment}
                                         getOptionLabel={(option) => option.title}
                                         renderOption={(props, option) => (
                                             <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
@@ -1272,13 +944,6 @@ const User = () => {
                             </Button>
                         </div>
                     </form>
-
-                    {/* <div className="drawer_footer">
-                        <Button onClick={toggleDrawer(false)} color="primary">
-                            {dialogMode === 'add' ? 'Save' : 'Update'}
-                        </Button>
-                        <Button onClick={toggleDrawer(false)}>Cancel</Button>
-                    </div> */}
                 </Box>
             </SwipeableDrawer>
 

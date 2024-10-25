@@ -706,36 +706,36 @@ const IncidentDetails = (props) => {
 
   const getId = (type) => {
 
-    if(type == "Source") {
+    if (type == "Source") {
       let arr = inputs.Source.options;
       let val = inputs.Source.value;
       let sourceId;
-      if(typeof val === 'object') {
-          val = val.title
+      if (typeof val === 'object') {
+        val = val.title
       } else {
       }
       sourceId = arr.find((item) => item.title == val)
       return sourceId.id;
-    } else if(type == "Category") {
+    } else if (type == "Category") {
 
       let arr = inputs.Category.options;
       let val = inputs.Category.value;
       let categoryId;
-      if(typeof val === 'object') {
-          val = val.title
+      if (typeof val === 'object') {
+        val = val.title
       } else {
       }
       categoryId = arr.find((item) => item.title == val)
       return categoryId.id;
 
 
-    } else if(type == "Severity") {
+    } else if (type == "Severity") {
 
       let arr = inputs.Severity.options;
       let val = inputs.Severity.value;
       let severityId;
-      if(typeof val === 'object') {
-          val = val.title
+      if (typeof val === 'object') {
+        val = val.title
       } else {
       }
       severityId = arr.find((item) => item.title == val)
@@ -745,7 +745,7 @@ const IncidentDetails = (props) => {
 
   }
 
-  const handleIncidentUpdate = async(e) => {
+  const handleIncidentUpdate = async (e) => {
     e.preventDefault();
     console.log("submit", inputs)
 
@@ -762,7 +762,7 @@ const IncidentDetails = (props) => {
         incidentStatusId: 34,
         title: subject,
         userId: userId,
-        incidentId:id
+        incidentId: id
       }
       console.log("incdentpayload", payload)
 
@@ -784,7 +784,7 @@ const IncidentDetails = (props) => {
       if (response.data.statusResponse.responseCode === 200) {
         setMessage("Incident updated successfully!");
         setSeverity('success');
-        setShowModal3(false)     
+        setShowModal3(false)
         setOpen(true);
         setSelectedFiles([])
         fetchIncidentDetailsById();
@@ -1252,9 +1252,9 @@ const IncidentDetails = (props) => {
               </Accordion>
               <div className='row'>
                 <div className='col-md-12'>
-                  <Button 
-                  className='accordian_cancel_btn float-end'
-                  onClick={handleIncidentUpdate}
+                  <Button
+                    className='accordian_cancel_btn float-end'
+                    onClick={handleIncidentUpdate}
                   >Update Incident</Button>
                 </div>
 
@@ -1357,24 +1357,40 @@ const IncidentDetails = (props) => {
                   <ul className="created-tickets-info">
                     {incidentChats.map(chat => (
                       <React.Fragment key={chat.incidentChatId}>
+
                         <li>
                           <div className="ticket-created-user">
-                            <span className="avatar">
+                            <div className='row'>
+                              <div className='col-md-2'>
+                                <span className="avatar">
+                                  <AccountCircle />
+                                </span>
+                              </div>
+                              <div className='col-md-10'>
+                                <div className="user-name">
+                                  <h5><span>{chat.username}</span> posted a comment</h5>
+                                  {/* <span>{getTimeAgoInIST(chat.createdOn)}</span>  */}
+                                  <span>{chat.createdOn}</span>
+                                  <h6 className='mt-2'>{chat.comments}</h6>
+                                </div>
+                              </div>
+                            </div>
+                            {/* <span className="avatar">
                               <AccountCircle />
                             </span>
                             <div className="user-name">
                               <h5><span>{chat.username}</span> posted a comment</h5>
-                              {/* <span>{getTimeAgoInIST(chat.createdOn)}</span>  */}
+                             
                               <span>{chat.createdOn}</span>
-                            </div>
+                            </div> */}
                           </div>
                         </li>
-                        <li className="mt-2">
+                        {/* <li className="mt-2">
                           <div className="ticket-created-info">
                             <h6>{chat.comments}</h6>
 
                           </div>
-                        </li>
+                        </li> */}
                         <hr />
                       </React.Fragment>
                     ))}

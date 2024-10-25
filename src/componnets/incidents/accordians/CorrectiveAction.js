@@ -28,10 +28,10 @@ import { useParams } from 'react-router-dom';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText } from '@mui/material';
 
 
-import { getMastersListByType, addMasterByType, saveTasksForCap, getTasksForIncident, saveCorrectiveAction, getIncidentCAPDetails, addTasksWithAI } from '../../../api';
+import { getMastersListByType, addMasterByType, saveTasksForCap, getTasksForIncident, saveCorrectiveAction, getIncidentCAPDetails, addTasksWithAI, deleteFile, downloadFile } from '../../../api';
 import DoneIcon from '@mui/icons-material/Done';
 
 
@@ -73,6 +73,9 @@ const CorrectiveAction = ({ invokeHistory }) => {
 
     const storedUser = JSON.parse(localStorage.getItem('userDetails'));
     const userId = storedUser ? storedUser.userId : null;
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [fileToDelete, setFileToDelete] = useState(null);
+    const [fileToDeleteIndex, setFileToDeleteIndex] = useState(null);
 
     console.log(userId);
 
@@ -93,7 +96,7 @@ const CorrectiveAction = ({ invokeHistory }) => {
             const data = response.data
             setPromptData(data)
             console.log('aidata', data)
-            
+
             console.log('aiproData', promptData)
         } catch (error) {
             console.log('Error creating incident with ai prompt:', error)
@@ -486,7 +489,101 @@ const CorrectiveAction = ({ invokeHistory }) => {
         }
     }
 
+    const openDeleteDialog = (file, index) => {
+        setFileToDelete(file);
+        setFileToDeleteIndex(index);
+        setDeleteDialogOpen(true);
+    };
 
+    const closeDeleteDialog = () => {
+        setDeleteDialogOpen(false);
+        setFileToDelete(null);
+        setFileToDeleteIndex(null);
+    };
+
+    const confirmDeleteFile = async () => {
+        if (!fileToDelete) return;
+        try {
+            const payload = {
+                documentId: fileToDelete.documentId,
+                documentName: fileToDelete.documentName
+            };
+
+            const response = await axios.post(deleteFile, payload);
+
+            if (response.status === 200) {
+                setSelectedFiles(selectedFiles.filter(file => file.documentId !== fileToDelete.documentId));
+                setCorrectiveSelectecFiles(correctiveSelectedFiles.filter(file => file.documentId !== fileToDelete.documentId));
+
+                setMessage("File deleted successfully.");
+                setSeverity('success');
+                setOpen(true);
+                invokeHistory()
+                setCorrectiveSelectecFiles([])
+
+                const interimFiles = response.data.correctiveFiles || [];
+                console.log(interimFiles)
+                if (interimFiles.length > 0) {
+                    const newFiles = interimFiles.map((file) => ({
+                        documentId: file.documentId,
+                        documentName: file.documentName,
+                        documentSize: file.documentSize,
+                        documentUrl: file.documentUrl,
+                        documentType: file.documentType,
+                        uploadDate: file.uploadDate
+                    }));
+                    setSelectedFiles(prevFiles => [...prevFiles, ...newFiles]);
+                }
+                fetchCorrectiveAction();
+            } else if (response?.data?.statusResponse?.responseCode === 200) {
+                setMessage("Interim investigation Updated Successfully");
+                setSeverity('success');
+                invokeHistory()
+                setOpen(true);
+                setCorrectiveSelectecFiles([])
+                const newFiles = response?.data?.correctiveFiles?.map((file) => ({
+                    documentId: file.documentId,
+                    documentName: file.documentName,
+                    documentSize: file.documentSize,
+                    documentUrl: file.documentUrl,
+                    documentType: file.documentType,
+                    uploadDate: file.uploadDate
+                }))
+                setSelectedFiles(prevFiles => [...prevFiles, ...newFiles])
+                fetchCorrectiveAction()
+            } else {
+                setMessage("Failed to delete the file.");
+                setSeverity('error');
+                invokeHistory()
+                setOpen(true);
+            }
+        } catch (error) {
+            console.error("Error deleting the file:", error);
+            setMessage("An error occurred while deleting the file.");
+            setSeverity('error');
+            invokeHistory()
+            setOpen(true);
+        } finally {
+            closeDeleteDialog();
+        }
+    };
+    const download = async (url, fileName) => {
+        try {
+            const payload = { documentName: fileName };
+            const response = await axios.post(downloadFile, payload, { responseType: 'blob' });
+            const blob = new Blob([response.data], { type: response.headers['content-type'] });
+            const link = document.createElement('a');
+            const url = window.URL.createObjectURL(blob);
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error in downloading file:', error);
+        }
+    };
     return (
         <div>
             <Accordion className='mb-2 accordian_arrow'>
@@ -718,10 +815,10 @@ const CorrectiveAction = ({ invokeHistory }) => {
                                                     </IconButton>
                                                     <IconButton onClick={() => handleTaskSave(row)}>
                                                         <DoneIcon
-                                                         style={{
-                                                            fontSize: '20px',
-                                                            color: "green"
-                                                        }}
+                                                            style={{
+                                                                fontSize: '20px',
+                                                                color: "green"
+                                                            }}
                                                         />
 
                                                     </IconButton>
@@ -838,11 +935,14 @@ const CorrectiveAction = ({ invokeHistory }) => {
                                                             <div className="file-download me-2">
                                                                 <ArrowDownwardIcon
                                                                     style={{ marginRight: "5px", cursor: 'pointer' }}
-                                                                // onClick={() => downloadFile(file.documentUrl, file.documentName)}
+                                                                 onClick={() => download(file.documentUrl, file.documentName)}
                                                                 />
                                                             </div>
                                                             <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
                                                                 <VisibilityIcon />
+                                                            </IconButton>
+                                                            <IconButton edge='end' onClick={() => openDeleteDialog(file, index)}>
+                                                                <CloseIcon className='close_icon' />
                                                             </IconButton>
                                                         </div>
                                                     </div>
@@ -952,6 +1052,17 @@ const CorrectiveAction = ({ invokeHistory }) => {
                     <Button className='accordian_submit_btn' onClick={createTaskhandlerwithAiPrompt} color="primary">OK</Button>
                     <Button className=' accordian_cancel_btn' onClick={handeClickAiPromptDialog}>Cancel</Button>
 
+                </DialogActions>
+            </Dialog>
+
+            <Dialog open={deleteDialogOpen} onClose={closeDeleteDialog}>
+                <DialogTitle className='dialog_head'>Delete Confirmation</DialogTitle>
+                <DialogContent className='dialog_content'>
+                    <DialogContentText className='mt-4'>Are you sure you want to delete the file "{fileToDelete?.documentName}"?</DialogContentText>
+                </DialogContent>
+                <DialogActions className='dialog_content'>
+                    <Button className='accordian_submit_btn' onClick={closeDeleteDialog} color="primary">Cancel</Button>
+                    <Button className=' accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button>
                 </DialogActions>
             </Dialog>
         </div>

@@ -22,10 +22,10 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Dialog from '@mui/material/Dialog';
-import {DialogContentText,DialogTitle} from '@mui/material';
+import { DialogContentText, DialogTitle } from '@mui/material';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import { savePreventiveAction, getPreventiveActionDetails,downloadFile,deleteFile } from '../../../api';
+import { savePreventiveAction, getPreventiveActionDetails, downloadFile, deleteFile } from '../../../api';
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -88,7 +88,7 @@ const Preventivections = ({ invokeHistory }) => {
             if (response.status === 200) {
                 setPreventiveFiles(preventiveFiles.filter(file => file.documentId !== fileToDelete.documentId));
                 setPreventiveSelectedFiles(preventiveSelectedFiles.filter(file => file.documentId !== fileToDelete.documentId));
-            
+
                 setMessage("File deleted successfully.");
                 setSeverity('success');
                 setOpen(true);
@@ -233,8 +233,8 @@ const Preventivections = ({ invokeHistory }) => {
         console.log("fileclik")
         setFilePreview(fileUrl); // Set the selected file URL
     };
-    
-    const download = async (url,fileName) => {
+
+    const download = async (url, fileName) => {
         try {
             const payload = { documentName: fileName };
             const response = await axios.post(downloadFile, payload, { responseType: 'blob' });
@@ -313,84 +313,84 @@ const Preventivections = ({ invokeHistory }) => {
                     </div>
 
                     {preventiveSelectedFiles.length > 0 && (
-                            preventiveSelectedFiles.map((file, index) => (
-                                <div className="row attached-files-info mt-3">
-                                    <div className="col-xxl-6">
-                                        <div className="attached-files">
-                                            <ul>
-                                                <li key={index} className='mt-2'>
-                                                    <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
-                                                        <div className="d-flex align-items-center">
-                                                            <span className="file-icon">
-                                                                <TextSnippetIcon style={{ color: "#533529" }} />
-                                                            </span>
-                                                            <p className="mb-0 ms-2">{file.name}</p>
-                                                        </div>
-                                                        <div className="file-actions d-flex align-items-center">
-                                                        <IconButton edge='end' onClick={() => setPreventiveSelectedFiles(preventiveSelectedFiles.filter((_, i) => i !== index))}>
-                                                <CloseIcon className='close_icon' />
-                                            </IconButton>
-                                                        </div>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                        {Array.isArray(preventiveFiles)  && preventiveFiles.length > 0 && (
+                        preventiveSelectedFiles.map((file, index) => (
                             <div className="row attached-files-info mt-3">
                                 <div className="col-xxl-6">
                                     <div className="attached-files">
                                         <ul>
-                                            {preventiveFiles.map((file, index) => (
-                                                <li key={index} className='mt-2'>
-                                                    <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
-                                                        <div className="d-flex align-items-center">
-                                                            <span className="file-icon">
-                                                                <TextSnippetIcon style={{ color: "#533529" }} />
-                                                            </span>
-                                                            <p className="mb-0 ms-2">
-                                                                <a target="_blank" rel="noopener noreferrer">
-                                                                    {file.documentName}
-                                                                </a> ({(file.documentSize / 1024).toFixed(2)} KB)
-                                                            </p>
-                                                        </div>
-                                                        <div className="file-actions d-flex align-items-center">
-                                                            <div className="file-download me-2">
-                                                                <ArrowDownwardIcon
-                                                                    style={{ marginRight: "5px", cursor: 'pointer' }}
-                                                                    onClick={() => download(file.documentUrl, file.documentName)}
-                                                                />
-                                                            </div>
-                                                            <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
-                                                                <VisibilityIcon />
-                                                            </IconButton>
-                                                            <IconButton edge='end' onClick={() => openDeleteDialog(file, index)}>
-                                                    <CloseIcon className='close_icon' />
-                                                </IconButton>
-                                                        </div>
+                                            <li key={index} className='mt-2'>
+                                                <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
+                                                    <div className="d-flex align-items-center">
+                                                        <span className="file-icon">
+                                                            <TextSnippetIcon style={{ color: "#533529" }} />
+                                                        </span>
+                                                        <p className="mb-0 ms-2">{file.name}</p>
                                                     </div>
-                                                </li>
-                                            ))}
+                                                    <div className="file-actions d-flex align-items-center">
+                                                        <IconButton edge='end' onClick={() => setPreventiveSelectedFiles(preventiveSelectedFiles.filter((_, i) => i !== index))}>
+                                                            <CloseIcon className='close_icon' />
+                                                        </IconButton>
+                                                    </div>
+                                                </div>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
                             </div>
-                        )}
+                        ))
+                    )}
+                    {Array.isArray(preventiveFiles) && preventiveFiles.length > 0 && (
+                        <div className="row attached-files-info mt-3">
+                            <div className="col-xxl-6">
+                                <div className="attached-files">
+                                    <ul>
+                                        {preventiveFiles.map((file, index) => (
+                                            <li key={index} className='mt-2'>
+                                                <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
+                                                    <div className="d-flex align-items-center">
+                                                        <span className="file-icon">
+                                                            <TextSnippetIcon style={{ color: "#533529" }} />
+                                                        </span>
+                                                        <p className="mb-0 ms-2">
+                                                            <a target="_blank" rel="noopener noreferrer">
+                                                                {file.documentName}
+                                                            </a> ({(file.documentSize / 1024).toFixed(2)} KB)
+                                                        </p>
+                                                    </div>
+                                                    <div className="file-actions d-flex align-items-center">
+                                                        {/* <div className="file-download me-2"> */}
+                                                            <ArrowDownwardIcon
+                                                                style={{ marginRight: "5px", cursor: 'pointer' }}
+                                                                onClick={() => download(file.documentUrl, file.documentName)}
+                                                            />
+                                                        {/* </div> */}
+                                                        <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
+                                                            <VisibilityIcon />
+                                                        </IconButton>
+                                                        <IconButton edge='end' onClick={() => openDeleteDialog(file, index)}>
+                                                            <CloseIcon className='close_icon' />
+                                                        </IconButton>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
-                        <div className='d-flex justify-content-end gap-3 mt-3'>
-                            <Button className='accordian_submit_btn'
-                                onClick={submit_Preventive_Action}
-                            // onClick={handleSubmit}
-                            >Submit</Button>
-                            {/* <Button
+                    <div className='d-flex justify-content-end gap-3 mt-3'>
+                        <Button className='accordian_submit_btn'
+                            onClick={submit_Preventive_Action}
+                        // onClick={handleSubmit}
+                        >Submit</Button>
+                        {/* <Button
                                 className='accordian_cancel_btn'
                             >
                                 Close
                             </Button> */}
-                        </div>
+                    </div>
                     {/* <div className='row accordian_row'>
 
                         <div className='col-md-8 ps-0 attached-files-info mt-3'>
@@ -455,13 +455,13 @@ const Preventivections = ({ invokeHistory }) => {
                 </Alert>
             </Snackbar>
             <Dialog open={deleteDialogOpen} onClose={closeDeleteDialog}>
-                <DialogTitle>Delete Confirmation</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>Are you sure you want to delete the file "{fileToDelete?.documentName}"?</DialogContentText>
+                <DialogTitle className='dialog_head'>Delete Confirmation</DialogTitle>
+                <DialogContent className='dialog_content'>
+                    <DialogContentText className='mt-4'>Are you sure you want to delete the file "{fileToDelete?.documentName}"?</DialogContentText>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={closeDeleteDialog} color="primary">Cancel</Button>
-                    <Button onClick={confirmDeleteFile} color="secondary">Delete</Button>
+                <DialogActions className='dialog_content'>
+                    <Button className='accordian_submit_btn' onClick={closeDeleteDialog} color="primary">Cancel</Button>
+                    <Button className='accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button>
                 </DialogActions>
             </Dialog>
 
