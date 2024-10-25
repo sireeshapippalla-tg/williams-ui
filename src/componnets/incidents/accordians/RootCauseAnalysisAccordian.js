@@ -46,7 +46,7 @@ const VisuallyHiddenInput = styled('input')({
     width: 1,
 });
 
-const RootCauseAnalysisAccordian = () => {
+const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
 
     const { id } = useParams();
     console.log(id)
@@ -177,6 +177,7 @@ const RootCauseAnalysisAccordian = () => {
             if (response?.data?.statusResponse?.responseCode === 201) {
                 setMessage("Root cause analysis created Successfully");
                 setSeverity('success');
+                invokeHistory()
                 setOpen(true);
                 setRootSelectedFiles([])
 
@@ -198,6 +199,7 @@ const RootCauseAnalysisAccordian = () => {
             } else if (response?.data?.statusResponse?.responseCode === 200) {
                 setMessage("Root cause analysis Updated Successfully");
                 setSeverity('success');
+                invokeHistory()
                 setOpen(true);
 
                 setRootSelectedFiles([])
@@ -215,6 +217,7 @@ const RootCauseAnalysisAccordian = () => {
             } else {
                 setMessage("Failed to add Preventive action.");
                 setSeverity('error');
+                invokeHistory()
                 setOpen(true);
             }
 

@@ -436,7 +436,7 @@ const SECTION_IDS = {
   preventiveAction: 3,
 };
 
-const TaskAssign = ({ selectedDepartment }) => {
+const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
 
   const { id } = useParams();
 
@@ -771,21 +771,25 @@ const TaskAssign = ({ selectedDepartment }) => {
         fetchAssignToTask()
         setMessage("Task assigned Successfully");
         setSeverity('success');
+        invokeHistory()
         setOpen(true);
       } else if (response?.data?.statusResponse?.responseCode === 200) {
         fetchAssignToTask()
         setMessage("Task Updated Successfully");
         setSeverity('success');
+        invokeHistory()
         setOpen(true);
       } else {
         setMessage("Failed to assign task.");
         setSeverity('error');
+        invokeHistory()
         setOpen(true);
       }
     } catch (error) {
       console.log('Error in assigning the task:', error)
       setMessage("Failed to submit Task assigning. Error: " + error.message);
       setSeverity('error');
+      invokeHistory();
       setOpen(true);
     }
   };
@@ -944,10 +948,10 @@ const TaskAssign = ({ selectedDepartment }) => {
 
         {/* Accordians */}
         <div className='accordian_s'>
-          <IntrimAccordian selectedSection={selectedSection} />
-          <RootCauseAnalysisAccordian selectedSection={selectedSection} />
-          {selectedSection === SECTION_IDS.correctiveAction && <CorrectiveAction />}
-          {selectedSection === SECTION_IDS.preventiveAction && <Preventivections />}
+          <IntrimAccordian selectedSection={selectedSection} invokeHistory={invokeHistory}/>
+          <RootCauseAnalysisAccordian selectedSection={selectedSection} invokeHistory={invokeHistory}/>
+          {selectedSection === SECTION_IDS.correctiveAction && <CorrectiveAction invokeHistory={invokeHistory}/>}
+          {selectedSection === SECTION_IDS.preventiveAction && <Preventivections invokeHistory={invokeHistory}/>}
         </div>
       </div>
 

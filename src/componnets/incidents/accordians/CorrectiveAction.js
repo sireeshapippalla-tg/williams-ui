@@ -28,12 +28,10 @@ import { useParams } from 'react-router-dom';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
+import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 
 
-import { getMastersListByType, addMasterByType, saveTasksForCap, getTasksForIncident, saveCorrectiveAction, getIncidentCAPDetails } from '../../../api';
+import { getMastersListByType, addMasterByType, saveTasksForCap, getTasksForIncident, saveCorrectiveAction, getIncidentCAPDetails, addTasksWithAI } from '../../../api';
 import { Flag } from '@mui/icons-material';
 
 
@@ -50,7 +48,7 @@ const VisuallyHiddenInput = styled('input')({
     width: 1,
 });
 
-const CorrectiveAction = () => {
+const CorrectiveAction = ({ invokeHistory }) => {
     const { id } = useParams();
     console.log(id)
 
@@ -69,14 +67,39 @@ const CorrectiveAction = () => {
     const [correctiveId, setCorrectiveId] = useState()
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [selectedFileUrl, setSelectedFileUrl] = useState(null);
+    const [aiPromptOpen, setAiPromptOpen] = useState(false)
+    const [prompt, setPromt] = useState()
+    const [promptData, setPromptData] = useState()
 
     const storedUser = JSON.parse(localStorage.getItem('userDetails'));
     const userId = storedUser ? storedUser.userId : null;
 
     console.log(userId);
 
-    
 
+
+    const handeClickAiPromptDialog = () => {
+        setAiPromptOpen(!aiPromptOpen)
+    }
+    const handleAiPrompt = () => {
+        setAiPromptOpen(true)
+    };
+
+    const createTaskhandlerwithAiPrompt = async () => {
+        try {
+            const response = await axios.post(addTasksWithAI, {
+                userPrompt: prompt
+            });
+            const data = response.data
+            setPromptData(data)
+            console.log('aidata', data)
+            
+            console.log('aiproData', promptData)
+        } catch (error) {
+            console.log('Error creating incident with ai prompt:', error)
+        }
+
+    }
 
     const handleClose = (event, reason) => {
         if (reason === 'clickaway') {
@@ -227,7 +250,7 @@ const CorrectiveAction = () => {
                 createdBy: 1,
                 flag: row.capTaskId ? 'U' : 'I',
                 incidentId: id,
-                capTaskId: row.capTaskId ? row.capTaskId : 0 ,
+                capTaskId: row.capTaskId ? row.capTaskId : 0,
                 taskId: row.taskId,
                 dueDate: row.dueDate || '',
                 resolvedFlag: row.resolved ? 1 : 0,
@@ -254,21 +277,29 @@ const CorrectiveAction = () => {
                 fetchTaskIncident();
                 setMessage('Task created sucessfully');
                 setSeverity('success')
+                invokeHistory()
+
                 setOpen(true)
             } else if (response.data.statusResponse.responseCode === 200) {
                 fetchTaskIncident();
                 setMessage('Task Updated sucessfully');
                 setSeverity('success')
+                invokeHistory()
+
                 setOpen(true)
             } else {
                 setMessage("Failed to assign task.");
                 setSeverity('error');
+                invokeHistory()
+
                 setOpen(true);
             }
         } catch (error) {
             console.log('Error in assigning the task:', error)
             setMessage("Failed to submit Task assigning. Error: " + error.message);
             setSeverity('error');
+            invokeHistory()
+
             setOpen(true);
         }
     }
@@ -298,7 +329,7 @@ const CorrectiveAction = () => {
                 capTaskId: task.capTaskId
             }));
             console.log("taskData", taskData)
-            if(taskData && taskData.length > 0) {
+            if (taskData && taskData.length > 0) {
                 setCorrectiveRows(taskData);
 
             } else {
@@ -476,7 +507,12 @@ const CorrectiveAction = () => {
                 </AccordionSummary>
                 <AccordionDetails>
                     <div className='pb-3'>
-                    <Button variant='contained' className='mb-3' style={{float:"right"}}>Create Task with AI Prompt </Button>
+                        <Button
+                            className='mb-3 accordian_cancel_btn mt-2'
+                            style={{ float: "right" }}
+                            onClick={handleAiPrompt}
+                        >
+                            Create Task with AI Prompt </Button>
                         <TableContainer className='border tbl_scrool'>
                             <Table >
                                 <TableHead>
@@ -703,40 +739,8 @@ const CorrectiveAction = () => {
                         )}
                     </div>
                     <div className='row'>
-                        <div className='col-md-6 pe-3 mbl_mb'>
-                            <Form.Group
-                                className='mb-0'
-                                controlId='exampleForm.ControlTextarea1'
-                            >
-                                <Form.Control
-                                    style={{ backgroundColor: "#f1f0ef" }}
-                                    className='input_border'
-                                    as='textarea'
-                                    rows={2}
-                                    placeholder='Write the comment'
-                                    value={comments}
-                                    onChange={(e) => setComments(e.target.value)}
-                                />
-                            </Form.Group>
-                        </div>
                         <div className='col-md-6 pe-3'>
-                            {/* <Form.Group
-                                className='mb-0'
-                                controlId='exampleForm.ControlTextarea1'
-                            >
-                                <Form.Control
-                                    className='input_border'
-                                    as='textarea'
-                                    rows={2}
-                                    placeholder='Create Task with AI Prompt'
-                                    style={{ backgroundColor: "#f1f0ef" }}
-                                />
-                            </Form.Group> */}
-                            {/* <Button variant='contained'>Create Task with AI Prompt </Button> */}
-
-                        </div>
-                        <div className='row accordian_row'>
-                            <div className='col-md-8 ps-0 file_upload upload-file-border'>
+                            <div className='ps-0 file_upload upload-file-border'>
                                 <Button
                                     component='label'
 
@@ -753,111 +757,128 @@ const CorrectiveAction = () => {
                                 </Button>
                                 <span className='vertical-line'></span>
                                 <span style={{ marginLeft: "10px" }}> {correctiveSelectedFiles.length > 0 ? `${correctiveSelectedFiles.length} file(s) selected` : 'No file chosen'}</span>
-
-                                {/* <div className='col-md-12 file_upload'>
-                                    <input class="form-control" type="file" id="formFileMultiple" multiple onChange={correctiveHandleFileChange} />
-                                </div>
-                                {correctiveSelectedFiles.length > 0 && (
-                                    <List>
-                                        {correctiveSelectedFiles.map((file, index) => (
-                                            <ListItem key={index} divider>
-                                                <ListItemText primary={file.name} />
-                                                <ListItemSecondaryAction>
-                                                    <IconButton
-                                                        edge='end'
-                                                        aria-label='delete'
-                                                        onClick={() => correctiveHandleRemoveFile(index)}
-                                                    >
-                                                        <CloseIcon />
-                                                    </IconButton>
-                                                </ListItemSecondaryAction>
-                                            </ListItem>
-                                        ))}
-                                    </List>
-                                )} */}
                             </div>
+                        </div>
+                        <div className='col-md-6 pe-3 mbl_mb'>
+                            <Form.Group
+                                className='mb-0'
+                                controlId='exampleForm.ControlTextarea1'
+                            >
+                                <Form.Control
+                                    style={{ backgroundColor: "#f1f0ef" }}
+                                    className='input_border'
+                                    as='textarea'
+                                    rows={2}
+                                    placeholder='Write the comment'
+                                    value={comments}
+                                    onChange={(e) => setComments(e.target.value)}
+                                />
+                            </Form.Group>
+                        </div>
 
-
-
-                            <div className='col-md-4 float-end mt-3 p-0'>
-                                <div className='d-flex justify-content-end gap-3 '>
-                                    <Button className='accordian_submit_btn' onClick={submit_corrective_action}>Submit</Button>
-                                    <Button
-                                        className='accordian_cancel_btn'
-                                    >
-                                        Close
-                                    </Button>
-                                </div>
-                            </div>
-
-                            {correctiveSelectedFiles.length > 0 && (
-                                correctiveSelectedFiles.map((file, index) => (
-                                    <div className="row attached-files-info mt-3">
-                                        <div className="col-md-8">
-                                            <div className="attached-files">
-                                                <ul>
-                                                    <li key={index} className='mt-2'>
-                                                        <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
-                                                            <div className="d-flex align-items-center">
-                                                                <span className="file-icon">
-                                                                    <TextSnippetIcon style={{ color: "#533529" }} />
-                                                                </span>
-                                                                <p className="mb-0 ms-2">{file.name}</p>
-                                                            </div>
-                                                            <div className="file-actions d-flex align-items-center">
-                                                                <IconButton
-                                                                    edge='end'
-                                                                    aria-label='delete'
-                                                                    onClick={() => correctiveHandleRemoveFile(index)}
-                                                                >
-                                                                    <CloseIcon className='close_icon' />
-                                                                </IconButton>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                            {selectedFiles && selectedFiles.length > 0 && (
+                        {correctiveSelectedFiles.length > 0 && (
+                            correctiveSelectedFiles.map((file, index) => (
                                 <div className="row attached-files-info mt-3">
                                     <div className="col-md-8">
                                         <div className="attached-files">
                                             <ul>
-                                                {selectedFiles.map((file, index) => (
-                                                    <li key={index} className='mt-2'>
-                                                        <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
-                                                            <div className="d-flex align-items-center">
-                                                                <span className="file-icon">
-                                                                    <TextSnippetIcon style={{ color: "#533529" }} />
-                                                                </span>
-                                                                <p className="mb-0 ms-2">
-                                                                    <a href={file.documentUrl} target="_blank" rel="noopener noreferrer">
-                                                                        {file.documentName}
-                                                                    </a> ({(file.documentSize / 1024).toFixed(2)} KB)
-                                                                </p>
-                                                            </div>
-                                                            <div className="file-actions d-flex align-items-center">
-                                                                <div className="file-download me-2">
-                                                                    <ArrowDownwardIcon
-                                                                        style={{ marginRight: "5px", cursor: 'pointer' }}
-                                                                        // onClick={() => downloadFile(file.documentUrl, file.documentName)}
-                                                                    />
-                                                                </div>
-                                                                <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
-                                                                    <VisibilityIcon />
-                                                                </IconButton>
-                                                            </div>
+                                                <li key={index} className='mt-2'>
+                                                    <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
+                                                        <div className="d-flex align-items-center">
+                                                            <span className="file-icon">
+                                                                <TextSnippetIcon style={{ color: "#533529" }} />
+                                                            </span>
+                                                            <p className="mb-0 ms-2">{file.name}</p>
                                                         </div>
-                                                    </li>
-                                                ))}
+                                                        <div className="file-actions d-flex align-items-center">
+                                                            <IconButton
+                                                                edge='end'
+                                                                aria-label='delete'
+                                                                onClick={() => correctiveHandleRemoveFile(index)}
+                                                            >
+                                                                <CloseIcon className='close_icon' />
+                                                            </IconButton>
+                                                        </div>
+                                                    </div>
+                                                </li>
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
-                            )}
+                            ))
+                        )}
+                        {selectedFiles && selectedFiles.length > 0 && (
+                            <div className="row attached-files-info mt-3">
+                                <div className="col-md-8">
+                                    <div className="attached-files">
+                                        <ul>
+                                            {selectedFiles.map((file, index) => (
+                                                <li key={index} className='mt-2'>
+                                                    <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
+                                                        <div className="d-flex align-items-center">
+                                                            <span className="file-icon">
+                                                                <TextSnippetIcon style={{ color: "#533529" }} />
+                                                            </span>
+                                                            <p className="mb-0 ms-2">
+                                                                <a href={file.documentUrl} target="_blank" rel="noopener noreferrer">
+                                                                    {file.documentName}
+                                                                </a> ({(file.documentSize / 1024).toFixed(2)} KB)
+                                                            </p>
+                                                        </div>
+                                                        <div className="file-actions d-flex align-items-center">
+                                                            <div className="file-download me-2">
+                                                                <ArrowDownwardIcon
+                                                                    style={{ marginRight: "5px", cursor: 'pointer' }}
+                                                                // onClick={() => downloadFile(file.documentUrl, file.documentName)}
+                                                                />
+                                                            </div>
+                                                            <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
+                                                                <VisibilityIcon />
+                                                            </IconButton>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        <div className='float-end mt-3 p-0 me-2'>
+                            <div className='d-flex justify-content-end gap-3 '>
+                                <Button className='accordian_submit_btn' onClick={submit_corrective_action}>Submit</Button>
+                                <Button
+                                    className='accordian_cancel_btn'
+                                >
+                                    Close
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className='row accordian_row'>
+                            {/* <div className='col-md-8 ps-0 file_upload upload-file-border'>
+                                <Button
+                                    component='label'
+
+                                    style={{ color: "black" }}
+
+                                >
+                                    Choose file
+                                    <VisuallyHiddenInput
+                                        type='file'
+                                        multiple
+                                        style={{ display: 'none' }}
+                                        onChange={handleFileSelect}
+                                    />
+                                </Button>
+                                <span className='vertical-line'></span>
+                                <span style={{ marginLeft: "10px" }}> {correctiveSelectedFiles.length > 0 ? `${correctiveSelectedFiles.length} file(s) selected` : 'No file chosen'}</span>
+                            </div> */}
+
+
+
+
+
                         </div>
 
                     </div>
@@ -898,6 +919,30 @@ const CorrectiveAction = () => {
                     <Button onClick={() => setSelectedFileUrl(null)} className='accordian_submit_btn' >
                         Close
                     </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Ai promt diapog */}
+            <Dialog maxWidth="sm" fullWidth open={aiPromptOpen} onClose={handeClickAiPromptDialog}>
+                <DialogTitle className='dialog_head'>Create Task with AI prompt</DialogTitle>
+                <DialogContent className='dialog_content'>
+                    {/* <AiPrompt /> */}
+                    <TextField
+                        placeholder='Write your prompt here...'
+                        id="outlined-basic"
+                        variant="outlined"
+                        className='w-100 mt-4'
+                        multiline={true}
+                        minRows={3}
+                        style={{ border: "1px solid #533529", borderRadius: "6px" }}
+                        value={prompt}
+                        onChange={(e) => setPromt(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions className='dialog_content'>
+                    <Button className='accordian_submit_btn' onClick={createTaskhandlerwithAiPrompt} color="primary">OK</Button>
+                    <Button className=' accordian_cancel_btn' onClick={handeClickAiPromptDialog}>Cancel</Button>
+
                 </DialogActions>
             </Dialog>
         </div>

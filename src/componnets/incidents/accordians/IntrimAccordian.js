@@ -34,7 +34,7 @@ const VisuallyHiddenInput = styled('input')({
     width: 1,
 });
 
-const IntrimAccordian = () => {
+const IntrimAccordian = ({ invokeHistory }) => {
     const { id } = useParams();
     const [intrimFindings, setIntrimfindings] = useState('')
     const [interimSelectedFiles, setInterimSelectedFiles] = useState([]);
@@ -110,6 +110,7 @@ const IntrimAccordian = () => {
                 setMessage("Interim investigation created Successfully");
                 setSeverity('success');
                 setOpen(true);
+                invokeHistory()
                 setInterimSelectedFiles([])
 
                 const interimFiles = response.data.interimFiles || [];
@@ -129,6 +130,7 @@ const IntrimAccordian = () => {
             } else if (response?.data?.statusResponse?.responseCode === 200) {
                 setMessage("Interim investigation Updated Successfully");
                 setSeverity('success');
+                invokeHistory()
                 setOpen(true);
                 setInterimSelectedFiles([])
                 const newFiles = response?.data?.interimFiles?.map((file) => ({
@@ -144,12 +146,14 @@ const IntrimAccordian = () => {
             } else {
                 setMessage("Failed to add Interim investigation.");
                 setSeverity('error');
+                invokeHistory()
                 setOpen(true);
             }
         } catch (error) {
             console.log('Error in saving the intriminvestigation:', error)
             setMessage("Failed to submit interim investigation. Error: " + error.message);
             setSeverity('error');
+            invokeHistory()
             setOpen(true);
         }
     }
@@ -224,6 +228,7 @@ const IntrimAccordian = () => {
                 console.log('Files uploaded successfully:', response.data);
                 setMessage("File uploaded successfully!");
                 setSeverity('success');
+                invokeHistory()
                 setOpen(true);
                 setInterimSelectedFiles([])
                 const newFiles = response.data.map((file) => ({

@@ -38,7 +38,7 @@ const VisuallyHiddenInput = styled('input')({
     width: 1,
 });
 
-const Preventivections = () => {
+const Preventivections = ({ invokeHistory }) => {
     const { id } = useParams();
     const [preventiveActionData, setPreventiveActionData] = useState('')
     const [preventiveFindings, setPreventiveFindings] = useState('')
@@ -110,6 +110,7 @@ const Preventivections = () => {
             if (response?.data?.statusResponse?.responseCode === 201) {
                 setMessage("Preventive action created Successfully");
                 setSeverity('success');
+                invokeHistory()
                 setOpen(true);
                 setPreventiveSelectedFiles([])
 
@@ -130,6 +131,7 @@ const Preventivections = () => {
             } else if (response.data.statusResponse.responseCode === 200) {
                 setMessage("Preventive action Updated Successfully");
                 setSeverity('success');
+                invokeHistory()
                 setOpen(true);
 
                 setPreventiveSelectedFiles([])
