@@ -31,12 +31,12 @@ import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 
 
 const SidebarItems = [
-    {
-        label: "Dashboard",
-        path: "/dashboard",
-        icon: <HomeIcon />
+    // {
+    //     label: "Dashboard",
+    //     path: "/dashboard",
+    //     icon: <HomeIcon />
 
-    },
+    // },
     {
         label: "Incident",
         path: "/incident",

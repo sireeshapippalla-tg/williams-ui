@@ -23,6 +23,7 @@ import axios from 'axios';
 import { getNotifications } from '../api';
 
 function Header() {
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const [notificationsAnchorEl, setNotificationsAnchorEl] = useState(null); // New state for notifications
@@ -30,10 +31,40 @@ function Header() {
   const [notifiationData, setNotificationData] = useState([])
 
 
-  const { pathname } = useLocation();
+  const { pathname } = useLocation();const handleProfileMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+      // Clear specific items from local storage
+      localStorage.removeItem('keepLoggedIn');
+      localStorage.removeItem('userDetails');
+  
+      handleProfileMenuClose();
+      navigate('/login'); 
+  
+  }
+  
+  const renderProfileMenu = (
+    <Menu
+      anchorEl={anchorEl}
+      open={Boolean(anchorEl)}
+      onClose={handleProfileMenuClose}
+      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      sx={{ mt: 4 }}
+    >
+      <MenuItem onClick={handleProfileMenuClose}>Profile</MenuItem>
+      <MenuItem onClick={handleProfileMenuClose}>My Account</MenuItem>
+      <MenuItem onClick={() => {
+        handleLogout();
+        // Add logout functionality if needed
+      }}>Logout</MenuItem>
+    </Menu>
+  );
 
   const SidebarItems = [
-    { label: "Dashboard", path: "/dashboard", icon: <HomeIcon /> },
+    // { label: "Dashboard", path: "/dashboard", icon: <HomeIcon /> },
     { label: "Incident", path: "/incident", icon: <ReportProblemIcon /> },
     { label: "Users", path: "/users", icon: <PersonAddAltIcon /> }
   ];
@@ -128,19 +159,10 @@ function Header() {
                     <span style={{fontWeight:"600"}}>
                     {new Date(notification.createdAt).toLocaleString()}
                     </span>
-                  
+                 
                   </div>
-
                 </div>
-
               </div>
-              {/* <Typography variant="body2" color="textSecondary">
-                {notification.message}
-              </Typography>
-              <Typography>{notification.createdBy}</Typography>
-              <Typography variant="caption" color="textSecondary">
-                {new Date(notification.createdAt).toLocaleString()}
-              </Typography> */}
             </MenuItem>
           ))
         ) : (
@@ -182,6 +204,7 @@ function Header() {
 
         {/* Render Menus */}
         {renderNotificationsMenu}
+        {renderProfileMenu}
       </div>
 
       <Drawer open={open} onClose={() => setOpen(false)} className='mblDrawer' style={{ position: "relative", top: "40px" }}>
