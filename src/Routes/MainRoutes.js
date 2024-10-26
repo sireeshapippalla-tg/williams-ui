@@ -58,7 +58,7 @@ const MainRoutes = () => {
 
           {/* Public Routes */}
           <Route path='/login' element={<Login/>}/>
-          <Route path='/forgot/password' element={<Forgot/>}/>
+          <Route path='/forgotPassword' element={<Forgot/>}/>
         </Routes>
     </div>
   )

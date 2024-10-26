@@ -1,445 +1,511 @@
-import React, { useState } from 'react';
-import Button from '@mui/material/Button';
-import Modal from 'react-bootstrap/Modal';
-import { Autocomplete, TextField } from '@mui/material';
-import { Col, Row } from 'react-bootstrap';
-import { Grid, Checkbox, Drawer, Box, Typography, IconButton, Divider } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import AddIcon from '@mui/icons-material/Add';
+import React, { useState, useEffect } from 'react';
+import { Plus, Trash2, X } from 'lucide-react';
+import axios from 'axios';
+import { useParams } from 'react-router-dom';
 
-const DynamicField = (props) => {
-    const [fieldAddDialog, setFieldAddDialog] = useState(false);
-    const [fields, setFields] = useState([]);
-    const [currentField, setCurrentField] = useState({ type: 'input', label: '', options: [] });
-    const [confirmAddFieldDialog, setConfirmAddFieldDialog] = useState(false)
-    const [pendingField, setPendingField] = useState(null);
-
-
-
-    const handleAddField = () => {
-        setFields([...fields, { ...currentField, value: '' }]);
-        setCurrentField({ type: '', label: '', options: [''] });
-    };
-
-
-    const handleCheckboxChange = (index) => (event) => {
-        const newFields = [...fields];
-        newFields[index].checked = event.target.checked;
-        setFields(newFields);
-    };
-
-    const handleFieldChange = (e) => {
-        const { name, value } = e.target;
-        setCurrentField({ ...currentField, [name]: value });
-    };
-
-    const handleAddOption = () => {
-        setCurrentField({ ...currentField, options: [...currentField.options, ''] });
-    };
-    const handleFieldValueChange = (index, value) => {
-        const newFields = [...fields];
-        if (newFields[index]) {
-            newFields[index].value = value; // Update 'value' in fields
-            setFields(newFields);
-        }
-    };
-
-    const handleOptionChange = (index, value) => {
-        const newOptions = [...currentField.options];
-        newOptions[index] = value;
-        setCurrentField({ ...currentField, options: newOptions });
-    };
-
-    const fieldTypeOptions = [
-        { title: 'Input' },
-        { title: 'Dropdown' },
-    ];
-
-    const fieldDialogOpen = () => {
-        setFieldAddDialog(true);
-    };
-    const fieldDialogClose = () => {
-        setFieldAddDialog(false);
-    };
-
-    const confirmDialogOpen = () => {
-        setConfirmAddFieldDialog(true)
-        setFieldAddDialog(false);
-    }
-    const confirmDialogClose = () => {
-        setConfirmAddFieldDialog(false)
-        setFieldAddDialog(false);
-    }
-    const handleConfirmAddField = () => {
-        setFields([...fields, pendingField]); // Add pending field to fields
-        setPendingField(null); // Clear pending field
-        setConfirmAddFieldDialog(false);
-    };
-
+const Modal = ({ isOpen, onClose, children }) => {
+    if (!isOpen) return null;
 
     return (
-        <div className=' '>
-            <Button
-                // style={{
-                //     textTransform: "capitalize", backgroundColor: "#533529", color
-                //         : "white", border: "none", padding: "10px 15px", fontWeight: "600"
-                // }}
-                style={{ color: "#533529", fontWeight: "600", marginTop: "10px" }}
-
-                onClick={fieldDialogOpen}
-
-            >
-                Create new Fields
-            </Button>
-
-            <Modal show={fieldAddDialog} onHide={fieldDialogOpen}>
-                <Modal.Header className='brown_bg '>
-                    <Modal.Title>Create Field</Modal.Title>
-                    <button
-                        type='button'
-                        className='btn-close bg-white'
-                        onClick={fieldDialogClose}
-                    ></button>
-                </Modal.Header>
-                <Modal.Body className='modal_bg_body'>
-                    <div>
-                        <div className='row'>
-                            <Col md={5} sm={12} className="mb-3">
-                                <Autocomplete
-                                    options={fieldTypeOptions}
-                                    value={fieldTypeOptions.find(option => option.title.toLowerCase() === currentField.type) || null}
-                                    onChange={(event, newValue) => setCurrentField({ ...currentField, type: newValue ? newValue.title.toLowerCase() : '' })}
-                                    getOptionLabel={(option) => option.title}
-                                    renderOption={(props, option) => (
-                                        <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
-                                            {option.title}
-                                        </li>
-                                    )}
-                                    renderInput={(params) => (
-                                        <TextField {...params}
-                                            label="Field Type"
-                                            variant="outlined"
-                                            InputProps={{
-                                                ...params.InputProps,
-                                                className: 'custom-input-drop' // Apply the custom class
-                                            }}
-                                            className="custom-textfield"
-                                        />
-                                    )}
-                                />
-                            </Col>
-                            <Col md={5} sm={12} className="mb-3">
-                                <TextField
-                                    InputProps={{ className: 'custom-input' }}
-                                    className="custom-textfield"
-                                    id="outlined-basic"
-                                    label="Label Name"
-                                    variant="outlined"
-                                    type="text"
-                                    name="label"
-                                    value={currentField.label}
-                                    onChange={handleFieldChange}
-                                />
-                            </Col>
-                            <Col md={2}>
-                                <IconButton><AddIcon /></IconButton>
-                            </Col>
-                            {currentField.type === 'dropdown' && (
-                                <div className='mt-0'>
-                                    <label className='fw-bold'>Options:</label>
-                                    <br />
-                                    <TextField
-                                        InputProps={{ className: 'custom-input' }}
-                                        className="custom-textfield m-1"
-                                        type="text"
-
-                                        label="Option 1"
-                                        value={currentField.options[0]}
-                                        onChange={(e) => handleOptionChange(0, e.target.value)}
-                                    />
-                                    <Button className=' dynamic_btn' onClick={handleAddOption}>Add Option</Button>
-
-                                    {currentField.options.slice(1).map((option, index) => (
-                                        <div key={index}>
-                                            <TextField
-                                                type="text"
-                                                InputProps={{ className: 'custom-input m-1' }}
-                                                className="custom-textfield"
-                                                label={`Option ${index + 2}`}
-                                                value={option}
-                                                onChange={(e) => handleOptionChange(index + 1, e.target.value)}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                        {/* <Button className='add-Field-btn' onClick={handleAddField}>Add Field</Button> */}
-                        <h6 className='mt-5 font-weight-bold'>Generated Fields</h6>
-
-
-                        <form>
-                            {fields.map((field, index) => (
-                                index % 2 === 0 && ( // Render two fields per row
-                                    <Row key={index} className='mb-3'>
-                                        <Col md={6} sm={6}>
-                                            <Grid container alignItems="center">
-                                                <Grid item xs={2}>
-                                                    <Checkbox
-                                                        checked={!!field.value && field.value.trim() !== ''}
-                                                        onChange={handleCheckboxChange(index)}
-                                                        color="primary"
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={10}>
-                                                    {field.type === 'input' ? (
-                                                        <TextField
-                                                            InputProps={{ className: 'custom-input' }}
-                                                            className="custom-textfield"
-                                                            type="text"
-                                                            label={field.label}
-                                                            name={field.label}
-                                                            value={field.value || ''}
-                                                            onChange={(e) => handleFieldValueChange(index, e.target.value)}
-                                                        />
-                                                    ) : (
-                                                        <Autocomplete
-                                                            options={field.options}
-                                                            value={field.value || null}
-                                                            onChange={(event, newValue) => handleFieldValueChange(index, newValue)}
-                                                            renderInput={(params) => (
-                                                                <TextField
-                                                                    {...params}
-                                                                    label={field.label}
-                                                                    variant="outlined"
-                                                                    InputProps={{
-                                                                        ...params.InputProps,
-                                                                        className: 'custom-input-drop' // Apply the custom class
-                                                                    }}
-                                                                    className="custom-textfield"
-                                                                />
-                                                            )}
-                                                        />
-                                                    )}
-                                                </Grid>
-                                            </Grid>
-                                        </Col>
-                                        {index + 1 < fields.length && ( // Ensure not out of bounds
-                                            <Col md={6} sm={6}>
-                                                <Grid container alignItems="center">
-                                                    <Grid item xs={2}>
-                                                        <Checkbox
-                                                            checked={!!fields[index + 1].value && fields[index + 1].value.trim() !== ''}
-                                                            onChange={handleCheckboxChange(index + 1)}
-                                                            color="primary"
-                                                        />
-                                                    </Grid>
-                                                    <Grid item xs={10}>
-                                                        {fields[index + 1].type === 'input' ? (
-                                                            <TextField
-                                                                InputProps={{ className: 'custom-input' }}
-                                                                className="custom-textfield"
-                                                                type="text"
-                                                                label={fields[index + 1].label}
-                                                                name={fields[index + 1].label}
-                                                                value={fields[index + 1].value || ''}
-                                                                onChange={(e) => handleFieldValueChange(index + 1, e.target.value)}
-                                                            />
-                                                        ) : (
-                                                            <Autocomplete
-                                                                options={fields[index + 1].options}
-                                                                value={fields[index + 1].value || null}
-                                                                onChange={(event, newValue) => handleFieldValueChange(index + 1, newValue)}
-                                                                renderInput={(params) => (
-                                                                    <TextField
-                                                                        {...params}
-                                                                        label={fields[index + 1].label}
-                                                                        variant="outlined"
-                                                                        InputProps={{
-                                                                            ...params.InputProps,
-                                                                            className: 'custom-input-drop' // Apply the custom class
-                                                                        }}
-                                                                        className="custom-textfield"
-                                                                    />
-                                                                )}
-                                                            />
-                                                        )}
-                                                    </Grid>
-                                                </Grid>
-                                            </Col>
-                                        )}
-                                    </Row>
-                                )
-                            ))}
-                        </form>
-                    </div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant='outlined' className='dynamic_btn m-1'
-                    // onClick={confirmDialogOpen}
-                    >Yes</Button>
-                    <Button variant='outlined' className='m-1 add-Field-btn p-2' onClick={fieldDialogClose}>No</Button>
-                </Modal.Footer>
-            </Modal>
-
-            {/* <Drawer anchor="right" open={fieldAddDialog} onClose={fieldDialogClose}>
-                <Box sx={{ width: 400 }} className="drawer-container">
-                    <Box display="flex" justifyContent="space-between" alignItems="center" p={2} className="drawer-header brown-bg">
-                        <Typography variant="h6" className='text-white'>Create Field</Typography>
-                        <IconButton onClick={fieldDialogClose}>
-                            <CloseIcon className='text-white' />
-                        </IconButton>
-                    </Box>
-                    <Divider />
-                    <Box p={2} className="drawer-body modal-bg-body">
-                        <div className='row'>
-                            <Col md={6} sm={12} className="mb-3">
-                                <Autocomplete
-                                    options={fieldTypeOptions}
-                                    value={fieldTypeOptions.find(option => option.title.toLowerCase() === currentField.type) || null}
-                                    onChange={(event, newValue) => setCurrentField({ ...currentField, type: newValue ? newValue.title.toLowerCase() : '' })}
-                                    getOptionLabel={(option) => option.title}
-                                    renderOption={(props, option) => (
-                                        <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
-                                            {option.title}
-                                        </li>
-                                    )}
-                                    renderInput={(params) => (
-                                        <TextField {...params}
-                                            label="Field Type"
-                                            variant="outlined"
-                                            InputProps={{
-                                                ...params.InputProps,
-                                                className: 'custom-input-drop' // Apply the custom class
-                                            }}
-                                            className="custom-textfield"
-                                        />
-                                    )}
-                                />
-                            </Col>
-                            <Col md={6} sm={12} className="mb-3">
-                                <TextField
-                                    InputProps={{ className: 'custom-input' }}
-                                    className="custom-textfield"
-                                    id="outlined-basic"
-                                    label="Label Name"
-                                    variant="outlined"
-                                    type="text"
-                                    name="label"
-                                    value={currentField.label}
-                                    onChange={handleFieldChange}
-                                />
-                            </Col>
-                            {currentField.type === 'dropdown' && (
-                                <div className='mt-0'>
-                                    <label className='fw-bold'>Options:</label>
-                                    <br />
-                                    <TextField
-                                        InputProps={{ className: 'custom-input' }}
-                                        className="custom-textfield m-1"
-                                        type="text"
-                                        label="Option 1"
-                                        value={currentField.options[0]}
-                                        onChange={(e) => handleOptionChange(0, e.target.value)}
-                                    />
-                                    <Button className='accordian_cancel_btn mt-2' onClick={handleAddOption}>Add Option</Button>
-                                    {currentField.options.slice(1).map((option, index) => (
-                                        <div key={index}>
-                                            <TextField
-                                                type="text"
-                                                InputProps={{ className: 'custom-input m-1' }}
-                                                className="custom-textfield"
-                                                label={`Option ${index + 2}`}
-                                                value={option}
-                                                onChange={(e) => handleOptionChange(index + 1, e.target.value)}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                        <Button className='dynamic_btn mt-2 float-end' onClick={handleAddField}>Add Field</Button>
-                        <Typography variant="h6" className='mt-5 font-weight-bold'>Generated Fields</Typography>
-                        <form>
-                            {fields.map((field, index) => (
-                                <Grid container key={index} className='mb-3'>
-                                    <Grid item xs={12}>
-                                        <Grid container alignItems="center">
-                                            <Grid item xs={2}>
-                                                <Checkbox
-                                                    checked={!!field.value && field.value.trim() !== ''}
-                                                    onChange={handleCheckboxChange(index)}
-                                                    color="primary"
-                                                />
-                                            </Grid>
-                                            <Grid item xs={10}>
-                                                {field.type === 'input' ? (
-                                                    <TextField
-                                                        InputProps={{ className: 'custom-input' }}
-                                                        className="custom-textfield"
-                                                        style={{ width: "100%" }}
-                                                        type="text"
-                                                        label={field.label}
-                                                        name={field.label}
-                                                        value={field.value || ''}
-                                                        onChange={(e) => handleFieldValueChange(index, e.target.value)}
-                                                    />
-                                                ) : (
-                                                    <Autocomplete
-                                                        options={field.options}
-                                                        value={field.value || null}
-                                                        onChange={(event, newValue) => handleFieldValueChange(index, newValue)}
-                                                        renderInput={(params) => (
-                                                            <TextField
-                                                                {...params}
-                                                                label={field.label}
-                                                                variant="outlined"
-                                                                InputProps={{
-                                                                    ...params.InputProps,
-                                                                    className: 'custom-input-drop' // Apply the custom class
-                                                                }}
-                                                                className="custom-textfield"
-                                                            />
-                                                        )}
-                                                    />
-                                                )}
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-                                </Grid>
-                            ))}
-                        </form>
-                    </Box>
-                    <Divider />
-                    <Box p={2} className="drawer-footer " display="flex" justifyContent="space-between">
-                        <Button variant='outlined' className='accordian_submit_btn m-1'>Yes</Button>
-                        <Button variant='outlined' className='accordian_cancel_btn p-2' onClick={fieldDialogClose}>No</Button>
-                    </Box>
-                </Box>
-            </Drawer> */}
-            <Modal show={confirmAddFieldDialog}>
-                <Modal.Header className='brown_bg'>
-                    <Modal.Title>Create Fields</Modal.Title>
-                    <button
-                        type='button'
-                        className='btn-close bg-white'
-                        onClick={confirmDialogClose}
-                    ></button>
-                </Modal.Header>
-                <Modal.Body>
-                    <p>
-                        Are you sure you want to create these fields
-                    </p>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant='outlined' className='dynamic_btn m-1' onClick={handleConfirmAddField}>Yes</Button>
-                    <Button variant='outlined' className='m-1 add-Field-btn p-2' onClick={confirmDialogClose}>No</Button>
-                </Modal.Footer>
-            </Modal>
-
-
+        <div style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100
+        }}>
+            <div style={{
+                backgroundColor: 'white',
+                borderRadius: '12px',
+                width: '90%',
+                maxWidth: '600px',
+                maxHeight: '85vh',
+                overflowY: 'auto',
+                boxShadow: '0 8px 20px rgba(0, 0, 0, 0.2)',
+                padding: '24px',
+                position: 'relative'
+            }}>
+                <button
+                    onClick={onClose}
+                    style={{
+                        position: 'absolute',
+                        top: '12px',
+                        right: '12px',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: '#aaa'
+                    }}
+                >
+                    <X size={24} />
+                </button>
+                {children}
+            </div>
         </div>
     );
 };
 
-export default DynamicField;
+const DynamicFormFields = ({ incidentId }) => {
+    const [availableFields, setAvailableFields] = useState([]);
+    const [selectedFields, setSelectedFields] = useState([]); 
+    const [newlyAddedFields, setNewlyAddedFields] = useState([]); 
+    const [isAccordionOpen, setIsAccordionOpen] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState('existing');
+    const [selectedExistingFields, setSelectedExistingFields] = useState([]);
+    const [newField, setNewField] = useState({
+        type: 'text',
+        label: '',
+        options: [{ value: '', isSelected: false }]
+    });
+    const { id } = useParams();
+
+    const fetchAvailableFields = async () => {
+        try {
+            const response = await axios.post(`http://13.127.196.228:8084/iassure/api/incident/getAllFields`);
+            if (response.status === 200) {
+                const data = response.data.dynamicFields;
+                const parsedFields = data.map(field => {
+                    const fieldData = JSON.parse(field.fieldData);
+                    return {
+                        fieldId: field.id,
+                        type: fieldData.type,
+                        label: fieldData.label,
+                        options: fieldData.options || [],
+                        value: fieldData.type === 'text' ? "" : null,
+                    };
+                });
+                setAvailableFields(parsedFields);
+            }
+        } catch (error) {
+            console.error("Error fetching available fields:", error);
+        }
+    };
+
+    const fetchIncidentFields = async () => {
+        try {
+            const response = await axios.post(`http://13.127.196.228:8084/iassure/api/incident/getIncidentFields`, {
+                incidentId: id
+            });
+            if (response.status === 200) {
+                const data = response.data;
+                const incidentFields = data.map(field => ({
+                    incidentFieldId: field.incidentFieldId,
+                    fieldId: field.fieldId,
+                    type: field.type,
+                    label: field.label,
+                    value: JSON.parse(field.selectedOption).value,
+                    options: field.options ? JSON.parse(field.options) : []
+                }));
+                setSelectedFields(incidentFields);
+            }
+        } catch (error) {
+            console.error("Error fetching incident fields:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchAvailableFields();
+        fetchIncidentFields();
+    }, [id]);
+
+    const handleFieldChange = (fieldId, value) => {
+        setSelectedFields(selectedFields.map(field =>
+            field.fieldId === fieldId ? { ...field, value } : field
+        ));
+        setNewlyAddedFields(newlyAddedFields.map(field =>
+            field.fieldId === fieldId ? { ...field, value } : field
+        ));
+    };
+
+    const handleAddExistingFields = () => {
+        const fieldsToAdd = availableFields.filter(field =>
+            selectedExistingFields.includes(field.fieldId) &&
+            !selectedFields.find(f => f.fieldId === field.fieldId)
+        ).map(field => ({
+            ...field,
+            incidentFieldId: null 
+        }));
+
+        setSelectedFields([...selectedFields, ...fieldsToAdd]);
+        setSelectedExistingFields([]);
+        setIsModalOpen(false);
+    };
+
+    const handleCreateField = async () => {
+        if (!newField.label) return;
+
+        const fieldData = {
+            type: newField.type,
+            label: newField.label,
+            isActive: 1,
+            ...(newField.type === 'text' ? { value: '' } : { options: newField.options })
+        };
+
+        try {
+            const response = await axios.post("http://13.127.196.228:8084/iassure/api/incident/createFields", fieldData);
+            if (response.status === 200) {
+                const newId = Math.max(...availableFields.map(f => f.fieldId), 0) + 1;
+                const fieldToAdd = { fieldId: newId, value: "", ...fieldData };
+                setNewlyAddedFields([...newlyAddedFields, fieldToAdd]);
+                setNewField({ type: 'text', label: '', options: [{ value: '', isSelected: false }] });
+                setIsModalOpen(false);
+                
+                fetchAvailableFields();
+                fetchIncidentFields();
+            }
+        } catch (error) {
+            console.error("Error saving field:", error);
+        }
+    };
+
+    const handleAddOption = () => {
+        setNewField({
+            ...newField,
+            options: [...newField.options, { value: '', isSelected: false }]
+        });
+    };
+
+    const handleOptionChange = (index, value) => {
+        const updatedOptions = [...newField.options];
+        updatedOptions[index] = { ...updatedOptions[index], value };
+        setNewField({
+            ...newField,
+            options: updatedOptions
+        });
+    };
+
+    const handleDeleteOption = (index) => {
+        const updatedOptions = newField.options.filter((_, i) => i !== index);
+        setNewField({
+            ...newField,
+            options: updatedOptions
+        });
+    };
+
+    const handleDeleteField = async (fieldId, isIncidentField = false) => {
+        if (isIncidentField) {
+            // Handle deleting a field associated with an incident
+            const field = selectedFields.find(f => f.fieldId === fieldId);
+    
+            if (field) {
+                if (field.incidentFieldId) {
+                    // Delete from the server if it has an incidentFieldId
+                    try {
+                        const response = await axios.post("http://13.127.196.228:8084/iassure/api/incident/deleteIncidentField", { incidentFieldId: field.incidentFieldId });
+                        if (response.status === 200) {
+                            alert(response.data.responseMessage);
+                            setSelectedFields(prevFields => prevFields.filter(f => f.fieldId !== fieldId));
+                        }
+                    } catch (error) {
+                        alert("Error deleting incident field.");
+                        console.error("Error deleting incident field:", error);
+                    }
+                } else {
+                    // Remove locally if it doesn't have an incidentFieldId
+                    setSelectedFields(prevFields => prevFields.filter(f => f.fieldId !== fieldId));
+                }
+            }
+        } else {
+            // Handle deleting a newly created field
+            const field = newlyAddedFields.find(f => f.fieldId === fieldId);
+    
+            if (field) {
+                if (field.fieldId) {
+                    // Delete from the server if it has a fieldId
+                    try {
+                        const response = await axios.post("http://13.127.196.228:8084/iassure/api/incident/deleteField", { fieldId });
+                        if (response.status === 200) {
+                            alert(response.data.responseMessage);
+                            setNewlyAddedFields(prevFields => prevFields.filter(f => f.fieldId !== fieldId));
+                        }
+                    } catch (error) {
+                        alert("Error deleting newly added field.");
+                        console.error("Error deleting newly added field:", error);
+                    }
+                } else {
+                    // Remove locally if it doesn't have a fieldId
+                    setNewlyAddedFields(prevFields => prevFields.filter(f => f.fieldId !== fieldId));
+                }
+            }
+        }
+    };
+    
+
+    const handleSubmit = async () => {
+        const newFieldsData = newlyAddedFields.map(field => {
+            const selectedOption = field.type === 'select'
+                ? { value: field.value, isSelected: true }
+                : { value: field.value };
+
+            return {
+                field_id: field.fieldId,
+                incident_id: id,
+                is_active: 1,
+                selected_option: selectedOption
+            };
+        });
+
+        if (newFieldsData.length === 0) {
+            console.log("No new fields to submit");
+            return;
+        }
+
+        try {
+            const response = await axios.post("http://13.127.196.228:8084/iassure/api/incident/submitFields", { fields: newFieldsData });
+            if (response.status === 200) {
+                alert("New fields submitted successfully.");
+                setNewlyAddedFields([]);
+            }
+        } catch (error) {
+            alert("Error submitting new fields.");
+            console.error("Error submitting new fields:", error);
+        }
+    };
+
+    return (
+        <div style={{
+            width: '100%',
+            maxWidth: '768px',
+            margin: '0 auto',
+            backgroundColor: 'white',
+            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.15)',
+            borderRadius: '12px',
+            overflow: 'hidden'
+        }}>
+            <div style={{
+                background: 'linear-gradient(to right, #1E40AF, #2563EB)',
+                color: 'white',
+                padding: '1.5rem'
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <button
+                        onClick={() => setIsAccordionOpen(!isAccordionOpen)}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            fontSize: '1.125rem',
+                            fontWeight: '600',
+                            color: '#E0E7FF',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <span>Dynamic Form Builder</span>
+                        <span
+                            style={{
+                                transform: isAccordionOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                                transition: 'transform 0.2s'
+                            }}
+                        >
+                            ▼
+                        </span>
+                    </button>
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.5rem 1rem',
+                            backgroundColor: 'white',
+                            color: '#2563EB',
+                            borderRadius: '0.375rem',
+                            cursor: 'pointer',
+                            border: 'none'
+                        }}
+                    >
+                        <Plus style={{ height: '16px', width: '16px' }} />
+                        Add Fields
+                    </button>
+                </div>
+            </div>
+
+            {isAccordionOpen && (
+                <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '1rem' }}>
+                    {[...selectedFields, ...newlyAddedFields].map((field) => (
+                        <div key={field.fieldId} style={{
+                            padding: '1rem',
+                            borderBottom: '1px solid #E5E7EB',
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <div style={{ width: '8rem', fontSize: '0.875rem', fontWeight: '500', color: '#4B5563' }}>
+                                    {field.label} ({field.type})
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    {field.type === 'text' ? (
+                                        <input
+                                            type="text"
+                                            value={field.value || ""}
+                                            onChange={(e) => handleFieldChange(field.fieldId, e.target.value)}
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.5rem',
+                                                border: '1px solid #E5E7EB',
+                                                borderRadius: '0.375rem'
+                                            }}
+                                        />
+                                    ) : (
+                                        <select
+                                            value={field.value || ""}
+                                            onChange={(e) => handleFieldChange(field.fieldId, e.target.value)}
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.5rem',
+                                                border: '1px solid #E5E7EB',
+                                                borderRadius: '0.375rem'
+                                            }}
+                                        >
+                                            <option value="">{field.label}</option>
+                                            {field.options.map((option, idx) => (
+                                                <option key={idx} value={option.value}>
+                                                    {option.value}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={() => handleDeleteField(field.fieldId, !!field.incidentFieldId)}
+                                    style={{
+                                        padding: '0.5rem',
+                                        color: '#9CA3AF',
+                                        cursor: 'pointer',
+                                        borderRadius: '0.375rem',
+                                        border: 'none',
+                                        backgroundColor: 'transparent'
+                                    }}
+                                >
+                                    <Trash2 style={{ height: '16px', width: '16px' }} />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                    <button onClick={handleSubmit} style={{
+                        marginTop: '1rem',
+                        padding: '0.5rem 1rem',
+                        backgroundColor: '#2563EB',
+                        color: 'white',
+                        borderRadius: '0.375rem',
+                        cursor: 'pointer',
+                        border: 'none'
+                    }}>Submit</button>
+                </div>
+            )}
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setNewField({ type: 'text', label: '', options: [{ value: '', isSelected: false }] });
+                    setSelectedExistingFields([]);
+                    setActiveTab('existing');
+                }}
+            >
+                <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                        <button onClick={() => setActiveTab('existing')} style={{ fontWeight: activeTab === 'existing' ? 'bold' : 'normal' }}>Existing Fields</button>
+                        <button onClick={() => setActiveTab('new')} style={{ fontWeight: activeTab === 'new' ? 'bold' : 'normal' }}>Create New Field</button>
+                    </div>
+                    {activeTab === 'existing' ? (
+                        <div>
+                            {availableFields.map((field) => (
+                                <label key={field.fieldId} style={{ display: 'flex', alignItems: 'center', padding: '0.75rem', borderBottom: '1px solid #E5E7EB' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedExistingFields.includes(field.fieldId)}
+                                        onChange={() => {
+                                            setSelectedExistingFields(selectedExistingFields.includes(field.fieldId)
+                                                ? selectedExistingFields.filter(id => id !== field.fieldId)
+                                                : [...selectedExistingFields, field.fieldId]);
+                                        }}
+                                    />
+                                    <div style={{ marginLeft: '0.75rem' }}>
+                                        {field.label} ({field.type})
+                                        {field.type === 'select' && (
+                                            <ul style={{ marginTop: '0.5rem' }}>
+                                                {field.options.map((opt, idx) => <li key={idx} style={{ fontSize: '0.875rem', color: '#4B5563' }}>{opt.value}</li>)}
+                                            </ul>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={() => handleDeleteField(field.fieldId)}
+                                        style={{
+                                            padding: '0.5rem',
+                                            color: '#9CA3AF',
+                                            cursor: 'pointer',
+                                            borderRadius: '0.375rem',
+                                            border: 'none',
+                                            backgroundColor: 'transparent'
+                                        }}
+                                    >
+                                        <Trash2 style={{ height: '16px', width: '16px' }} />
+                                    </button>
+                                </label>
+                            ))}
+                            <button onClick={handleAddExistingFields} style={{
+                                marginTop: '1rem',
+                                padding: '0.5rem 1rem',
+                                backgroundColor: '#2563EB',
+                                color: 'white',
+                                borderRadius: '0.375rem',
+                                cursor: 'pointer',
+                                border: 'none'
+                            }}>Add Selected Fields</button>
+                        </div>
+                    ) : (
+                        <div>
+                            <h2>Create New Field</h2>
+                            <div>
+                                <label>Field Type</label>
+                                <select value={newField.type} onChange={(e) => setNewField({ ...newField, type: e.target.value })}>
+                                    <option value="text">Text Field</option>
+                                    <option value="select">Dropdown</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Field Label</label>
+                                <input
+                                    type="text"
+                                    value={newField.label}
+                                    onChange={(e) => setNewField({ ...newField, label: e.target.value })}
+                                />
+                            </div>
+                            {newField.type === 'select' && (
+                                <div>
+                                    <label>Options</label>
+                                    {newField.options.map((option, index) => (
+                                        <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
+                                            <input
+                                                type="text"
+                                                value={option.value}
+                                                onChange={(e) => handleOptionChange(index, e.target.value)}
+                                            />
+                                            <button onClick={() => handleDeleteOption(index)}><Trash2 /></button>
+                                        </div>
+                                    ))}
+                                    <button onClick={handleAddOption}>Add Option</button>
+                                </div>
+                            )}
+                            <button onClick={handleCreateField} style={{
+                                marginTop: '1rem',
+                                padding: '0.5rem 1rem',
+                                backgroundColor: '#2563EB',
+                                color: 'white',
+                                borderRadius: '0.375rem',
+                                cursor: 'pointer',
+                                border: 'none'
+                            }}>Create Field</button>
+                        </div>
+                    )}
+                </div>
+            </Modal>
+        </div>
+    );
+};
+
+export default DynamicFormFields;

@@ -30,6 +30,7 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { DialogContentText } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { formatDistanceToNow } from 'date-fns';
@@ -46,7 +47,9 @@ import {
   getAllUsers,
   getIncidentHistory,
   closeIncident,
-  addIncident
+  addIncident,
+  downloadFile,
+  deleteFile
 } from '../../api';
 
 
@@ -110,6 +113,10 @@ const IncidentDetails = (props) => {
   const [selectedFileUrl, setSelectedFileUrl] = useState(null);
   const [history, setHistory] = useState([])
   const [showModal3, setShowModal3] = useState(false);
+  const [globalLoading, setGlobalLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState(null);
+  const [fileToDeleteIndex, setFileToDeleteIndex] = useState(null);
 
 
   const storedUser = JSON.parse(localStorage.getItem('userDetails'));
@@ -123,13 +130,22 @@ const IncidentDetails = (props) => {
 
 
   useEffect(() => {
-    fetchDepartments()
-    fetchDropdowns();
-
-    fetchIncidentDetailsById()
-    fetchIncidentCharts()
-    fetchAllUsers()
-    fetchHistory();
+    // Trigger loading before starting API calls
+    setGlobalLoading(true);
+    
+    Promise.all([
+      fetchDepartments(),
+      fetchDropdowns(),
+      fetchIncidentDetailsById(),
+      fetchIncidentCharts(),
+      fetchAllUsers(),
+      fetchHistory()
+    ]).then(() => {
+      setGlobalLoading(false); // End loading after all API calls finish
+    }).catch(error => {
+      console.error("Error in loading incident details", error);
+      setGlobalLoading(false);
+    });
   }, [id]);
 
   useEffect(() => {
@@ -505,7 +521,49 @@ const IncidentDetails = (props) => {
     name: 'file0702202413.pdf',
     downloadLink: '#'
   };
+  const openDeleteDialog = (file, index) => {
+    setFileToDelete(file);
+    setFileToDeleteIndex(index);
+    setDeleteDialogOpen(true);
+};
 
+const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setFileToDelete(null);
+    setFileToDeleteIndex(null);
+};
+
+const confirmDeleteFile = async () => {
+    if (!fileToDelete) return;
+    try {
+        const payload = {
+            documentId: fileToDelete.documentId,
+            documentName: fileToDelete.documentName
+        };
+
+        const response = await axios.post(deleteFile, payload);
+
+        if (response.status === 200) {
+            setIncidentFiles(incidentFiles.filter(file => file.documentId !== fileToDelete.documentId));
+            setSelectedFiles(selectedFiles.filter(file => file.documentId !== fileToDelete.documentId));
+
+            setMessage("File deleted successfully.");
+            setSeverity('success');
+            setOpen(true);
+        } else {
+            setMessage("Failed to delete the file.");
+            setSeverity('error');
+            setOpen(true);
+        }
+    } catch (error) {
+        console.error("Error deleting the file:", error);
+        setMessage("An error occurred while deleting the file.");
+        setSeverity('error');
+        setOpen(true);
+    } finally {
+        closeDeleteDialog();
+    }
+};
 
   //incident deatils by id
   const fetchIncidentDetailsById = async () => {
@@ -633,14 +691,23 @@ const IncidentDetails = (props) => {
     setSelectedFileUrl(fileUrl); // Set the selected file URL
   };
 
-  const downloadFile = (url, fileName) => {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName; // Set the file name for the download
-    document.body.appendChild(link); // Append to body
-    link.click(); // Trigger the download
-    document.body.removeChild(link); // Clean up
-  };
+  const download = async (url,fileName) => {
+    try {
+        const payload = { documentName: fileName };
+        const response = await axios.post(downloadFile, payload, { responseType: 'blob' });
+        const blob = new Blob([response.data], { type: response.headers['content-type'] });
+        const link = document.createElement('a');
+        const url = window.URL.createObjectURL(blob);
+        link.href = url;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error in downloading file:', error);
+    }
+};
 
   const fetchHistory = async () => {
     console.log("invokeHistory")
@@ -800,6 +867,17 @@ const IncidentDetails = (props) => {
       setOpen(true);
     }
   }
+ 
+
+  // Your code
+  if (globalLoading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress sx={{ color: '#533529' }} /> {/* Brown color */}
+      </div>
+    );
+  }
+  
 
   return (
     <div>
@@ -819,7 +897,7 @@ const IncidentDetails = (props) => {
                 // Show a spinner or loading message when data is being fetched
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: "20px" }}>
                   {/* <CircularProgress /> */}
-                  ...Loading
+                  Loading...
                 </div>
               ) : (
                 <>
@@ -1024,7 +1102,7 @@ const IncidentDetails = (props) => {
                                       <p className="mb-0 ms-2">{file.name}</p>
                                     </div>
                                     <div className="file-actions d-flex align-items-center">
-                                      <IconButton edge='end' aria-label='delete' onClick={() => handleRemoveFile(index)}>
+                                      <IconButton edge='end' aria-label='delete' onClick={() => setSelectedFiles(selectedFiles.filter((_, i) => i !== index))}>
                                         <CloseIcon className='close_icon' />
                                       </IconButton>
                                     </div>
@@ -1077,12 +1155,15 @@ const IncidentDetails = (props) => {
                                     <div className="file-download me-2">
                                       <ArrowDownwardIcon
                                         style={{ marginRight: "5px", cursor: 'pointer' }}
-                                        onClick={() => downloadFile(file.documentUrl, file.documentName)}
+                                        onClick={() => download(file.documentUrl, file.documentName)}
                                       />
                                     </div>
                                     <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
                                       <VisibilityIcon />
                                     </IconButton>
+                                    <IconButton edge='end' onClick={() => openDeleteDialog(file, index)}>
+                                                        <CloseIcon className='close_icon' />
+                                     </IconButton>
                                   </div>
                                 </div>
                               </li>
@@ -1097,159 +1178,10 @@ const IncidentDetails = (props) => {
                 </>
               )
               }
-
-
-              <Accordion className='mb-2 accordian_arrow'>
-                <AccordionSummary
-                  style={{
-                    // color: '#0c63e4',
-                    backgroundColor: '#533529',
-                    boxShadow: 'inset 0 -1px 0 rgba(0, 0, 0, .125);',
-                    padding: '0px 20px',
-                  }}
-                  expandIcon={<ExpandMoreIcon className='accordian_arrow' />}
-                  aria-controls='panel3-content'
-                  id='panel3-header'
-                >
-                  <Typography className='accord_typo'>
-                    Additional Fields
-                  </Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <Grid container alignItems="center" spacing={2}>
-                    {draggableItems.map((widget, index) => (
-                      <Grid item xs={4} key={index}>
-                        {widget.widgetType === 'dropdown' ? (
-                          <div className='resolve-drop'>
-                            <Autocomplete
-                              style={{ width: '100%' }}
-                              value={dynamicFields[widget.label] || null}
-                              onChange={DragablehandleChange(widget.label)}
-                              filterOptions={(options, params) => {
-                                const filtered = options.filter(option =>
-                                  option.toLowerCase().includes(params.inputValue.toLowerCase())
-                                );
-                                if (params.inputValue !== '') {
-                                  filtered.push({
-                                    inputValue: params.inputValue,
-                                    title: `Add "${params.inputValue}"`,
-                                  });
-                                }
-                                return filtered;
-                              }}
-                              selectOnFocus
-                              clearOnBlur
-                              handleHomeEndKeys
-                              options={widget.options}
-                              getOptionLabel={(option) => {
-                                if (typeof option === 'string') {
-                                  return option;
-                                }
-                                if (option.inputValue) {
-                                  return option.inputValue;
-                                }
-                                return option;
-                              }}
-                              renderOption={(props, option) => (
-                                <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
-                                  {option.inputValue ? (
-                                    <>
-                                      Add "{option.inputValue}"
-                                      <AddIcon style={{ marginLeft: "10px" }} />
-                                    </>
-                                  ) : (
-                                    option
-                                  )}
-                                </li>
-                              )}
-                              renderInput={(params) => (
-                                <TextField
-                                  {...params}
-                                  label={`${widget.label}`}
-                                  variant="outlined"
-                                  InputProps={{
-                                    ...params.InputProps,
-                                    className: 'custom-input-drop' // Apply the custom class
-                                  }}
-                                  className="custom-textfield"
-                                />
-                              )}
-                            />
-                          </div>
-                        ) : (
-                          <Form.Group
-                            className='mb-0'
-                            controlId='exampleForm.ControlTextarea1 '
-                          >
-                            <TextField
-                              id="outlined-basic"
-                              InputProps={{ className: 'custom-input' }}
-                              className='w-100 custom-textfield'
-                              label={` ${widget.label}`}
-                              variant="outlined"
-                              value={dynamicFields[widget.label] || ''}
-                              onChange={DragablehandleChange(widget.label)}
-                            />
-                          </Form.Group>
-                        )}
-                      </Grid>
-                    ))}
-
-
-                    {fields.map((field, index) => (
-                      <>
-                        <Grid item xs={4} key={index}>
-                          {field.type === 'input' ? (
-                            <Form.Group
-                              className='mb-0'
-                              controlId='exampleForm.ControlTextarea1 '
-                            >
-                              <TextField
-                                id="outlined-basic"
-                                InputProps={{ className: 'custom-input' }}
-                                className='w-100 custom-textfield'
-                                label={field.label}
-                                variant="outlined"
-                                name={field.label}
-                                value={field.value || ''}
-                              // onChange={(e) => handleFieldValueChange(index, e.target.value)}
-                              />
-                            </Form.Group>
-
-                          ) : (
-                            <div className='resolve-drop'>
-                              <Autocomplete
-                                style={{ width: '100%' }}
-                                options={field.options}
-                                value={field.value || null}
-                                // onChange={(event, newValue) => handleFieldValueChange(index, newValue)}
-                                renderInput={(params) => (
-                                  <TextField
-                                    {...params}
-                                    label={field.label}
-                                    variant="outlined"
-                                    InputProps={{
-                                      ...params.InputProps,
-                                      className: 'custom-input-drop' // Apply the custom class
-                                    }}
-                                    className="custom-textfield"
-                                  />
-                                )}
-                              />
-                            </div>
-                          )}
-                        </Grid>
-                      </>
-
-                    ))}
-
-                  </Grid>
-
-                </AccordionDetails>
-
-
-
-              </Accordion>
+              <div className='accordian_s'>
+              <DynamicField selectedSection={selectedSection} invokeHistory={invokeHistory}/>
+              </div>
+               
               <div className='row'>
                 <div className='col-md-12'>
                   <Button
@@ -1277,7 +1209,7 @@ const IncidentDetails = (props) => {
             {/* Right content */}
             <div className='col-md-4 '>
               <div className='mb-3' style={{ display: "flex", justifyContent: "end" }}>
-                <Button
+                {/* <Button
                   variant='outlined'
                   className='accordian_submit_btn'
                   onClick={fieldDialogOpen}
@@ -1285,7 +1217,7 @@ const IncidentDetails = (props) => {
                   style={{ color: "#533529", fontWeight: "600", }}
                 >
                   Create new Fields
-                </Button>
+                </Button>*/}
               </div>
               <div className='dynamic_fields mb-3' style={{ minHeight: "110px", maxHeight: "110px", overflowY: "auto" }}>
                 <h6 style={{ fontSize: "20px", fontWeight: "600" }}>Summary</h6>
@@ -1442,167 +1374,6 @@ const IncidentDetails = (props) => {
           </div>
         </div>
       </div>
-
-      <Modal show={fieldAddDialog} onHide={fieldDialogOpen}>
-        <Modal.Header className='brown_bg '>
-          <Modal.Title>Create Field</Modal.Title>
-          <button
-            type='button'
-            className='btn-close bg-white'
-            onClick={fieldDialogClose}
-          ></button>
-        </Modal.Header>
-        <Modal.Body className='modal_bg_body'>
-          <div>
-            <div className='row'>
-              <Col md={5} sm={12} className="mb-3">
-                <Autocomplete
-                  options={fieldTypeOptions}
-                  value={fieldTypeOptions.find(option => option.title.toLowerCase() === currentField.type) || null}
-                  onChange={(event, newValue) => setCurrentField({ ...currentField, type: newValue ? newValue.title.toLowerCase() : '' })}
-                  getOptionLabel={(option) => option.title}
-                  renderOption={(props, option) => (
-                    <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
-                      {option.title}
-                    </li>
-                  )}
-                  renderInput={(params) => (
-                    <TextField {...params}
-                      label="Field Type"
-                      variant="outlined"
-                      InputProps={{
-                        ...params.InputProps,
-                        className: 'custom-input-drop' // Apply the custom class
-                      }}
-                      className="custom-textfield"
-                    />
-                  )}
-                />
-              </Col>
-              <Col md={5} sm={12} className="mb-3">
-                <TextField
-                  InputProps={{ className: 'custom-input' }}
-                  className="custom-textfield"
-                  id="outlined-basic"
-                  label="Label Name"
-                  variant="outlined"
-                  type="text"
-                  name="label"
-                  value={currentField.label}
-                  onChange={handleFieldChange}
-                />
-              </Col>
-              <Col md={2} >
-                <IconButton className='dynamic-addicon' onClick={handleAddField}>
-                  <AddIcon />
-                </IconButton>
-              </Col>
-              {currentField.type === 'dropdown' && (
-                <div className='mt-0'>
-                  <label>Dropdown options:</label>
-                  <br />
-                  <Col md={6} className='mb-2'>
-                    <Grid container alignItems="center">
-                      <Grid item xs={11}>
-                        <TextField
-                          InputProps={{ className: 'custom-input' }}
-                          className="custom-textfield m-1"
-                          type="text"
-
-                          label="Option 1"
-                          value={currentField.options[0]}
-                          onChange={(e) => handleOptionChange(0, e.target.value)}
-                        />
-                      </Grid>
-                      <Grid item xs={1}>
-                        <IconButton onClick={handleAddOption}>
-                          <AddIcon />
-                        </IconButton>
-                      </Grid>
-                    </Grid>
-                  </Col>
-
-
-                  {/* <Button className=' dynamic_btn' onClick={handleAddOption}>Add Option</Button> */}
-                  {currentField.options.slice(1).map((option, index) => (
-                    <Col md={6} className='mb-2'>
-                      <Grid container alignItems="center">
-                        <Grid item xs={11}>
-                          <div key={index}>
-                            <TextField
-                              type="text"
-                              InputProps={{ className: 'custom-input m-1' }}
-                              className="custom-textfield"
-                              label={`Option ${index + 2}`}
-                              value={option}
-                              onChange={(e) => handleOptionChange(index + 1, e.target.value)}
-                            />
-                          </div>
-                        </Grid>
-                      </Grid>
-                    </Col>
-
-                  ))}
-                </div>
-              )}
-            </div>
-            {/* <Button className='add-Field-btn' onClick={handleAddField}>Add Field</Button> */}
-            <h6 style={{ fontWeight: "600" }}>Generated Fields</h6>
-            <form>
-              {fields.map((field, index) => (
-                <Row key={index} className='mb-3'>
-                  <Col md={10} sm={12}>
-                    {field.type === 'input' ? (
-                      <TextField
-                        InputProps={{ className: 'custom-input' }}
-                        className="custom-textfield"
-                        type="text"
-                        label={field.label}
-                        name={field.label}
-                        value={field.value || ''}
-                        // onChange={(e) => handleFieldValueChange(index, e.target.value)}
-                        fullWidth
-                      />
-                    ) : (
-                      <Autocomplete
-                        options={field.options}
-                        value={field.value || null}
-                        // onChange={(event, newValue) => handleFieldValueChange(index, newValue)}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label={field.label}
-                            variant="outlined"
-                            InputProps={{
-                              ...params.InputProps,
-                              className: 'custom-input-drop' // Apply the custom class
-                            }}
-                            className="custom-textfield"
-                            fullWidth
-                          />
-                        )}
-                      />
-                    )}
-                  </Col>
-                  <Col md={2}>
-                    <IconButton onClick={() => handleRemoveField(index)}>
-                      <CloseIcon className='close_icon' />
-                    </IconButton>
-
-                  </Col>
-                </Row>
-              ))}
-            </form>
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant='outlined' className='dynamic_btn m-1'
-            onClick={confirmDrawerOpen}
-          >Yes</Button>
-          <Button variant='outlined' className='m-1 add-Field-btn p-2' onClick={fieldDialogClose}>No</Button>
-        </Modal.Footer>
-      </Modal>
-
       <Dialog
         open={Boolean(selectedFileUrl)} // Open the dialog if a file is selected
         onClose={() => setSelectedFileUrl(null)} // Close the dialog
@@ -1847,7 +1618,17 @@ const IncidentDetails = (props) => {
         </Box>
       </Drawer>
 
-
+      
+      <Dialog open={deleteDialogOpen} onClose={closeDeleteDialog}>
+                <DialogTitle className='dialog_head'>Delete Confirmation</DialogTitle>
+                <DialogContent className='dialog_content'>
+                    <DialogContentText className='mt-4'>Are you sure you want to delete the file "{fileToDelete?.documentName}"?</DialogContentText>
+                </DialogContent>
+                <DialogActions className='dialog_content'>
+                    <Button className='accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button>
+                    <Button className='accordian_submit_btn' onClick={closeDeleteDialog} color="primary">Cancel</Button>
+                </DialogActions>
+            </Dialog>
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
         <Alert onClose={handleClose} severity={severity}>
           {message}

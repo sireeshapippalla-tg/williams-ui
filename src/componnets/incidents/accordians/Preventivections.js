@@ -460,9 +460,8 @@ const Preventivections = ({ invokeHistory }) => {
                     <DialogContentText className='mt-4'>Are you sure you want to delete the file "{fileToDelete?.documentName}"?</DialogContentText>
                 </DialogContent>
                 <DialogActions className='dialog_content'>
-                    <Button className='accordian_submit_btn' onClick={closeDeleteDialog} color="primary">Cancel</Button>
-                    <Button className='accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button>
-                </DialogActions>
+                <Button className='accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button>
+                <Button className='accordian_submit_btn' onClick={closeDeleteDialog} color="primary">Cancel</Button> </DialogActions>
             </Dialog>
 
             <Dialog
