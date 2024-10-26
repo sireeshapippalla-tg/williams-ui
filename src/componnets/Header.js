@@ -59,8 +59,8 @@ function Header() {
       transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       sx={{ mt: 4 }}
     >
-      <MenuItem onClick={handleProfileMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleProfileMenuClose}>My Account</MenuItem>
+      {/* <MenuItem onClick={handleProfileMenuClose}>Profile</MenuItem>
+      <MenuItem onClick={handleProfileMenuClose}>My Account</MenuItem> */}
       <MenuItem onClick={() => {
         handleLogout();
         // Add logout functionality if needed
@@ -267,11 +267,11 @@ function Header() {
         </div>
 
         <Box className='head_right_icons' sx={{ display: { xs: 'none', md: 'flex' } }}>
-          <IconButton size="large" aria-label="show 4 new mails" color="inherit">
+          {/* <IconButton size="large" aria-label="show 4 new mails" color="inherit">
             <Badge badgeContent={4} color="error">
               <MailIcon />
             </Badge>
-          </IconButton>
+          </IconButton> */}
 
           <IconButton size="large" aria-label="show new notifications" color="inherit" onClick={handleNotificationsMenuOpen}>
             <Badge badgeContent={notifiationData.length} color="error">

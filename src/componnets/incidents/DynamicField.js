@@ -23,7 +23,7 @@ const Modal = ({ isOpen, onClose, children }) => {
                 borderRadius: '12px',
                 width: '90%',
                 maxWidth: '600px',
-                maxHeight: '85vh',
+                // maxHeight: '85vh',
                 overflowY: 'auto',
                 boxShadow: '0 8px 20px rgba(0, 0, 0, 0.2)',
                 // padding: '24px',
@@ -272,7 +272,7 @@ const DynamicFormFields = ({ incidentId }) => {
             console.error("Error submitting new fields:", error);
         }
     };
-    
+
     const allFields = [...selectedFields, ...newlyAddedFields];
     return (
         <div style={{
@@ -289,14 +289,14 @@ const DynamicFormFields = ({ incidentId }) => {
                 color: 'white',
                 padding: '12px'
             }}>
-                <div 
-                 onClick={() => setIsAccordionOpen(!isAccordionOpen)}
-                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0px 8px 0px 15px;' }}>
+                <div
+                    onClick={() => setIsAccordionOpen(!isAccordionOpen)}
+                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0px 8px 0px 15px;' }}>
                     <div>
                         <span className='accord_typo'>Dynamic Form Builder</span>
                     </div>
                     <div className='d-flex'>
-                   
+
                         <button
                             // onClick={() => setIsAccordionOpen(!isAccordionOpen)}
                             style={{
@@ -418,7 +418,7 @@ const DynamicFormFields = ({ incidentId }) => {
                 //                 }}
                 //             >
                 //                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                              
+
                 //                     <div style={{ flex: 1 }}>
                 //                         {field.type === 'text' ? (
                 //                             <TextField
@@ -507,98 +507,98 @@ const DynamicFormFields = ({ incidentId }) => {
                 //     </div>
                 // </div>
                 <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '1rem' }}>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-                    {allFields.map((field) => {
-                        // Determine the flex basis based on how many fields are in the row
-                        const fieldCount = allFields.length;
-                        const flexBasis = fieldCount === 1 ? '100%' : fieldCount === 2 ? 'calc(50% - 0.5rem)' : 'calc(33.33% - 1rem)';
-    
-                        return (
-                            <div key={field.fieldId} style={{ flex: `0 0 ${flexBasis}`, boxSizing: 'border-box' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <div style={{ flex: 1 }}>
-                                        {field.type === 'text' ? (
-                                            <TextField
-                                                label={field.label}
-                                                variant="outlined"
-                                                className="custom-textfield w-100"
-                                                InputProps={{ className: 'custom-input' }}
-                                                value={field.value || ""}
-                                                onChange={(e) => handleFieldChange(field.fieldId, e.target.value)}
-                                            />
-                                        ) : (
-                                            <Autocomplete
-                                                options={field.options}
-                                                value={field.options.find(option => option.value === field.value) || null}
-                                                onChange={(event, newValue) =>
-                                                    handleFieldChange(field.fieldId, newValue ? newValue.value : "")
-                                                }
-                                                inputValue={field.value || ''} // Show placeholder if no value
-                                                onInputChange={(event, newInputValue) => {
-                                                    if (field.value) {
-                                                        handleFieldChange(field.fieldId, newInputValue);
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+                        {allFields.map((field) => {
+                            // Determine the flex basis based on how many fields are in the row
+                            const fieldCount = allFields.length;
+                            const flexBasis = fieldCount === 1 ? '100%' : fieldCount === 2 ? 'calc(50% - 0.5rem)' : 'calc(33.33% - 1rem)';
+
+                            return (
+                                <div key={field.fieldId} style={{ flex: `0 0 ${flexBasis}`, boxSizing: 'border-box' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                        <div style={{ flex: 1 }}>
+                                            {field.type === 'text' ? (
+                                                <TextField
+                                                    label={field.label}
+                                                    variant="outlined"
+                                                    className="custom-textfield w-100"
+                                                    InputProps={{ className: 'custom-input' }}
+                                                    value={field.value || ""}
+                                                    onChange={(e) => handleFieldChange(field.fieldId, e.target.value)}
+                                                />
+                                            ) : (
+                                                <Autocomplete
+                                                    options={field.options}
+                                                    value={field.options.find(option => option.value === field.value) || null}
+                                                    onChange={(event, newValue) =>
+                                                        handleFieldChange(field.fieldId, newValue ? newValue.value : "")
                                                     }
-                                                }}
-                                                getOptionLabel={(option) => (option && option.value ? option.value : '')}
-                                                renderOption={(props, option) => (
-                                                    <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
-                                                        {option.value}
-                                                    </li>
-                                                )}
-                                                renderInput={(params) => (
-                                                    <TextField
-                                                        {...params}
-                                                        label={field.label}
-                                                        variant="outlined"
-                                                        className="custom-textfield"
-                                                        InputProps={{
-                                                            ...params.InputProps,
-                                                            className: 'custom-input-drop'
-                                                        }}
-                                                    />
-                                                )}
-                                                style={{ padding: "0px" }}
-                                            />
-                                        )}
+                                                    inputValue={field.value || ''} // Show placeholder if no value
+                                                    onInputChange={(event, newInputValue) => {
+                                                        if (field.value) {
+                                                            handleFieldChange(field.fieldId, newInputValue);
+                                                        }
+                                                    }}
+                                                    getOptionLabel={(option) => (option && option.value ? option.value : '')}
+                                                    renderOption={(props, option) => (
+                                                        <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
+                                                            {option.value}
+                                                        </li>
+                                                    )}
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            {...params}
+                                                            label={field.label}
+                                                            variant="outlined"
+                                                            className="custom-textfield"
+                                                            InputProps={{
+                                                                ...params.InputProps,
+                                                                className: 'custom-input-drop'
+                                                            }}
+                                                        />
+                                                    )}
+                                                    style={{ padding: "0px" }}
+                                                />
+                                            )}
+                                        </div>
+                                        <button
+                                            onClick={() => handleDeleteField(field.fieldId, !!field.incidentFieldId)}
+                                            style={{
+                                                padding: '0.5rem',
+                                                color: '#9CA3AF',
+                                                cursor: 'pointer',
+                                                borderRadius: '0.375rem',
+                                                border: 'none',
+                                                backgroundColor: 'transparent'
+                                            }}
+                                        >
+                                            <Trash2 style={{ height: '16px', width: '16px' }} />
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={() => handleDeleteField(field.fieldId, !!field.incidentFieldId)}
-                                        style={{
-                                            padding: '0.5rem',
-                                            color: '#9CA3AF',
-                                            cursor: 'pointer',
-                                            borderRadius: '0.375rem',
-                                            border: 'none',
-                                            backgroundColor: 'transparent'
-                                        }}
-                                    >
-                                        <Trash2 style={{ height: '16px', width: '16px' }} />
-                                    </button>
                                 </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })}
+                    </div>
+
+                    {/* Action buttons */}
+                    <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between' }}>
+                        <button
+                            className='accordian_cancel_btn'
+                            onClick={() => setIsModalOpen(true)}
+                            style={{ display: 'flex', alignItems: 'center' }}
+                        >
+                            <Plus style={{ height: '16px', width: '16px' }} />
+                            Add Fields
+                        </button>
+                        <button
+                            className='accordian_submit_btn'
+                            style={{ float: "right" }}
+                            onClick={handleSubmit}
+                        >
+                            Submit
+                        </button>
+                    </div>
                 </div>
-    
-                {/* Action buttons */}
-                <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between' }}>
-                    <button
-                        className='accordian_cancel_btn'
-                        onClick={() => setIsModalOpen(true)}
-                        style={{ display: 'flex', alignItems: 'center' }}
-                    >
-                        <Plus style={{ height: '16px', width: '16px' }} />
-                        Add Fields
-                    </button>
-                    <button
-                        className='accordian_submit_btn'
-                        style={{ float: "right" }}
-                        onClick={handleSubmit}
-                    >
-                        Submit
-                    </button>
-                </div>
-            </div>
             )}
 
 
@@ -611,7 +611,7 @@ const DynamicFormFields = ({ incidentId }) => {
                     setActiveTab('existing');
                 }}
             >
-                <div style={{ minHeight: "400px", maxHeight: "400px" }}>
+                <div>
                     {/* Tab Header */}
                     <div
                         style={{ display: 'flex', padding: "15px", backgroundColor: "#533529", color: "white" }}
@@ -642,46 +642,46 @@ const DynamicFormFields = ({ incidentId }) => {
 
                     {/* Tab Content */}
                     {activeTab === 'existing' ? (
-                     
-                        <div style={{ padding: "16px", backgroundColor: '#F9FAFB', borderRadius: '8px' }}>
-                        <Grid container spacing={2}>
-                            {availableFields.map((field) => (
-                                <Grid item xs={12} sm={6} key={field.fieldId}>
-                                    <div style={{ display: 'flex', alignItems: 'center', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '8px', backgroundColor: '#FFFFFF' }}>
-                                        <Checkbox
-                                            checked={selectedExistingFields.includes(field.fieldId)}
-                                            onChange={() => {
-                                                setSelectedExistingFields(selectedExistingFields.includes(field.fieldId)
-                                                    ? selectedExistingFields.filter(id => id !== field.fieldId)
-                                                    : [...selectedExistingFields, field.fieldId]);
-                                            }}
-                                            color="primary"
-                                        />
-                                        <div style={{ flex: 1, marginLeft: '8px' }}>
-                                            <Typography variant="body1" style={{ fontWeight: '500' }}>{field.label}</Typography>
-                                            <Typography variant="body2" color="textSecondary">({field.type})</Typography>
+
+                        <div style={{ padding: "16px", backgroundColor: '#F9FAFB', borderRadius: '8px', minHeight: "350px", maxHeight: "350px",  overflowY: 'auto' }}>
+                            <Grid container spacing={2}>
+                                {availableFields.map((field) => (
+                                    <Grid item xs={12} sm={6} key={field.fieldId}>
+                                        <div style={{ display: 'flex', alignItems: 'center', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '8px', backgroundColor: '#FFFFFF' }}>
+                                            <Checkbox
+                                                checked={selectedExistingFields.includes(field.fieldId)}
+                                                onChange={() => {
+                                                    setSelectedExistingFields(selectedExistingFields.includes(field.fieldId)
+                                                        ? selectedExistingFields.filter(id => id !== field.fieldId)
+                                                        : [...selectedExistingFields, field.fieldId]);
+                                                }}
+                                                color="primary"
+                                            />
+                                            <div style={{ flex: 1, marginLeft: '8px' }}>
+                                                <Typography variant="body1" style={{ fontWeight: '500' }}>{field.label}</Typography>
+                                                <Typography variant="body2" color="textSecondary">({field.type})</Typography>
+                                            </div>
+                                            <IconButton onClick={() => handleDeleteField(field.fieldId)} style={{ color: '#9CA3AF' }}>
+                                                <Trash2 />
+                                            </IconButton>
                                         </div>
-                                        <IconButton onClick={() => handleDeleteField(field.fieldId)} style={{ color: '#9CA3AF' }}>
-                                            <Trash2 />
-                                        </IconButton>
-                                    </div>
-                                </Grid>
-                            ))}
-                        </Grid>
-                        <Button
-                            onClick={handleAddExistingFields}
-                            variant="contained"
-                            color="primary"
-                          className='accordian_submit_btn mt-4 '
-                          style={{float:"right"}}
-                        >
-                            Add Selected Fields
-                        </Button>
-                    </div>
+                                    </Grid>
+                                ))}
+                            </Grid>
+                            <Button
+                                onClick={handleAddExistingFields}
+                                variant="contained"
+                                color="primary"
+                                className='accordian_submit_btn mt-4 '
+                                style={{ float: "right" }}
+                            >
+                                Add Selected Fields
+                            </Button>
+                        </div>
 
                     ) : (
-                    
-                        <div style={{ padding: "20px", borderRadius: '8px' }}>
+
+                        <div style={{ padding: "20px", borderRadius: '8px', minHeight: "350px", maxHeight: "350px",  overflowY: 'auto' }}>
                             {/* <h2>Create New Field</h2> */}
                             <FormControl fullWidth margin="normal">
                                 <Autocomplete
