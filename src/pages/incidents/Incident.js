@@ -14,6 +14,7 @@ import BuildIcon from '@mui/icons-material/Build';
 import { styled } from '@mui/material/styles';
 import { TextField, InputAdornment } from '@mui/material';
 import axios from 'axios';
+import { CircularProgress } from '@mui/material';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -395,7 +396,11 @@ console.log(userId);
 
       </div>
       {isLoading ? (
-        <div className='m-auto'>Loading...</div>
+       
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          <CircularProgress sx={{ color: '#533529' }} /> {/* Brown color */}
+        </div>
+      
       ) :
         <div class="row mb-5 ">
           <div class="col-md-12">
