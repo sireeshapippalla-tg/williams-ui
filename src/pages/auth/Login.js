@@ -171,9 +171,9 @@ const Login = () => {
                         label="Keep me logged in"
                     />
 
-                    {/* <div className='float-end'>
-                        <a href='/forgot/password'>Forgot password</a>
-                    </div> */}
+                    <div className='float-end'>
+                        <a href='/forgotPassword'>Forgot password</a>
+                    </div>
 
                     <Button onClick={handleSubmit} variant='contained' fullWidth className='mt-2 search_btn '>
                         Log In

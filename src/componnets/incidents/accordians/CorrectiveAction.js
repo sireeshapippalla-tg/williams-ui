@@ -178,16 +178,56 @@ const CorrectiveAction = ({ invokeHistory }) => {
         }));
 
     };
-    const tableCorrectiveHandleRemoveFile = (rowId, fileIndex) => {
-        setTableCorectiveSelectedFiles(prevState => {
-            const updatedFiles = prevState[rowId].filter((_, index) => index !== fileIndex);
-            return {
-                ...prevState,
-                [rowId]: updatedFiles
+    // const tableCorrectiveHandleRemoveFile = (rowId, fileIndex) => {
+    //     setTableCorectiveSelectedFiles(prevState => {
+    //         const updatedFiles = prevState[rowId].filter((_, index) => index !== fileIndex);
+    //         return {
+    //             ...prevState,
+    //             [rowId]: updatedFiles
+    //         };
+    //     });
+    // };
+    const tableCorrectiveHandleRemoveFile = async (rowId, fileIndex) => {
+        // Check if the selected file exists in the row's files
+        const fileToDelete = tableCorrectveSelectedFiles[rowId][fileIndex];
+        if (!fileToDelete) return;
+    
+        try {
+            const payload = {
+                documentId: fileToDelete.documentId,
+                documentName: fileToDelete.documentName
             };
-        });
-        // setTableCorectiveSelectedFiles(tableCorrectveSelectedFiles.filter((_, i) => i !== index));
+    
+            const response = await axios.post(deleteFile, payload);
+    
+            if (response.status === 200) {
+                setTableCorectiveSelectedFiles(prevState => {
+                    const updatedFiles = prevState[rowId].filter((_, index) => index !== fileIndex);
+                    return {
+                        ...prevState,
+                        [rowId]: updatedFiles
+                    };
+                });
+                setMessage("File deleted successfully.");
+                setSeverity('success');
+                setOpen(true);
+                invokeHistory();
+                fetchTaskIncident();
+            } else {
+                setMessage("Failed to delete the file.");
+                setSeverity('error');
+                setOpen(true);
+                invokeHistory();
+            }
+        } catch (error) {
+            console.error("Error deleting the file:", error);
+            setMessage("An error occurred while deleting the file.");
+            setSeverity('error');
+            setOpen(true);
+            invokeHistory();
+        }
     };
+    
 
     useEffect(() => {
         fetchTaskDropdown();
@@ -731,13 +771,26 @@ const CorrectiveAction = ({ invokeHistory }) => {
 
 
                                                                 <ListItemSecondaryAction>
+                                                                    {file.documentName && (
+                                                                        <IconButton
+                                                                            edge='end'
+                                                                            aria-label='download'
+                                                                        // onClick={() => handleDownloadFile(file.documentName)} // Define this function
+                                                                        >
+                                                                            <ArrowDownwardIcon
+                                                                                style={{ marginLeft: "5px", cursor: 'pointer', color:"blue" }}
+                                                                            onClick={() => download(file.documentUrl, file.documentName)}
+                                                                            />
+                                                                        </IconButton>
+                                                                    )}
                                                                     <IconButton
                                                                         edge='end'
                                                                         aria-label='delete'
                                                                         onClick={() => tableCorrectiveHandleRemoveFile(row.id, index)}
                                                                     >
-                                                                        <CloseIcon />
+                                                                        <CloseIcon  style={{color:"red"}}/>
                                                                     </IconButton>
+
                                                                 </ListItemSecondaryAction>
                                                             </ListItem>
                                                         ))}
@@ -935,7 +988,7 @@ const CorrectiveAction = ({ invokeHistory }) => {
                                                             <div className="file-download me-2">
                                                                 <ArrowDownwardIcon
                                                                     style={{ marginRight: "5px", cursor: 'pointer' }}
-                                                                 onClick={() => download(file.documentUrl, file.documentName)}
+                                                                    onClick={() => download(file.documentUrl, file.documentName)}
                                                                 />
                                                             </div>
                                                             <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
@@ -1061,8 +1114,8 @@ const CorrectiveAction = ({ invokeHistory }) => {
                     <DialogContentText className='mt-4'>Are you sure you want to delete the file "{fileToDelete?.documentName}"?</DialogContentText>
                 </DialogContent>
                 <DialogActions className='dialog_content'>
-                <Button className='accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button>
-                <Button className='accordian_submit_btn' onClick={closeDeleteDialog} color="primary">Cancel</Button>  </DialogActions>
+                    <Button className='accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button>
+                    <Button className='accordian_submit_btn' onClick={closeDeleteDialog} color="primary">Cancel</Button>  </DialogActions>
             </Dialog>
         </div>
     )

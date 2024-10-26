@@ -123,7 +123,7 @@ export default function Sidebar() {
     const location = useLocation();
     const { pathname } = location;
 
-    const shouldHideDrawer = pathname === "/login" || pathname === "/forgot/password";
+    const shouldHideDrawer = pathname === "/login" || pathname === "/forgotPassword";
 
 
 

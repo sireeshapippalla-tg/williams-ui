@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, X } from 'lucide-react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const Modal = ({ isOpen, onClose, children }) => {
     if (!isOpen) return null;
@@ -49,9 +50,9 @@ const Modal = ({ isOpen, onClose, children }) => {
 
 const DynamicFormFields = ({ incidentId }) => {
     const [availableFields, setAvailableFields] = useState([]);
-    const [selectedFields, setSelectedFields] = useState([]); 
-    const [newlyAddedFields, setNewlyAddedFields] = useState([]); 
-    const [isAccordionOpen, setIsAccordionOpen] = useState(true);
+    const [selectedFields, setSelectedFields] = useState([]);
+    const [newlyAddedFields, setNewlyAddedFields] = useState([]);
+    const [isAccordionOpen, setIsAccordionOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('existing');
     const [selectedExistingFields, setSelectedExistingFields] = useState([]);
@@ -126,7 +127,7 @@ const DynamicFormFields = ({ incidentId }) => {
             !selectedFields.find(f => f.fieldId === field.fieldId)
         ).map(field => ({
             ...field,
-            incidentFieldId: null 
+            incidentFieldId: null
         }));
 
         setSelectedFields([...selectedFields, ...fieldsToAdd]);
@@ -152,7 +153,7 @@ const DynamicFormFields = ({ incidentId }) => {
                 setNewlyAddedFields([...newlyAddedFields, fieldToAdd]);
                 setNewField({ type: 'text', label: '', options: [{ value: '', isSelected: false }] });
                 setIsModalOpen(false);
-                
+
                 fetchAvailableFields();
                 fetchIncidentFields();
             }
@@ -189,7 +190,7 @@ const DynamicFormFields = ({ incidentId }) => {
         if (isIncidentField) {
             // Handle deleting a field associated with an incident
             const field = selectedFields.find(f => f.fieldId === fieldId);
-    
+
             if (field) {
                 if (field.incidentFieldId) {
                     // Delete from the server if it has an incidentFieldId
@@ -211,7 +212,7 @@ const DynamicFormFields = ({ incidentId }) => {
         } else {
             // Handle deleting a newly created field
             const field = newlyAddedFields.find(f => f.fieldId === fieldId);
-    
+
             if (field) {
                 if (field.fieldId) {
                     // Delete from the server if it has a fieldId
@@ -232,7 +233,7 @@ const DynamicFormFields = ({ incidentId }) => {
             }
         }
     };
-    
+
 
     const handleSubmit = async () => {
         const newFieldsData = newlyAddedFields.map(field => {
@@ -268,60 +269,57 @@ const DynamicFormFields = ({ incidentId }) => {
     return (
         <div style={{
             width: '100%',
-            maxWidth: '768px',
+            // maxWidth: '768px',
             margin: '0 auto',
             backgroundColor: 'white',
             boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.15)',
-            borderRadius: '12px',
+            // borderRadius: '12px',
             overflow: 'hidden'
         }}>
             <div style={{
-                background: 'linear-gradient(to right, #1E40AF, #2563EB)',
+                background: '#533529',
                 color: 'white',
-                padding: '1.5rem'
+                padding: '12px'
             }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <button
-                        onClick={() => setIsAccordionOpen(!isAccordionOpen)}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            fontSize: '1.125rem',
-                            fontWeight: '600',
-                            color: '#E0E7FF',
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        <span>Dynamic Form Builder</span>
-                        <span
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0px 8px 0px 15px;' }}>
+                    <div>
+                        <span className='accord_typo'>Dynamic Form Builder</span>
+                    </div>
+                    <div className='d-flex'>
+                        {/* <button
+                            className='accordian_cancel_btn'
+                            onClick={() => setIsModalOpen(true)}>
+                            <Plus style={{ height: '16px', width: '16px' }} />
+                            Add Fields
+                        </button> */}
+                        <button
+                            onClick={() => setIsAccordionOpen(!isAccordionOpen)}
                             style={{
-                                transform: isAccordionOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                                transition: 'transform 0.2s'
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                fontSize: '1.125rem',
+                                fontWeight: '600',
+                                color: '#E0E7FF',
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer'
                             }}
                         >
-                            ▼
-                        </span>
-                    </button>
-                    <button
-                        onClick={() => setIsModalOpen(true)}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            padding: '0.5rem 1rem',
-                            backgroundColor: 'white',
-                            color: '#2563EB',
-                            borderRadius: '0.375rem',
-                            cursor: 'pointer',
-                            border: 'none'
-                        }}
-                    >
-                        <Plus style={{ height: '16px', width: '16px' }} />
-                        Add Fields
-                    </button>
+                            {/* <span>Dynamic Form Builder</span> */}
+                            <span
+                                style={{
+                                    transform: isAccordionOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                                    transition: 'transform 0.2s'
+                                }}
+                            >
+                                {/* ▼ */}
+                                <ExpandMoreIcon className='accordian_arrow' />
+                            </span>
+                        </button>
+
+                    </div>
+
                 </div>
             </div>
 
@@ -385,15 +383,21 @@ const DynamicFormFields = ({ incidentId }) => {
                             </div>
                         </div>
                     ))}
-                    <button onClick={handleSubmit} style={{
-                        marginTop: '1rem',
-                        padding: '0.5rem 1rem',
-                        backgroundColor: '#2563EB',
-                        color: 'white',
-                        borderRadius: '0.375rem',
-                        cursor: 'pointer',
-                        border: 'none'
-                    }}>Submit</button>
+                    <div>
+                        <button
+                            className='accordian_cancel_btn'
+                            onClick={() => setIsModalOpen(true)}>
+                            <Plus style={{ height: '16px', width: '16px' }} />
+                            Add Fields
+                        </button>
+                        <button
+                        className='accordian_submit_btn'
+                        style={{float:"right"}}
+                            onClick={handleSubmit}
+                        >
+                            Submit1
+                        </button>
+                    </div>
                 </div>
             )}
 

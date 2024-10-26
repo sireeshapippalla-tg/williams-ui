@@ -1182,7 +1182,7 @@ const confirmDeleteFile = async () => {
               <DynamicField selectedSection={selectedSection} invokeHistory={invokeHistory}/>
               </div>
                
-              <div className='row'>
+              <div className='row mt-3'>
                 <div className='col-md-12'>
                   <Button
                     className='accordian_cancel_btn float-end'
