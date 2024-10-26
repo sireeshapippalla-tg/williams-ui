@@ -242,7 +242,8 @@ const DynamicFormFields = ({ incidentId }) => {
     };
 
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         const newFieldsData = newlyAddedFields.map(field => {
             const selectedOption = field.type === 'select'
                 ? { value: field.value, isSelected: true }
@@ -584,7 +585,11 @@ const DynamicFormFields = ({ incidentId }) => {
                     <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between' }}>
                         <button
                             className='accordian_cancel_btn'
-                            onClick={() => setIsModalOpen(true)}
+                            // onClick={() => setIsModalOpen(true)}
+                            onClick={(event) => {
+                                event.preventDefault();  // Prevents any default action if needed
+                                setIsModalOpen(true);     // Opens the modal
+                            }}
                             style={{ display: 'flex', alignItems: 'center' }}
                         >
                             <Plus style={{ height: '16px', width: '16px' }} />

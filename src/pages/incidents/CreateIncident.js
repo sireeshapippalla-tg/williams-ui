@@ -447,9 +447,9 @@ const CreateIncident = (props) => {
         title: subject,
         userId: userId,
         source: data ? data.source : '',
-        category:data ? data.category : '',
-        severity:data ? data.severity : '',
-        department : data ? data.department : ''
+        category: data ? data.category : '',
+        severity: data ? data.severity : '',
+        department: data ? data.department : ''
       }
       console.log("payload", payload);
       // const payload = {
@@ -863,16 +863,12 @@ const CreateIncident = (props) => {
 
                 </Col>
               </Row>
+              <div className='accordian_s'>
+              <DynamicField />
+            </div>
             </div>
 
-            <div className='accordian_s'>
-              <DynamicField/>
-              </div>
-
-            {/* <div className='col-md-2'></div> */}
-            {/* <div className=' col-md-6 float-end'>
-                            
-                        </div> */}
+         
 
           </div>
           {console.log("issummary", props.isSummaryVisible)}
