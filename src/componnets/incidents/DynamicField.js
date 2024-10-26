@@ -64,7 +64,7 @@ const DynamicFormFields = ({ incidentId }) => {
 
     const fetchAvailableFields = async () => {
         try {
-            const response = await axios.post(`http://localhost:8084/iassure/api/incident/getAllFields`);
+            const response = await axios.post(`http://13.127.196.228:8084/iassure/api/incident/getAllFields`);
             if (response.status === 200) {
                 const data = response.data.dynamicFields;
                 const parsedFields = data.map(field => {
@@ -86,7 +86,7 @@ const DynamicFormFields = ({ incidentId }) => {
 
     const fetchIncidentFields = async () => {
         try {
-            const response = await axios.post(`http://localhost:8084/iassure/api/incident/getIncidentFields`, {
+            const response = await axios.post(`http://13.127.196.228:8084/iassure/api/incident/getIncidentFields`, {
                 incidentId: id
             });
             if (response.status === 200) {
@@ -145,7 +145,7 @@ const DynamicFormFields = ({ incidentId }) => {
         };
 
         try {
-            const response = await axios.post("http://localhost:8084/iassure/api/incident/createFields", fieldData);
+            const response = await axios.post("http://13.127.196.228:8084/iassure/api/incident/createFields", fieldData);
             if (response.status === 200) {
                 const newId = Math.max(...availableFields.map(f => f.fieldId), 0) + 1;
                 const fieldToAdd = { fieldId: newId, value: "", ...fieldData };
@@ -194,7 +194,7 @@ const DynamicFormFields = ({ incidentId }) => {
                 if (field.incidentFieldId) {
                     // Delete from the server if it has an incidentFieldId
                     try {
-                        const response = await axios.post("http://localhost:8084/iassure/api/incident/deleteIncidentField", { incidentFieldId: field.incidentFieldId });
+                        const response = await axios.post("http://13.127.196.228:8084/iassure/api/incident/deleteIncidentField", { incidentFieldId: field.incidentFieldId });
                         if (response.status === 200) {
                             alert(response.data.responseMessage);
                             setSelectedFields(prevFields => prevFields.filter(f => f.fieldId !== fieldId));
@@ -216,7 +216,7 @@ const DynamicFormFields = ({ incidentId }) => {
                 if (field.fieldId) {
                     // Delete from the server if it has a fieldId
                     try {
-                        const response = await axios.post("http://localhost:8084/iassure/api/incident/deleteField", { fieldId });
+                        const response = await axios.post("http://13.127.196.228:8084/iassure/api/incident/deleteField", { fieldId });
                         if (response.status === 200) {
                             alert(response.data.responseMessage);
                             setNewlyAddedFields(prevFields => prevFields.filter(f => f.fieldId !== fieldId));
@@ -254,7 +254,7 @@ const DynamicFormFields = ({ incidentId }) => {
         }
 
         try {
-            const response = await axios.post("http://localhost:8084/iassure/api/incident/submitFields", { fields: newFieldsData });
+            const response = await axios.post("http://13.127.196.228:8084/iassure/api/incident/submitFields", { fields: newFieldsData });
             if (response.status === 200) {
                 alert("New fields submitted successfully.");
                 setNewlyAddedFields([]);
