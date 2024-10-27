@@ -442,7 +442,6 @@ const CreateIncident = (props) => {
         severityId: inputs.Severity.value ? inputs.Severity.value.id ? inputs.Severity.value.id : 0 : 0,
         departmentId: selectedDepartment ? selectedDepartment.id : null, // Add departmentId to the payload
         assignedUserId: selectedUser ? selectedUser.id : null,
-        attachmentUrl: 'URL4',
         incidentStatusId: 34,
         title: subject,
         userId: userId,
