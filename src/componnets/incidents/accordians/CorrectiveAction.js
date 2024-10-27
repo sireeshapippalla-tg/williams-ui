@@ -95,7 +95,40 @@ const CorrectiveAction = ({ invokeHistory }) => {
             });
             const data = response.data
             setPromptData(data)
-            console.log('aidata', data)
+            console.log('aidata', data, taskOptions)
+            console.log('duedateAI', data.dueDate, data.taskId)
+
+            const newRow = {
+                id: "",
+                task: data.taskName || '',
+                taskId: taskOptions.some(opt => opt.id === data.taskId) ? data.taskId : 0,
+                dueDate: data.dueDate || '',
+                resolved: data.isResolved || false,
+                capTaskId: "",
+            };
+            let isTaskFound = taskOptions.find((item) => item.title == data.taskName);
+            if (isTaskFound) {
+
+            } else {
+                setTaskOptions([...taskOptions, { id: 0, title: data.taskName }]);
+
+            }
+
+            // setCorrectiveRows((prevRows) => [...prevRows, newRow]);
+            setAiPromptOpen(false)
+            setPromt('')
+            if (correctiveRows && correctiveRows.length > 0) {
+                if (correctiveRows[0].taskId) {
+                    setCorrectiveRows([...correctiveRows, newRow]);
+
+                } else {
+                    setCorrectiveRows([newRow]);
+
+                }
+            } else {
+                setCorrectiveRows([newRow]);
+            }
+
 
             console.log('aiproData', promptData)
         } catch (error) {
@@ -165,6 +198,7 @@ const CorrectiveAction = ({ invokeHistory }) => {
 
 
     const correctiveRowshandleChange = (rowId, field, value) => {
+        console.log(rowId, field, value)
         const updatedRows = correctiveRows.map((row) =>
             row.id === rowId ? { ...row, [field]: value } : row
         );
@@ -191,15 +225,15 @@ const CorrectiveAction = ({ invokeHistory }) => {
         // Check if the selected file exists in the row's files
         const fileToDelete = tableCorrectveSelectedFiles[rowId][fileIndex];
         if (!fileToDelete) return;
-    
+
         try {
             const payload = {
                 documentId: fileToDelete.documentId,
                 documentName: fileToDelete.documentName
             };
-    
+
             const response = await axios.post(deleteFile, payload);
-    
+
             if (response.status === 200) {
                 setTableCorectiveSelectedFiles(prevState => {
                     const updatedFiles = prevState[rowId].filter((_, index) => index !== fileIndex);
@@ -227,7 +261,7 @@ const CorrectiveAction = ({ invokeHistory }) => {
             invokeHistory();
         }
     };
-    
+
 
     useEffect(() => {
         fetchTaskDropdown();
@@ -297,10 +331,12 @@ const CorrectiveAction = ({ invokeHistory }) => {
                 taskId: row.taskId,
                 dueDate: row.dueDate || '',
                 resolvedFlag: row.resolved ? 1 : 0,
+                taskName:row.taskId ? "" : row.task
 
             }
             console.log(payload)
             formData.append('tasks', JSON.stringify(payload));
+            fetchTaskIncident();
 
             const selectedFiles = tableCorrectveSelectedFiles[row.id];
             if (selectedFiles && Array.isArray(selectedFiles) && selectedFiles.length > 0) {
@@ -321,20 +357,18 @@ const CorrectiveAction = ({ invokeHistory }) => {
                 setMessage('Task created sucessfully');
                 setSeverity('success')
                 invokeHistory()
-
                 setOpen(true)
             } else if (response.data.statusResponse.responseCode === 200) {
                 fetchTaskIncident();
                 setMessage('Task Updated sucessfully');
                 setSeverity('success')
                 invokeHistory()
-
                 setOpen(true)
             } else {
                 setMessage("Failed to assign task.");
                 setSeverity('error');
                 invokeHistory()
-
+                fetchTaskIncident();
                 setOpen(true);
             }
         } catch (error) {
@@ -348,6 +382,7 @@ const CorrectiveAction = ({ invokeHistory }) => {
     }
 
     const fetchTaskIncident = async () => {
+        setCorrectiveRows([])
         try {
             const payload = {
                 incidentId: id,
@@ -379,11 +414,9 @@ const CorrectiveAction = ({ invokeHistory }) => {
                 setCorrectiveRows([{ id: 1, task: '', taskId: '', dueDate: '', resolved: false, capTaskId: "" },])
             }
 
-            console.log(correctiveRows);
 
             // Map files to tasks
             const files = response.data.taskFileDetails;
-            console.log(files);
 
             const taskFilesMap = {}; // Create a map to hold files for each task
 
@@ -755,6 +788,8 @@ const CorrectiveAction = ({ invokeHistory }) => {
                                                     )}
 
                                                 />
+
+
                                             </TableCell>
                                             <TableCell
                                                 style={{ margin: 'auto', textAlign: 'center', minWidth: "200px" }}
@@ -778,8 +813,8 @@ const CorrectiveAction = ({ invokeHistory }) => {
                                                                         // onClick={() => handleDownloadFile(file.documentName)} // Define this function
                                                                         >
                                                                             <ArrowDownwardIcon
-                                                                                style={{ marginLeft: "5px", cursor: 'pointer', color:"blue" }}
-                                                                            onClick={() => download(file.documentUrl, file.documentName)}
+                                                                                style={{ marginLeft: "5px", cursor: 'pointer', color: "blue" }}
+                                                                                onClick={() => download(file.documentUrl, file.documentName)}
                                                                             />
                                                                         </IconButton>
                                                                     )}
@@ -788,7 +823,7 @@ const CorrectiveAction = ({ invokeHistory }) => {
                                                                         aria-label='delete'
                                                                         onClick={() => tableCorrectiveHandleRemoveFile(row.id, index)}
                                                                     >
-                                                                        <CloseIcon  style={{color:"red"}}/>
+                                                                        <CloseIcon style={{ color: "red" }} />
                                                                     </IconButton>
 
                                                                 </ListItemSecondaryAction>
