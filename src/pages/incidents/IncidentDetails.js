@@ -132,7 +132,7 @@ const IncidentDetails = (props) => {
   useEffect(() => {
     // Trigger loading before starting API calls
     setGlobalLoading(true);
-    
+
     Promise.all([
       fetchDepartments(),
       fetchDropdowns(),
@@ -525,45 +525,45 @@ const IncidentDetails = (props) => {
     setFileToDelete(file);
     setFileToDeleteIndex(index);
     setDeleteDialogOpen(true);
-};
+  };
 
-const closeDeleteDialog = () => {
+  const closeDeleteDialog = () => {
     setDeleteDialogOpen(false);
     setFileToDelete(null);
     setFileToDeleteIndex(null);
-};
+  };
 
-const confirmDeleteFile = async () => {
+  const confirmDeleteFile = async () => {
     if (!fileToDelete) return;
     try {
-        const payload = {
-            documentId: fileToDelete.documentId,
-            documentName: fileToDelete.documentName
-        };
+      const payload = {
+        documentId: fileToDelete.documentId,
+        documentName: fileToDelete.documentName
+      };
 
-        const response = await axios.post(deleteFile, payload);
+      const response = await axios.post(deleteFile, payload);
 
-        if (response.status === 200) {
-            setIncidentFiles(incidentFiles.filter(file => file.documentId !== fileToDelete.documentId));
-            setSelectedFiles(selectedFiles.filter(file => file.documentId !== fileToDelete.documentId));
+      if (response.status === 200) {
+        setIncidentFiles(incidentFiles.filter(file => file.documentId !== fileToDelete.documentId));
+        setSelectedFiles(selectedFiles.filter(file => file.documentId !== fileToDelete.documentId));
 
-            setMessage("File deleted successfully.");
-            setSeverity('success');
-            setOpen(true);
-        } else {
-            setMessage("Failed to delete the file.");
-            setSeverity('error');
-            setOpen(true);
-        }
-    } catch (error) {
-        console.error("Error deleting the file:", error);
-        setMessage("An error occurred while deleting the file.");
+        setMessage("File deleted successfully.");
+        setSeverity('success');
+        setOpen(true);
+      } else {
+        setMessage("Failed to delete the file.");
         setSeverity('error');
         setOpen(true);
+      }
+    } catch (error) {
+      console.error("Error deleting the file:", error);
+      setMessage("An error occurred while deleting the file.");
+      setSeverity('error');
+      setOpen(true);
     } finally {
-        closeDeleteDialog();
+      closeDeleteDialog();
     }
-};
+  };
 
   //incident deatils by id
   const fetchIncidentDetailsById = async () => {
@@ -691,23 +691,23 @@ const confirmDeleteFile = async () => {
     setSelectedFileUrl(fileUrl); // Set the selected file URL
   };
 
-  const download = async (url,fileName) => {
+  const download = async (url, fileName) => {
     try {
-        const payload = { documentName: fileName };
-        const response = await axios.post(downloadFile, payload, { responseType: 'blob' });
-        const blob = new Blob([response.data], { type: response.headers['content-type'] });
-        const link = document.createElement('a');
-        const url = window.URL.createObjectURL(blob);
-        link.href = url;
-        link.setAttribute('download', fileName);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
+      const payload = { documentName: fileName };
+      const response = await axios.post(downloadFile, payload, { responseType: 'blob' });
+      const blob = new Blob([response.data], { type: response.headers['content-type'] });
+      const link = document.createElement('a');
+      const url = window.URL.createObjectURL(blob);
+      link.href = url;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
-        console.error('Error in downloading file:', error);
+      console.error('Error in downloading file:', error);
     }
-};
+  };
 
   const fetchHistory = async () => {
     console.log("invokeHistory")
@@ -867,7 +867,7 @@ const confirmDeleteFile = async () => {
       setOpen(true);
     }
   }
- 
+
 
   // Your code
   if (globalLoading) {
@@ -877,7 +877,7 @@ const confirmDeleteFile = async () => {
       </div>
     );
   }
-  
+
 
   return (
     <div>
@@ -1162,8 +1162,8 @@ const confirmDeleteFile = async () => {
                                       <VisibilityIcon />
                                     </IconButton>
                                     <IconButton edge='end' onClick={() => openDeleteDialog(file, index)}>
-                                                        <CloseIcon className='close_icon' />
-                                     </IconButton>
+                                      <CloseIcon className='close_icon' />
+                                    </IconButton>
                                   </div>
                                 </div>
                               </li>
@@ -1179,9 +1179,9 @@ const confirmDeleteFile = async () => {
               )
               }
               <div className='accordian_s'>
-              <DynamicField selectedSection={selectedSection} invokeHistory={invokeHistory}/>
+                <DynamicField selectedSection={selectedSection} invokeHistory={invokeHistory} />
               </div>
-               
+
               <div className='row mt-3'>
                 <div className='col-md-12'>
                   <Button
@@ -1218,48 +1218,95 @@ const confirmDeleteFile = async () => {
                 >
                   Create new Fields
                 </Button>*/}
+              </div><div className="card mb-3" style={{ minHeight: "110px", maxHeight: "110px", overflowY: "auto" }}>
+                <div
+                  className="card-header"
+                  style={{
+                    backgroundColor: "#f5f5f5",
+                    fontWeight: "600",
+                    fontSize: "20px",
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 1,
+                  }}
+                >
+                  Summary
+                </div>
+                <div className="card-body">
+                  <p
+                    style={{
+                      fontSize: "14px",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      cursor: "pointer",
+                    }}
+                    title={summary.summary} // Tooltip with the full summary text
+                  >
+                    {summary.summary}
+                  </p>
+                </div>
               </div>
-              <div className='dynamic_fields mb-3' style={{ minHeight: "110px", maxHeight: "110px", overflowY: "auto" }}>
-                <h6 style={{ fontSize: "20px", fontWeight: "600" }}>Summary</h6>
-                <p style={{ fontSize: "14px" }}>{summary.summary}</p>
-              </div>
-              <div className="ticket-chat attached-files mb-3" style={{ minHeight: "160px", maxHeight: "160px", overflowY: "auto" }}>
-                <h5 style={{ fontWeight: "600" }}>History</h5>
 
-                {/* <div className="d-flex align-items-center">
-                                    <span className="history_bg">
-                                        sp
-                                    </span> created new &nbsp; <span style={{ fontWeight: "600" }}>incident</span>&nbsp; 2 days ago
-                                </div> */}
-                {historyLoading ? (
-                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    Loading...
-                  </div>
-                ) : (
-                  history.length > 0 ? (
-                    history.map((entry) => {
-                      // Split the 'createdBy' to get the first name
-                      const firstName = entry.createdBy.split(' ')[0];
 
-                      return (
-                        <div key={entry.id} className="d-flex align-items-center mb-3">
-                          <span className="history_bg">
-                            {firstName ? firstName.charAt(0).toUpperCase() : "?"}
-                          </span>
-                          {/* <span> {firstName}</span> &nbsp; */}
-                          <span style={{ fontWeight: "600", fontSize: "14px" }}> {entry.comments}</span> &nbsp;
-                          <span> {new Date(entry.createdAt).toLocaleDateString()}</span>
-                        </div>
-                      );
-                    })
+              <div className="card mb-3" style={{ minHeight: "200px", maxHeight: "200px", overflowY: "auto" }}>
+                <div
+                  className="card-header"
+                  style={{
+                    backgroundColor: "#f5f5f5",
+                    fontWeight: "600",
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 1,
+                  }}
+                >
+                  History
+                </div>
+                <div className="card-body">
+                  {historyLoading ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      Loading...
+                    </div>
                   ) : (
-                    <p>No history available.</p>
-                  )
-                )}
-
-
-
+                    history.length > 0 ? (
+                      history.map((entry) => {
+                        const firstName = entry.createdBy.split(' ')[0];
+                        return (
+                          <div key={entry.id} className="d-flex align-items-center mb-3">
+                            <span
+                              className="history_bg d-flex justify-content-center align-items-center"
+                              style={{
+                                backgroundColor: "#83472f",
+                                color: "#fff",
+                                width: "30px",
+                                height: "30px",
+                                borderRadius: "50%",
+                                fontWeight: "bold",
+                                fontSize: "16px",
+                                marginRight: "10px"
+                              }}
+                            >
+                              {firstName ? firstName.charAt(0).toUpperCase() : "?"}
+                            </span>
+                            <div style={{ flex: 1 }}>
+                              <span style={{ fontWeight: "600", fontSize: "14px" }}>{entry.comments}</span>
+                              <span style={{ fontSize: "12px", color: "#666", marginLeft: "8px" }}>
+                                {new Date(entry.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <p className="text-center text-muted">No history available.</p>
+                    )
+                  )}
+                </div>
               </div>
+
+
               <div className="ticket-chat ">
                 <div className="ticket-chat-head">
                   <h5 style={{ fontWeight: "600" }}>Incident Chat</h5>
@@ -1618,17 +1665,17 @@ const confirmDeleteFile = async () => {
         </Box>
       </Drawer>
 
-      
+
       <Dialog open={deleteDialogOpen} onClose={closeDeleteDialog}>
-                <DialogTitle className='dialog_head'>Delete Confirmation</DialogTitle>
-                <DialogContent className='dialog_content'>
-                    <DialogContentText className='mt-4'>Are you sure you want to delete the file "{fileToDelete?.documentName}"?</DialogContentText>
-                </DialogContent>
-                <DialogActions className='dialog_content'>
-                    <Button className='accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button>
-                    <Button className='accordian_submit_btn' onClick={closeDeleteDialog} color="primary">Cancel</Button>
-                </DialogActions>
-            </Dialog>
+        <DialogTitle className='dialog_head'>Delete Confirmation</DialogTitle>
+        <DialogContent className='dialog_content'>
+          <DialogContentText className='mt-4'>Are you sure you want to delete the file "{fileToDelete?.documentName}"?</DialogContentText>
+        </DialogContent>
+        <DialogActions className='dialog_content'>
+          <Button className='accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button>
+          <Button className='accordian_submit_btn' onClick={closeDeleteDialog} color="primary">Cancel</Button>
+        </DialogActions>
+      </Dialog>
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
         <Alert onClose={handleClose} severity={severity}>
           {message}
