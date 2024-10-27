@@ -191,8 +191,8 @@ const DynamicFormFields = ({ incidentId }) => {
                 setLoading(true);
                 try {
                     const response = await axios.post("http://13.127.196.228:8084/iassure/api/incident/deleteIncidentField", {
-                        "incidentId" : id,
-                        "fieldId" : fieldId
+                        "incidentId": id,
+                        "fieldId": fieldId
                     });
                     if (response.status === 200) {
                         showSnackbar("Field deleted from incident successfully.", 'success');
@@ -292,7 +292,7 @@ const DynamicFormFields = ({ incidentId }) => {
             <div style={{ background: '#533529', color: 'white', padding: '12px' }}>
                 <div onClick={() => setIsAccordionOpen(!isAccordionOpen)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span className='accord_typo'>Additional Fields</span>
-                    <ExpandMoreIcon style={{ transform: isAccordionOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+                    <ExpandMoreIcon style={{ transform: isAccordionOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', marginRight:"10px" }} />
                 </div>
             </div>
 
@@ -341,7 +341,12 @@ const DynamicFormFields = ({ incidentId }) => {
                         </Typography>
                     )}
                     <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between' }}>
-                        <button className='accordian_cancel_btn' onClick={() => setIsModalOpen(true)}>
+                        <button className='accordian_cancel_btn' 
+                        onClick={(event) => {
+                            event.preventDefault(); 
+                            setIsModalOpen(true);     
+                        }}
+                        >
                             <Plus style={{ height: '16px', width: '16px' }} /> Add Fields
                         </button>
                         <button className='accordian_submit_btn' onClick={handleSubmit}>Submit</button>
@@ -349,59 +354,184 @@ const DynamicFormFields = ({ incidentId }) => {
                 </div>
             )}
 
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} loading={loading}>
-                <div style={{ padding: "16px" }}>
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}
+            // loading={loading}
+            >
+                <div>
                     <div style={{ display: 'flex', padding: "15px", backgroundColor: "#533529", color: "white" }}>
                         <div onClick={() => setActiveTab('existing')} style={{ cursor: 'pointer', padding: '0.5rem 1rem', borderBottom: activeTab === 'existing' ? '2px solid #2563EB' : 'none' }}>Existing Fields</div>
                         <div onClick={() => setActiveTab('new')} style={{ cursor: 'pointer', padding: '0.5rem 1rem', borderBottom: activeTab === 'new' ? '2px solid #2563EB' : 'none' }}>Create New Field</div>
                     </div>
                     {activeTab === 'existing' ? (
-                        <div style={{
-                            padding: "16px",
-                            backgroundColor: '#F9FAFB',
-                            borderRadius: '8px',
-                            minHeight: "350px",
-                            maxHeight: "350px",
-                            overflowY: 'auto'
-                        }}>
-                            <Grid container spacing={2}>
-                                {availableFields.map((field) => (
-                                    <Grid item xs={12} sm={6} key={field.fieldId}>
-                                        <div style={{ display: 'flex', alignItems: 'center', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '8px' }}>
-                                            <Checkbox checked={selectedExistingFields.includes(field.fieldId)} onChange={() => setSelectedExistingFields(prev => prev.includes(field.fieldId) ? prev.filter(id => id !== field.fieldId) : [...prev, field.fieldId])} color="primary" />
-                                            <Typography variant="body1" style={{ fontWeight: '500' }}>{field.label}</Typography>
-                                            <IconButton onClick={() => handleDeleteField(field.fieldId)} style={{ color: '#9CA3AF' }}><Trash2 /></IconButton>
-                                        </div>
+                        <>
+                            <div
+                                style={{
+                                    padding: "24px",
+                                    backgroundColor: '#FFFFFF',
+                                    borderRadius: '10px',
+                                    minHeight: "350px",
+                                    maxHeight: "350px",
+                                    overflowY: 'auto',
+                                    boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.05)'
+                                }}
+                            >
+                                {loading ? (
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        height: '100%'
+                                    }}>
+                                        <Typography variant="h6" color="textSecondary">Loading...</Typography>
+                                    </div>
+                                ) : (
+                                    <Grid container spacing={2}>
+                                        {availableFields.map((field) => (
+                                            <Grid item xs={12} sm={6} key={field.fieldId}>
+                                                <div style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    padding: '12px 16px',
+                                                    border: '1px solid #E0E0E0',
+                                                    borderRadius: '8px',
+                                                    backgroundColor: '#F3F4F6',
+                                                    boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.05)'
+                                                }}>
+                                                    <Checkbox
+                                                        checked={selectedExistingFields.includes(field.fieldId)}
+                                                        onChange={() => setSelectedExistingFields(prev =>
+                                                            prev.includes(field.fieldId)
+                                                                ? prev.filter(id => id !== field.fieldId)
+                                                                : [...prev, field.fieldId]
+                                                        )}
+                                                        color="primary"
+                                                    />
+                                                    <Typography variant="body1" style={{ flex: 1, fontWeight: 500, color: '#4B5563' }}>
+                                                        {field.label}
+                                                    </Typography>
+                                                    <IconButton
+                                                        onClick={() => handleDeleteField(field.fieldId)}
+                                                        style={{ color: '#9CA3AF' }}
+                                                    >
+                                                        <Trash2 style={{ fontSize: '20px', color: '#d9534f'  }} />
+                                                    </IconButton>
+                                                </div>
+                                            </Grid>
+                                        ))}
                                     </Grid>
-                                ))}
-                            </Grid>
-                            <Button onClick={handleAddExistingFields} variant="contained" color="primary" style={{ float: "right" }}>Add Selected Fields</Button>
-                        </div>
+                                )}
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', margin: "14px" }}>
+                                <Button
+                                    onClick={handleAddExistingFields}
+                                    variant="contained"
+                                    color="primary"
+                                    className='accordian_submit_btn'
+                                    style={{
+                                        padding: "10px 24px",
+                                        borderRadius: "8px",
+                                        fontWeight: '600',
+                                        textTransform: 'capitalize',
+                                        boxShadow: '0px 3px 6px rgba(0, 0, 0, 0.1)',
+                                    }}
+                                >
+                                    Add Selected Fields
+                                </Button>
+                            </div>
+                        </>
+
                     ) : (
-                        <div style={{ padding: "20px", borderRadius: '8px', minHeight: "350px", overflowY: 'auto' }}>
-                            <FormControl fullWidth margin="normal">
-                                <Autocomplete
-                                    options={fieldTypes}
-                                    getOptionLabel={(option) => option.label}
-                                    onChange={(event, newValue) => setNewField({ ...newField, type: newValue ? newValue.value : '' })}
-                                    renderInput={(params) => <TextField {...params} label="Field Type" variant="outlined" />}
+                        <>
+                            <div style={{
+                                padding: "24px",
+                                backgroundColor: '#FFFFFF',
+                                borderRadius: '10px',
+                                minHeight: "350px",
+                                maxHeight: "350px",
+                                overflowY: 'auto',
+                                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.05)'
+                            }}>
+                                {/* Field Type Selection */}
+                                <FormControl fullWidth margin="normal">
+                                    <Autocomplete
+                                        options={fieldTypes}
+                                        getOptionLabel={(option) => option.label}
+                                        onChange={(event, newValue) => setNewField({ ...newField, type: newValue ? newValue.value : '' })}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                label="Field Type"
+                                                variant="outlined"
+                                                style={{ backgroundColor: '#F9FAFB', borderRadius: '8px' }}
+                                            />
+                                        )}
+                                    />
+                                </FormControl>
+
+                                {/* Field Label Input */}
+                                <TextField
+                                    label="Field Label"
+                                    value={newField.label}
+                                    onChange={(e) => setNewField({ ...newField, label: e.target.value })}
+                                    fullWidth
+                                    margin="normal"
+                                    variant="outlined"
+                                    style={{ backgroundColor: '#F9FAFB', borderRadius: '8px' }}
                                 />
-                            </FormControl>
-                            <TextField label="Field Label" value={newField.label} onChange={(e) => setNewField({ ...newField, label: e.target.value })} fullWidth margin="normal" variant="outlined" />
-                            {newField.type === 'select' && (
-                                <div>
-                                    <label style={{ fontWeight: 'bold' }}>Options</label>
-                                    {newField.options.map((option, index) => (
-                                        <div key={index} style={{ display: 'flex', alignItems: 'center', margin: '10px 0' }}>
-                                            <TextField variant="outlined" value={option.value} onChange={(e) => handleOptionChange(index, e.target.value)} style={{ flex: 1, marginRight: '10px' }} />
-                                            <Button onClick={() => handleDeleteOption(index)} style={{ color: '#d9534f' }}><Trash2 /></Button>
-                                        </div>
-                                    ))}
-                                    <Button onClick={handleAddOption} variant="contained" style={{ backgroundColor: '#28a745', color: 'white', marginTop: '10px' }}>Add Option</Button>
-                                </div>
-                            )}
-                            <Button onClick={handleCreateField} variant="contained" style={{ float: "right" }}>Create Field</Button>
-                        </div>
+
+                                {/* Select Options Section */}
+                                {newField.type === 'select' && (
+                                    <div style={{ marginTop: '16px' }}>
+                                        <Typography variant="subtitle1" style={{ fontWeight: 'bold', marginBottom: '8px' }}>Options</Typography>
+                                        {newField.options.map((option, index) => (
+                                            <div key={index} style={{ display: 'flex', alignItems: 'center', margin: '8px 0' }}>
+                                                <TextField
+                                                    variant="outlined"
+                                                    value={option.value}
+                                                    onChange={(e) => handleOptionChange(index, e.target.value)}
+                                                    style={{ flex: 1, marginRight: '10px', backgroundColor: '#F9FAFB', borderRadius: '8px' }}
+                                                />
+                                                <IconButton onClick={() => handleDeleteOption(index)} style={{ color: '#d9534f' }}>
+                                                    <Trash2 />
+                                                </IconButton>
+                                            </div>
+                                        ))}
+                                        <Button
+                                            onClick={handleAddOption}
+                                            variant="text"
+                                            style={{
+                                                textTransform: 'capitalize',
+                                                 color:"#533529",
+                                                padding: '8px 12px',
+                                                fontWeight: '600'
+                                            }}
+                                        >
+                                           Click here to Add Option
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Create Field Button */}
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '14px' }}>
+                                <Button
+                                    onClick={handleCreateField}
+                                    // variant="contained"
+                                    className='accordian_submit_btn'
+                                    style={{
+                                        padding: "10px 24px",
+                                        borderRadius: "8px",
+                                        fontWeight: '600',
+                                        textTransform: 'capitalize',
+                                        boxShadow: '0px 3px 6px rgba(0, 0, 0, 0.1)',
+                                       
+                                    }}
+                                >
+                                    Create Field
+                                </Button>
+                            </div>
+                        </>
+
                     )}
                 </div>
             </Modal>
