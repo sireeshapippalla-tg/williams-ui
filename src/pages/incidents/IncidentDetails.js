@@ -572,7 +572,7 @@ const IncidentDetails = (props) => {
       const payload = {
         "orgId": 1,
         "incidentId": id,
-        "userId": userId
+        "userId": 0
       }
       console.log(payload)
       const response = await axios.post(getIncidentDetailsById, payload)
@@ -825,8 +825,6 @@ const IncidentDetails = (props) => {
         severityId: getId("Severity"),
         departmentId: selectedDepartment ? selectedDepartment.id : null,
         assignedUserId: selectedUser ? selectedUser.id : null,
-        attachmentUrl: 'URL4',
-        incidentStatusId: 34,
         title: subject,
         userId: userId,
         incidentId: id

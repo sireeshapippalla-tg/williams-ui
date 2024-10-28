@@ -255,7 +255,7 @@ const DynamicFormFields = ({ incidentId }) => {
                 ? { value: field.value, isSelected: true }
                 : { value: field.value }
         }));
-
+        console.log(id, "Incident ID");
         if (fieldsToSubmit.length === 0) {
             showSnackbar("No new fields to submit.", 'info');
             return;

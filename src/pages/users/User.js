@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import AddIcon from '@mui/icons-material/Add';
 import { Link } from 'react-router-dom';
+import DepartmentModal from './Department';
 import Button from '@mui/material/Button';
 import { Autocomplete, TextField, Menu, MenuItem, InputAdornment } from '@mui/material';
 import Paper from '@mui/material/Paper';
@@ -565,6 +566,9 @@ const User = () => {
                         <Link href="#">Dashboard</Link> <span> / Users</span>
 
                     </div>
+                </div>
+                <div className='col-md-6 btn_incident_create incident_mbl' style={{ float: "right" }}>
+                <DepartmentModal />
                 </div>
                 <div className='col-md-6 btn_incident_create incident_mbl' style={{ float: "right" }}>
                     <Button className='me-2'

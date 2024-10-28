@@ -84,7 +84,13 @@ const Login = () => {
     
                 // Navigate to the /incident page
                 navigate('/incident');
-            } else if (responseCode === 400) {
+            }else if(responseCode === 203){
+                setPasswordError(responseMessage);
+
+                navigate('/forgotPassword');
+            }
+            
+            else if (responseCode === 400) {
                 // Invalid credentials - stay on login page and show error message
                 setPasswordError(responseMessage); 
             }
