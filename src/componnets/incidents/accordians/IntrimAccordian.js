@@ -250,6 +250,7 @@ const IntrimAccordian = ({ invokeHistory }) => {
                             <Button component='label' style={{ color: "black" }}>Choose file
                                 <VisuallyHiddenInput type='file' multiple onChange={handleFileSelect} />
                             </Button>
+                            <span className='vertical-line'></span>
                             <span style={{ marginLeft: "10px" }}>
                                 {interimSelectedFiles.length > 0 ? `${interimSelectedFiles.length} file(s) selected` : 'No file chosen'}
                             </span>

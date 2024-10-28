@@ -855,16 +855,19 @@ const IncidentDetails = (props) => {
         setOpen(true);
         setSelectedFiles([])
         fetchIncidentDetailsById();
+        fetchHistory()
       } else {
         setMessage("Failed to add incident.");
         setSeverity('error');
         setOpen(true);
+        fetchHistory();
       }
     } catch (error) {
       console.error('Error:', error);
       setMessage("Failed to add incident. Error: " + error.message);
       setSeverity('error');
       setOpen(true);
+      fetchHistory();
     }
   }
 

@@ -13,18 +13,13 @@ import { styled } from '@mui/material/styles';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import CloseIcon from '@mui/icons-material/Close';
 import IconButton from '@mui/material/IconButton';
-import { Alert } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
-import { Snackbar } from '@mui/material';
+import { Snackbar, Dialog, DialogContentText, DialogTitle, DialogActions, DialogContent, Alert  } from '@mui/material';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import Dialog from '@mui/material/Dialog';
-import { DialogContentText, DialogTitle } from '@mui/material';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
 import { savePreventiveAction, getPreventiveActionDetails, downloadFile, deleteFile } from '../../../api';
 
 const VisuallyHiddenInput = styled('input')({
@@ -383,77 +378,16 @@ const Preventivections = ({ invokeHistory }) => {
                     <div className='d-flex justify-content-end gap-3 mt-3'>
                         <Button className='accordian_submit_btn'
                             onClick={submit_Preventive_Action}
-                        // onClick={handleSubmit}
                         >Submit</Button>
-                        {/* <Button
-                                className='accordian_cancel_btn'
-                            >
-                                Close
-                            </Button> */}
                     </div>
-                    {/* <div className='row accordian_row'>
-
-                        <div className='col-md-8 ps-0 attached-files-info mt-3'>
-                            <div className="row">
-                                <div className="col-xxl-6">
-                                    <div className="attached-files">
-                                        <ul>
-                                            {preventiveSelectedFiles.length > 0 && (
-                                                preventiveSelectedFiles.map((file, index) => (
-                                                    <li key={index} className='mt-2'>
-                                                        <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
-                                                            <div className="d-flex align-items-center">
-                                                                <span className="file-icon">
-                                                                    <TextSnippetIcon style={{ color: "#533529" }} />
-                                                                </span>
-                                                                <p className="mb-0 ms-2">{file.name}</p>
-                                                            </div>
-                                                            <div className="file-actions d-flex align-items-center">
-                                                                <div className="file-download me-2">
-                                                                    <a href="#">
-                                                                        <ArrowDownwardIcon style={{ marginRight: "5px" }} />
-                                                                    </a>
-                                                                </div>
-                                                                <IconButton>
-                                                                    <VisibilityIcon />
-                                                                </IconButton>
-                                                                <IconButton
-                                                                    edge='end'
-                                                                    aria-label='delete'
-                                                                    onClick={() => preventiveHandleRemoveFile(index)}
-                                                                >
-                                                                    <CloseIcon className='close_icon' />
-                                                                </IconButton>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                ))
-                                            )}
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                      
-                        <div className='col-md-4 float-end mt-3 '>
-                            <div className='d-flex justify-content-end gap-3 '>
-                                <Button className='accordian_submit_btn' onClick={submit_Preventive_Action}>Submit</Button>
-                                <Button
-                                    className='accordian_cancel_btn mr-1'
-                                >
-                                    Close
-                                </Button>
-                            </div>
-                        </div>
-                    </div> */}
                 </AccordionDetails>
             </Accordion>
-            <Snackbar open={open} autoHideDuration={2000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-                <Alert onClose={handleClose} severity={severity}>
+        
+            {/* <Snackbar open={open} autoHideDuration={2000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert onClose={handleClose} severity={severity} >
                     {message}
                 </Alert>
-            </Snackbar>
+            </Snackbar> */}
             <Dialog open={deleteDialogOpen} onClose={closeDeleteDialog}>
                 <DialogTitle className='dialog_head'>Delete Confirmation</DialogTitle>
                 <DialogContent className='dialog_content'>
@@ -465,10 +399,10 @@ const Preventivections = ({ invokeHistory }) => {
             </Dialog>
 
             <Dialog
-                open={Boolean(filePreview)} // Open the dialog if a file is selected
-                onClose={() => filePreview(null)} // Close the dialog
-                fullWidth // This makes the dialog take the full width of its container
-                maxWidth="xl" // Options: 'xs', 'sm', 'md', 'lg', 'xl'
+                open={Boolean(filePreview)} 
+                onClose={() => filePreview(null)} 
+                fullWidth 
+                maxWidth="xl" 
                 sx={{
                     '& .MuiDialog-paper': {
                         width: '80vw',
@@ -493,6 +427,9 @@ const Preventivections = ({ invokeHistory }) => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            <Snackbar open={open} autoHideDuration={2000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert onClose={handleClose} severity={severity}>{message}</Alert>
+            </Snackbar>
         </div>
     )
 }
