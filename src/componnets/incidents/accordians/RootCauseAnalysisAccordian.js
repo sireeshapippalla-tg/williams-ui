@@ -78,6 +78,7 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
     const [fileToDelete, setFileToDelete] = useState(null);
     const [fileToDeleteIndex, setFileToDeleteIndex] = useState(null);
     const [loading, setLoading] = useState(false)
+    const [errors, setErrors] = useState({})
 
 
     const storedUser = JSON.parse(localStorage.getItem('userDetails'));
@@ -131,10 +132,29 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
         fetch_rootcause_analysis();
     }, [])
 
-
+    const formValidation = () => {
+        const newErrors = {}
+        // if (!intrimFindings.trim()) {
+        //     newErrors.intrimFindings = "Findings is required"
+        // }
+        // setErrors(newErrors);
+        // return Object.keys(newErrors).length === 0;
+        if (!problemDescription.trim()) {
+            newErrors.problemDescription = "Problem description required"            
+        }
+        if(!summary.trim()) {
+            newErrors.summary = "Summary is required"
+        }
+        setErrors(newErrors);
+            return Object.keys(newErrors).length === 0;
+    }
 
     const handleRootCauseSubmit = async (e) => {
         e.preventDefault();
+        if (!formValidation()) {
+            console.log("Form validation failed");
+            return;
+        }
         setLoading(true)
 
         try {
@@ -237,7 +257,7 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
             setMessage("Failed to submit Root cause analysis. Error: " + error.message);
             setSeverity('error');
             setOpen(true);
-        }finally{
+        } finally {
             setLoading(false)
         }
 
@@ -451,10 +471,18 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                                                     style={{ backgroundColor: '#f1f0ef' }}
                                                     fullWidth
                                                     value={problemDescription}
-                                                    onChange={(e) =>
+                                                    onChange={(e) => {
                                                         setProblemDescription(e.target.value)
-                                                    }
+                                                        setErrors((prevErrors) => ({
+                                                            ...prevErrors,
+                                                            problemDescription: undefined,
+                                                        }));
+
+                                                    }}
                                                 />
+                                                {errors.problemDescription && (
+                                                    <div style={{ color: 'red', fontSize: '0.875em' }}>{errors.problemDescription}</div>
+                                                )}
                                             </TableCell>
                                         </TableRow>
 
@@ -555,10 +583,16 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                                         placeholder='Write your Summary'
                                         style={{ backgroundColor: "#f1f0ef" }}
                                         value={summary}
-                                        onChange={(e) =>
+                                        onChange={(e) =>{
                                             setSummary(e.target.value)
-                                        }
+                                            setErrors((prevErrors) => ({
+                                                ...prevErrors,
+                                                summary: undefined,
+                                            }));
+                                        }}
+                                        isInvalid={!!errors.summary}
                                     />
+                                    <Form.Control.Feedback type="invalid">{errors.summary}</Form.Control.Feedback>
                                 </Form.Group>
                             </div>
                             <div className='col-md-6 ps-0 file_upload upload-file-border'>
@@ -655,8 +689,8 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                         <div className='row accordian_row'>
                             <div className='d-flex justify-content-end gap-3 mt-3'>
                                 <Button className='accordian_submit_btn  ' style={{ float: "none", marginRight: "15px" }} onClick={handleRootCauseSubmit}>
-                                   {loading ? "Processing..." : "Submit"}
-                                    </Button>
+                                    {loading ? "Processing..." : "Submit"}
+                                </Button>
                                 {/* <Button className='accordian_cancel_btn'>Close</Button> */}
                             </div>
                         </div>
