@@ -30,8 +30,7 @@ import williamslogo from '../assets/images/williamslogo.jpeg';
 import { useGlobalState } from '../contexts/GlobalStateContext';
 
 function Header() {
-  const { notifications, fetchNotifications } = useGlobalState();
-  console.log('notifications context', notifications)
+  const { notifications } = useGlobalState();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
@@ -80,8 +79,8 @@ function Header() {
   ];
 
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+    // fetchNotifications();
+  }, []);
 
 
 

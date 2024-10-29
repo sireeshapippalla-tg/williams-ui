@@ -210,20 +210,6 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                 invokeHistory()
                 setOpen(true);
                 setRootSelectedFiles([])
-
-                const fetchedRootFiles = response.data.rootCauseFiles || [];
-                if (fetchedRootFiles && fetchedRootFiles.length > 0) {
-                    const newFiles = fetchedRootFiles.map((file) => ({
-                        documentId: file.documentId,
-                        documentName: file.documentName,
-                        documentSize: file.documentSize,
-                        documentUrl: file.documentUrl,
-                        documentType: file.documentType,
-                        uploadDate: file.uploadDate
-                    }));
-                    setFetchedFiles(prevFiles => [...prevFiles, ...newFiles])
-                }
-
                 fetch_rootcause_analysis();
 
             } else if (response?.data?.statusResponse?.responseCode === 200) {
@@ -233,16 +219,6 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                 setOpen(true);
 
                 setRootSelectedFiles([])
-
-                const newFiles = response?.data?.rootCauseFiles?.map((file) => ({
-                    documentId: file.documentId,
-                    documentName: file.documentName,
-                    documentSize: file.documentSize,
-                    documentUrl: file.documentUrl,
-                    documentType: file.documentType,
-                    uploadDate: file.uploadDate
-                }))
-                setFetchedFiles(prevFile => [...prevFile, newFiles])
                 fetch_rootcause_analysis()
             } else {
                 setMessage("Failed to add Preventive action.");

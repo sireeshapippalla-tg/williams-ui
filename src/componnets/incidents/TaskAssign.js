@@ -15,8 +15,10 @@ import CorrectiveAction from './accordians/CorrectiveAction';
 import Preventivections from './accordians/Preventivections';
 import { useParams } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
-import { getEmployeesAndManager, getAllUsers, saveIncidentAssign, getIncidentAssignDetails } from '../../api';
 
+
+import { getEmployeesAndManager, getAllUsers, saveIncidentAssign, getIncidentAssignDetails } from '../../api';
+import { useGlobalState } from '../../contexts/GlobalStateContext';
 // Mapping section names to their respective IDs
 const SECTION_IDS = {
   interimInvestigation: 1,
@@ -27,6 +29,8 @@ const SECTION_IDS = {
 const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
 
   const { id } = useParams();
+
+  const{fetchNotifications} = useGlobalState()
 
   const [loading, setLoading] = useState(false)
   const [selectedSection, setSelectedSection] = useState(SECTION_IDS.interimInvestigation);
@@ -306,17 +310,20 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
         setMessage("Task assigned Successfully");
         setSeverity('success');
         invokeHistory()
+        fetchNotifications()
         setOpen(true);
       } else if (response?.data?.statusResponse?.responseCode === 200) {
         fetchAssignToTask()
         setMessage("Task Updated Successfully");
         setSeverity('success');
         invokeHistory()
+        fetchNotifications()
         setOpen(true);
       } else {
         setMessage("Failed to assign task.");
         setSeverity('error');
         invokeHistory()
+        fetchNotifications()
         setOpen(true);
       }
     } catch (error) {
@@ -324,6 +331,7 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
       setMessage("Failed to submit Task assigning. Error: " + error.message);
       setSeverity('error');
       invokeHistory();
+      fetchNotifications()
       setOpen(true);
     } finally {
       setLoading(false)

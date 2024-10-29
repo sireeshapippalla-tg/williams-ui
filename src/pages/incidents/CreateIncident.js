@@ -99,6 +99,7 @@ const CreateIncident = (props) => {
   const [showModal3, setShowModal3] = useState(false);
   const [allUsers, setAllUsers] = useState([])
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false)
 
 
   const storedUser = JSON.parse(localStorage.getItem('userDetails'));
@@ -131,7 +132,7 @@ const CreateIncident = (props) => {
   //   if (data) {
   //     setSubject(data.title);
   //     setCaseDescription(data.description);
-  
+
   //     let isDepFound = departments.find((item) => item.title === data.department);
   //     if (isDepFound) {
   //       setSelectedDepartment(data.department); // Make sure to set the found department object
@@ -143,7 +144,7 @@ const CreateIncident = (props) => {
   //       setDepartments([...departments, obj]);
   //       setSelectedDepartment(obj); // Set the new department as selected
   //     }
-  
+
   //     // Clear errors since we're populating with valid data
   //     setErrors((prevErrors) => ({
   //       ...prevErrors,
@@ -323,12 +324,52 @@ const CreateIncident = (props) => {
         fetchDropdownData("Incident Category"),
         fetchDropdownData("Incident Severity")
       ]);
+      let sevObj;
+      let catObj;
+      let souObj;
 
+      if (severityData && severityData.length > 0) {
+        if (data && data.severity) {
+          let isSeverityFound = severityData.find((item) => item.title.toLowerCase() == data.severity.toLowerCase());
+
+          if (isSeverityFound) {
+            sevObj = isSeverityFound
+
+          } else {
+            sevObj = { id: 0, title: data.severity }
+          }
+
+        }
+      }
+      if (categoryData && categoryData.length > 0) {
+        if (data && data.category) {
+          let iscategoryDataFound = categoryData.find((item) => item.title.toLowerCase() == data.category.toLowerCase());
+
+          if (iscategoryDataFound) {
+            catObj = iscategoryDataFound
+
+          } else {
+            catObj = { id: 0, title: data.category }
+          }
+        }
+      }
+      if (sourceData && sourceData.length > 0) {
+        if (data && data.source) {
+          let issourceDataFound = sourceData.find((item) => item.title.toLowerCase() == data.source.toLowerCase());
+          if (issourceDataFound) {
+            souObj = issourceDataFound
+
+          } else {
+            souObj = { id: 0, title: data.source }
+          }
+        }
+      }
+      console.log("souObj", souObj)
       setInputs(prevState => ({
         ...prevState,
-        Source: { value: data.source, options: sourceData },
-        Category: { value: data.category, options: categoryData },
-        Severity: { value: data.severity, options: severityData }
+        Source: { value: souObj, options: sourceData },
+        Category: { value: catObj, options: categoryData },
+        Severity: { value: sevObj, options: severityData }
       }));
       console.log("inputs", inputs)
     } catch (error) {
@@ -376,7 +417,7 @@ const CreateIncident = (props) => {
   const handleDepartmentChange = (event, newValue) => {
     setErrors((prevErrors) => ({
       ...prevErrors,
-      department: undefined, 
+      department: undefined,
     }));
 
     setSelectedDepartment(newValue);
@@ -495,7 +536,7 @@ const CreateIncident = (props) => {
 
   const validateFields = () => {
     const newErrors = {};
-  
+
     // Validate each field and set an error message if invalid
     if (!subject?.trim()) {
       newErrors.subject = "Subject is required";
@@ -504,44 +545,44 @@ const CreateIncident = (props) => {
     if (!caseDescription?.trim()) {
       newErrors.caseDescription = "Description is required";
     }
-    if (!inputs.Source?.value?.id) {
+    if (inputs.Source?.value?.id == undefined) {
       newErrors.source = "Source is required";
     }
-    if (!inputs.Category?.value?.id) {
+    if (inputs.Category?.value?.id == undefined) {
       newErrors.category = "Category is required";
     }
-    if (!inputs.Severity?.value?.id) {
+    if (inputs.Severity?.value?.id == undefined) {
       newErrors.severity = "Severity is required";
     }
-    if (!selectedDepartment?.id) {
+    if (selectedDepartment?.id == undefined) {
       newErrors.department = "Department is required";
     }
-    if (!selectedUser?.id) {
+    if (selectedUser?.id == undefined) {
       newErrors.assignedUser = "Assigned user is required";
     }
-  
+
     setErrors(newErrors); // Update errors state
-  
+
     // Return true if no errors
     return Object.keys(newErrors).length === 0;
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("submit")
-    // if (!validateFields()) {
-    //   console.log("Form validation failed");
-    //   setShowModal3(false)
-    //   return;
-    // }
-
+    if (!validateFields()) {
+      console.log("Form validation failed");
+      setShowModal3(false)
+      return;
+    }
+    setLoading(true)
     try {
 
       const payload = {
         orgId: 1,
         description: caseDescription,
-        sourceId: inputs.Source.value ? inputs.Source.value.id ? inputs.Source.value.id : 0 : 0,
-        categoryId: inputs.Category.value ? inputs.Category.value.id ? inputs.Category.value.id : 0 : 0,
-        severityId: inputs.Severity.value ? inputs.Severity.value.id ? inputs.Severity.value.id : 0 : 0,
+        sourceId: inputs.Source.value ? inputs.Source.value.id ? inputs.Source.value.id : 0 : null,
+        categoryId: inputs.Category.value ? inputs.Category.value.id ? inputs.Category.value.id : 0 : null,
+        severityId: inputs.Severity.value ? inputs.Severity.value.id ? inputs.Severity.value.id : 0 : null,
         departmentId: selectedDepartment ? selectedDepartment.id : null, // Add departmentId to the payload
         assignedUserId: selectedUser ? selectedUser.id : null,
         incidentStatusId: 34,
@@ -588,6 +629,8 @@ const CreateIncident = (props) => {
       setMessage("Failed to add incident. Error: " + error.message);
       setSeverity('error');
       setOpen(true);
+    }finally{
+      setLoading(false)
     }
   }
 
@@ -781,7 +824,7 @@ const CreateIncident = (props) => {
                           className="custom-textfield"
                           error={!!errors[name.toLowerCase()]}
                           helperText={errors[name.toLowerCase()]}
-                          
+
                         />
                       )}
                     />
@@ -843,7 +886,7 @@ const CreateIncident = (props) => {
                         className="custom-textfield"
                         error={!!errors.assignedUser}
                         helperText={errors.assignedUser}
-                        
+
                       />
                     )}
                   />
@@ -865,7 +908,7 @@ const CreateIncident = (props) => {
                         setSubject(e.target.value)
                         setErrors((prevErrors) => ({
                           ...prevErrors,
-                          subject: undefined, 
+                          subject: undefined,
                         }));
                       }}
                       error={!!errors.subject}
@@ -893,19 +936,13 @@ const CreateIncident = (props) => {
                         setCaseDescription(e.target.value)
                         setErrors((prevErrors) => ({
                           ...prevErrors,
-                          caseDescription: undefined, 
+                          caseDescription: undefined,
                         }));
                       }}
                       error={!!errors.caseDescription}
                       helperText={errors.caseDescription || ''}
-                      sx={{
-                        "& .MuiFormHelperText-root": {
-                          backgroundColor: "transparent", // Ensure the helper text has no background
-                          marginLeft: 0, 
-                          padding: 0,
-                        },
-                      }}
                     />
+                    {/* <Form.Control.Feedback type="invalid">{errors.comments}</Form.Control.Feedback> */}
                   </Form.Group>
                 </div>
               </Col>
@@ -970,11 +1007,11 @@ const CreateIncident = (props) => {
                 </Col>
               </Row>
               <div className='accordian_s'>
-              {/* <DynamicField /> */}
-            </div>
+                {/* <DynamicField /> */}
+              </div>
             </div>
 
-         
+
 
           </div>
           {console.log("issummary", props.isSummaryVisible)}
@@ -1387,7 +1424,7 @@ const CreateIncident = (props) => {
             <Modal.Footer>
               <Button variant='outlined' className='dynamic_btn m-1'
                 onClick={handleSubmit}
-              >Yes</Button>
+              >{loading ? "Processing..." : "Yes"}</Button>
               <Button className='m-1 add-Field-btn p-2' onClick={toggleModal3}>No</Button>
             </Modal.Footer>
           </Modal>

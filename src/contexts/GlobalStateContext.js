@@ -59,7 +59,7 @@ export const GlobalStateProvider = ({ children }) => {
         <GlobalStateContext.Provider
             value={{
                 notifications,
-                fetchNotifications,
+                fetchNotifications
                 // markAsRead,
                 // deleteNotification
             }}

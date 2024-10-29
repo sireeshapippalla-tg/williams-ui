@@ -52,6 +52,8 @@ import {
   deleteFile
 } from '../../api';
 
+import { useGlobalState } from '../../contexts/GlobalStateContext';
+
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -69,6 +71,7 @@ const VisuallyHiddenInput = styled('input')({
 const IncidentDetails = (props) => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { fetchNotifications  } = useGlobalState();
   const [loading, setLoading] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false)
   const [message, setMessage] = useState('');
@@ -855,6 +858,7 @@ const IncidentDetails = (props) => {
         setSelectedFiles([])
         fetchIncidentDetailsById();
         fetchHistory()
+        fetchNotifications()
       } else {
         setMessage("Failed to add incident.");
         setSeverity('error');
