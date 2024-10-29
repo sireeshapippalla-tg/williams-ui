@@ -14,7 +14,7 @@ import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import CloseIcon from '@mui/icons-material/Close';
 import IconButton from '@mui/material/IconButton';
 import Form from 'react-bootstrap/Form';
-import { Snackbar, Dialog, DialogContentText, DialogTitle, DialogActions, DialogContent, Alert  } from '@mui/material';
+import { Snackbar, Dialog, DialogContentText, DialogTitle, DialogActions, DialogContent, Alert } from '@mui/material';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -48,6 +48,8 @@ const Preventivections = ({ invokeHistory }) => {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [fileToDelete, setFileToDelete] = useState(null);
     const [fileToDeleteIndex, setFileToDeleteIndex] = useState(null);
+    const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false)
 
     const storedUser = JSON.parse(localStorage.getItem('userDetails'));
     const userId = storedUser ? storedUser.userId : null;
@@ -113,7 +115,23 @@ const Preventivections = ({ invokeHistory }) => {
         fetch_preventive_Action();
     }, [])
 
-    const submit_Preventive_Action = async () => {
+    const formValidation = () => {
+        const newErrors = {};
+        if (!preventiveFindings.trim()) {
+            newErrors.preventiveFindings = "Findings is required"
+        }
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    }
+
+    const submit_Preventive_Action = async (e) => {
+        e.preventDefault();
+        if (!formValidation()) {
+            console.log("Form validation failed");
+            return;
+        }
+        console.log(preventiveId)
+        setLoading(true)
         try {
             const requestBody = {
                 findings: preventiveFindings,
@@ -153,38 +171,13 @@ const Preventivections = ({ invokeHistory }) => {
                 invokeHistory()
                 setOpen(true);
                 setPreventiveSelectedFiles([])
-
-                const preventiveActionFiles = response.data.preventiveFileDetails || [];
-                console.log(preventiveActionFiles)
-                if (preventiveActionFiles && preventiveActionFiles.length > 0) {
-                    const newFiles = preventiveActionFiles.map((file) => ({
-                        documentId: file.documentId,
-                        documentName: file.documentName,
-                        documentSize: file.documentSize,
-                        documentUrl: file.documentUrl,
-                        documentType: file.documentType,
-                        uploadDate: file.uploadDate
-                    }));
-                    setPreventiveFiles(newFiles)
-                }
                 fetch_preventive_Action()
             } else if (response.data.statusResponse.responseCode === 200) {
                 setMessage("Preventive action Updated Successfully");
                 setSeverity('success');
                 invokeHistory()
                 setOpen(true);
-
                 setPreventiveSelectedFiles([])
-
-                const newFiles = response?.data?.preventiveFileDetails?.map((file) => ({
-                    documentId: file.documentId,
-                    documentName: file.documentName,
-                    documentSize: file.documentSize,
-                    documentUrl: file.documentUrl,
-                    documentType: file.documentType,
-                    uploadDate: file.uploadDate
-                }))
-                setPreventiveFiles(prevFile => [...prevFile, newFiles])
                 fetch_preventive_Action()
             } else {
                 setMessage("Failed to add Preventive action.");
@@ -196,6 +189,8 @@ const Preventivections = ({ invokeHistory }) => {
             setMessage("Failed to submit Preventive action. Error: " + error.message);
             setSeverity('error');
             setOpen(true);
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -279,8 +274,16 @@ const Preventivections = ({ invokeHistory }) => {
                                     rows={2}
                                     placeholder='Write your findings'
                                     value={preventiveFindings ? preventiveFindings : ''}
-                                    onChange={(e) => setPreventiveFindings(e.target.value)}
+                                    onChange={(e) => {
+                                        setPreventiveFindings(e.target.value);
+                                        setErrors((prevErrors) => ({
+                                            ...prevErrors,
+                                            preventiveFindings: undefined,
+                                        }));
+                                    }}
+                                    isInvalid={!!errors.preventiveFindings}
                                 />
+                                 <Form.Control.Feedback type="invalid">{errors.preventiveFindings}</Form.Control.Feedback>
                             </Form.Group>
                         </div>
                         <div className='col-md-6 ps-0 file_upload upload-file-border'>
@@ -354,10 +357,10 @@ const Preventivections = ({ invokeHistory }) => {
                                                     </div>
                                                     <div className="file-actions d-flex align-items-center">
                                                         {/* <div className="file-download me-2"> */}
-                                                            <ArrowDownwardIcon
-                                                                style={{ marginRight: "5px", cursor: 'pointer' }}
-                                                                onClick={() => download(file.documentUrl, file.documentName)}
-                                                            />
+                                                        <ArrowDownwardIcon
+                                                            style={{ marginRight: "5px", cursor: 'pointer' }}
+                                                            onClick={() => download(file.documentUrl, file.documentName)}
+                                                        />
                                                         {/* </div> */}
                                                         <IconButton onClick={() => handleFilePreview(file.documentUrl)}>
                                                             <VisibilityIcon />
@@ -378,11 +381,13 @@ const Preventivections = ({ invokeHistory }) => {
                     <div className='d-flex justify-content-end gap-3 mt-3'>
                         <Button className='accordian_submit_btn'
                             onClick={submit_Preventive_Action}
-                        >Submit</Button>
+                        >
+                          {loading ? "Procesing..." : "Submit"}  
+                        </Button>
                     </div>
                 </AccordionDetails>
             </Accordion>
-        
+
             {/* <Snackbar open={open} autoHideDuration={2000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
                 <Alert onClose={handleClose} severity={severity} >
                     {message}
@@ -394,15 +399,15 @@ const Preventivections = ({ invokeHistory }) => {
                     <DialogContentText className='mt-4'>Are you sure you want to delete the file "{fileToDelete?.documentName}"?</DialogContentText>
                 </DialogContent>
                 <DialogActions className='dialog_content'>
-                <Button className='accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button>
-                <Button className='accordian_submit_btn' onClick={closeDeleteDialog} color="primary">Cancel</Button> </DialogActions>
+                    <Button className='accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button>
+                    <Button className='accordian_submit_btn' onClick={closeDeleteDialog} color="primary">Cancel</Button> </DialogActions>
             </Dialog>
 
             <Dialog
-                open={Boolean(filePreview)} 
-                onClose={() => filePreview(null)} 
-                fullWidth 
-                maxWidth="xl" 
+                open={Boolean(filePreview)}
+                onClose={() => filePreview(null)}
+                fullWidth
+                maxWidth="xl"
                 sx={{
                     '& .MuiDialog-paper': {
                         width: '80vw',

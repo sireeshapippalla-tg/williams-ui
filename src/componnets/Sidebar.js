@@ -31,12 +31,12 @@ import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 
 
 const SidebarItems = [
-    // {
-    //     label: "Dashboard",
-    //     path: "/dashboard",
-    //     icon: <HomeIcon />
+    {
+        label: "Dashboard",
+        path: "/incident/dashboard",
+        icon: <HomeIcon />
 
-    // },
+    },
     {
         label: "Incident",
         path: "/incident",
@@ -123,7 +123,7 @@ export default function Sidebar() {
     const location = useLocation();
     const { pathname } = location;
 
-    const shouldHideDrawer = pathname === "/login" || pathname === "/forgotPassword";
+    const shouldHideDrawer = pathname === "/" || pathname === "/forgotPassword";
 
 
 

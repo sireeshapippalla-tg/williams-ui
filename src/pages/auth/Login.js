@@ -4,17 +4,21 @@ import { TextField, IconButton, InputAdornment, Button, Checkbox, FormControlLab
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Email from '@mui/icons-material/Email';
+import { Snackbar, Alert } from '@mui/material';
 import williamslogo from '../../assets/images/william-logo.png';
 import axios from 'axios';
 import { login } from '../../api';
 
 const Login = () => {
     const navigate = useNavigate();
-
+    const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [keepLoggedIn, setKeepLoggedIn] = useState(false);
     const [userName, setUserName] = useState();
     const [password, setPassword] = useState();
+    const [message, setMessage] = useState('');
+    const [severity, setSeverity] = useState('success');
+    const [open, setOpen] = useState(false);
 
 
     // Validation states
@@ -49,57 +53,77 @@ const Login = () => {
         }
     };
 
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+        setOpen(false);
+      };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
         // Validate the form
         const isUserNameValid = validateUserName();
         const isPasswordValid = validatePassword();
-    
+
         // Check if both fields are valid
         if (!isUserNameValid || !isPasswordValid) {
             return;
         }
-    
+
+        setLoading(true);
+
         try {
             const payload = {
                 username: userName,
                 password: password
             }
-    
+
             const response = await axios.post(login, payload);
-    
+
             // Check the response code
             const { responseCode, responseMessage } = response.data.statusResponse;
-    
-            if (responseCode === 200) {
+            if (responseCode === 203) {
+                setMessage(`${responseMessage} For change the password click on forgot password`);
+                setSeverity('error');
+                setOpen(true);
+            } else if (responseCode === 200) {
                 // Successful login
                 if (keepLoggedIn) {
                     localStorage.setItem('keepLoggedIn', 'true');
                 }
-    
+
                 // Store user details in localStorage 
                 localStorage.setItem('userDetails', JSON.stringify(response.data.userLoginDetails));
-    
-                // Navigate to the /incident page
-                navigate('/incident');
-            }else if(responseCode === 203){
-                setPasswordError(responseMessage);
 
-                navigate('/forgotPassword');
+                // Navigate to the /incident page
+                setMessage("Login successfully!");
+                setSeverity('success');
+                setOpen(true);
+                setTimeout(() => {
+                    navigate('/incident/dashboard');
+                }, 2000);
+             
             }
-            
             else if (responseCode === 400) {
                 // Invalid credentials - stay on login page and show error message
-                setPasswordError(responseMessage); 
+                setPasswordError(responseMessage);
+                setMessage(responseMessage);
+                setSeverity('error');
+                setOpen(true);
             }
         } catch (error) {
             console.log('Error during login:', error);
             setPasswordError('An error occurred during login. Please try again.');
+            // setMessage(responseMessage);
+            setSeverity('error');
+            setOpen(true);
+        }finally {
+            setLoading(false); 
         }
     };
-    
+
 
     return (
         <div className='wraper'>
@@ -182,10 +206,15 @@ const Login = () => {
                     </div>
 
                     <Button onClick={handleSubmit} variant='contained' fullWidth className='mt-2 search_btn '>
-                        Log In
+                    {loading ? 'Processing...' : 'Log In'}
                     </Button>
                 </form>
             </div>
+            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert onClose={handleClose} severity={severity}>
+                    {message}
+                </Alert>
+            </Snackbar>
         </div>
     );
 };

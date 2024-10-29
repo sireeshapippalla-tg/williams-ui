@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TextField, IconButton, InputAdornment, Button } from '@mui/material';
+import { TextField, IconButton, InputAdornment, Button, Snackbar, Alert } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Email from '@mui/icons-material/Email';
@@ -9,17 +9,28 @@ import axios from 'axios';
 
 const ForgotPassword = () => {
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState('');
+    const [severity, setSeverity] = useState('success');
+    const [open, setOpen] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [userName, setUserName] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    
+
     const [userNameError, setUserNameError] = useState('');
     const [newPasswordError, setNewPasswordError] = useState('');
     const [confirmPasswordError, setConfirmPasswordError] = useState('');
     const [generalError, setGeneralError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpen(false);
+    };
 
     const handleClickShowPassword = () => setShowPassword(!showPassword);
     const handleClickShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
@@ -56,28 +67,40 @@ const ForgotPassword = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         const isUserNameValid = validateUserName();
         const isPasswordValid = validatePassword();
         const isConfirmPasswordValid = validateConfirmPassword();
 
         if (!isUserNameValid || !isPasswordValid || !isConfirmPasswordValid) return;
+        setLoading(true);
 
         try {
             const payload = { username: userName, password: newPassword };
             const response = await axios.post('http://13.127.196.228:8084/iassure/api/users/forgotPassword', payload);
             console.log(response);
             if (response.data.responseCode === 200) {
-                setSuccessMessage('Password changed successfully!');
+                // setSuccessMessage('Password changed successfully!');
                 setGeneralError('');
+                setMessage("Password changed successfully!");
+                setSeverity('success');
+                setOpen(true);
                 setTimeout(() => {
-                  navigate('/login');
-              }, 2000);
+                    navigate('/');
+                }, 2000);
             } else {
-                setGeneralError('Failed to change password. Please check your username.');
+                setMessage("Failed to change password. Please check your username.");
+                setSeverity('error');
+                setOpen(true);
+                // setGeneralError('Failed to change password. Please check your username.');
             }
         } catch (error) {
-            setGeneralError('An error occurred. Please try again later.');
+            // setGeneralError('An error occurred. Please try again later.');
+            setMessage("An error occurred. Please try again later.");
+            setSeverity('error');
+            setOpen(true);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -155,10 +178,15 @@ const ForgotPassword = () => {
                     {successMessage && <p className='success-text'>{successMessage}</p>}
 
                     <Button type='submit' variant='contained' fullWidth className='mt-2 search_btn'>
-                        Change Password
+                        {loading ? 'Processing...' : 'Change Password'}
                     </Button>
                 </form>
             </div>
+            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert onClose={handleClose} severity={severity}>
+                    {message}
+                </Alert>
+            </Snackbar>
         </div>
     );
 };

@@ -28,15 +28,10 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
 
   const { id } = useParams();
 
-
+  const [loading, setLoading] = useState(false)
   const [selectedSection, setSelectedSection] = useState(SECTION_IDS.interimInvestigation);
   const [showModal3, setShowModal3] = useState(false);
   const [interimInvestigation, setInterimInvestigation] = useState({
-    assignTo: '',
-    cc: '',
-    redo: false,
-  });
-  const [rootCauseAnalysis, setRootCauseAnalysis] = useState({
     assignTo: '',
     cc: '',
     redo: false,
@@ -59,8 +54,8 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
   const [severity, setSeverity] = useState('success');
   const [open, setOpen] = useState(false);
   const [loadingOptions, setLoadingOptions] = useState(false);
-  const[assigningId, setAssigningId] = useState()
-
+  const [assigningId, setAssigningId] = useState()
+  const [errors, setErrors] = useState({});
 
   const storedUser = JSON.parse(localStorage.getItem('userDetails'));
   const userId = storedUser ? storedUser.userId : null;
@@ -121,10 +116,10 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
         fetchAssignToOptions(selectedDepartment.id), // Fetch based on department
         fetchAllCC() // Fetch all CC options (without department filter)
       ]).then(() => setLoadingOptions(false)) // Mark loading as complete
-      .catch((error) => {
-        console.error('Error while loading options:', error);
-        setLoadingOptions(false); // Reset loading even if there was an error
-      });
+        .catch((error) => {
+          console.error('Error while loading options:', error);
+          setLoadingOptions(false); // Reset loading even if there was an error
+        });
     }
   }, [selectedDepartment]);
 
@@ -236,7 +231,46 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
     }
   };
 
-  const handleSubmitTaskAssign = async () => {
+  const validateForm = () => {
+    const newErrors = {}
+    if (!comments.trim()) {
+      newErrors.comments = 'Comments is required'
+    }
+
+    // Validate assignTo
+    const assignTo =
+      selectedSection === SECTION_IDS.interimInvestigation
+        ? interimInvestigation.assignTo
+        : selectedSection === SECTION_IDS.correctiveAction
+          ? correctiveAction.assignTo
+          : preventiveAction.assignTo
+
+    if (!assignTo || !assignTo.id) {
+      newErrors.assignTo = 'Assign To is required';
+    }
+
+    // Validate CC
+    const cc =
+      selectedSection === SECTION_IDS.interimInvestigation
+        ? interimInvestigation.cc
+        : selectedSection === SECTION_IDS.correctiveAction
+          ? correctiveAction.cc
+          : preventiveAction.cc
+   
+    if (!cc || !cc.id) {
+      newErrors.cc = "CC is required"
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }
+  const handleSubmitTaskAssign = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) {
+      console.log("Form validation failed");
+      return;
+    }
+    setLoading(true)
     try {
       console.log('Selected Section ID:', selectedSection);
       console.log('incidentId', id)
@@ -291,6 +325,8 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
       setSeverity('error');
       invokeHistory();
       setOpen(true);
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -349,7 +385,14 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
                           }
                           // loading={assignToOptions.length === 0}
                           onChange={(event, newValue) =>
+                          {
                             handleFieldChange(selectedSection, 'assignTo', newValue)
+                            setErrors((prevErrors) => ({
+                              ...prevErrors,
+                              assignTo: undefined, 
+                            }));
+                          }
+                         
                           }
                           getOptionLabel={(option) => option.title || ''}
                           renderInput={(params) => (
@@ -357,10 +400,8 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
                               // label={`Assign To ${selectedSection}`}
                               label='Assign To'
                               variant='outlined'
-                            // InputProps={{
-                            //   ...params.InputProps,
-                            //   className: 'custom-input-drop' 
-                            // }} 
+                              error={!!errors.assignTo}
+                              helperText={errors.assignTo}
                             />
                           )}
                         />
@@ -380,8 +421,14 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
                                 ? correctiveAction.cc
                                 : preventiveAction.cc
                           }
-                          onChange={(event, newValue) =>
+                          onChange={(event, newValue) =>{
                             handleFieldChange(selectedSection, 'cc', newValue)
+                            setErrors((prevErrors) => ({
+                              ...prevErrors,
+                              cc: undefined, 
+                            }));
+                          }
+                           
                           }
                           renderInput={(params) => (
                             <TextField {...params}
@@ -389,10 +436,8 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
                               // label={`CC ${selectedSection}`}
                               label='CC'
                               variant='outlined'
-                            // InputProps={{
-                            //   ...params.InputProps,
-                            //   className: 'custom-input-drop' // Apply the custom class
-                            // }}
+                              error={!!errors.cc}
+                              helperText={errors.cc}
                             />
                           )}
                         />
@@ -433,12 +478,25 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
                     rows={2}
                     placeholder='Write your comments'
                     value={comments}
-                    onChange={(e) => setComments(e.target.value)} />
+                    onChange={(e) => {
+                      setComments(e.target.value)
+                      setErrors((prevErrors) => ({
+                        ...prevErrors,
+                        comments: undefined,
+                      }));
+                    }}
+                    isInvalid={!!errors.comments}
+                  />
+
+                  <Form.Control.Feedback type="invalid">
+                    {errors.comments}
+                  </Form.Control.Feedback>
                 </Form.Group>
               </div>
               <div className='mb-3 col-md-12 float-right'>
                 <Button className='close_incident_btn' onClick={handleSubmitTaskAssign}>
-                  Submit
+                  {loading ? 'Procesing...' : 'Submit'}
+
                 </Button>
               </div>
             </div>
@@ -450,10 +508,10 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
 
         {/* Accordians */}
         <div className='accordian_s'>
-          <IntrimAccordian selectedSection={selectedSection} invokeHistory={invokeHistory}/>
-          <RootCauseAnalysisAccordian selectedSection={selectedSection} invokeHistory={invokeHistory}/>
-          {selectedSection === SECTION_IDS.correctiveAction && <CorrectiveAction invokeHistory={invokeHistory}/>}
-          {selectedSection === SECTION_IDS.preventiveAction && <Preventivections invokeHistory={invokeHistory}/>}
+          <IntrimAccordian selectedSection={selectedSection} invokeHistory={invokeHistory} />
+          <RootCauseAnalysisAccordian selectedSection={selectedSection} invokeHistory={invokeHistory} />
+          {selectedSection === SECTION_IDS.correctiveAction && <CorrectiveAction invokeHistory={invokeHistory} />}
+          {selectedSection === SECTION_IDS.preventiveAction && <Preventivections invokeHistory={invokeHistory} />}
         </div>
       </div>
 

@@ -77,6 +77,7 @@ const CorrectiveAction = ({ invokeHistory }) => {
     const [fileToDelete, setFileToDelete] = useState(null);
     const [fileToDeleteIndex, setFileToDeleteIndex] = useState(null);
     const [loading, setLoading] = useState(false);
+    
 
     console.log(userId);
 
@@ -435,16 +436,9 @@ const CorrectiveAction = ({ invokeHistory }) => {
     };
 
 
-    const submit_corrective_action = async () => {
-        // {
-        //     "flag":"U",
-        //         "incidentId":15,
-        //         "incidentActionPlanId":1, 
-        //         "comments":"This is test for CAP  comments updated",
-        //         "userId":1
-
-        //     }
-
+    const submit_corrective_action = async (e) => {
+        e.preventDefault();
+        setLoading(true)
         try {
             const requestBody = {
                 incidentId: id,
@@ -491,35 +485,12 @@ const CorrectiveAction = ({ invokeHistory }) => {
                 setSeverity('success');
                 setOpen(true);
                 setCorrectiveSelectecFiles([])
-
-                const correctiveFiles = response.data.correctiveFiles || [];
-                console.log(correctiveFiles)
-                if (correctiveFiles.length > 0) {
-                    const newFiles = correctiveFiles.map((file) => ({
-                        documentId: file.documentId,
-                        documentName: file.documentName,
-                        documentSize: file.documentSize,
-                        documentUrl: file.documentUrl,
-                        documentType: file.documentType,
-                        uploadDate: file.uploadDate
-                    }));
-                    setSelectedFiles(prevFiles => [...prevFiles, ...newFiles]);
-                }
                 fetchCorrectiveAction();
             } else if (response?.data?.statusResponse?.responseCode === 200) {
                 setMessage("corrective action Updated Successfully");
                 setSeverity('success');
                 setOpen(true);
                 setCorrectiveSelectecFiles([])
-                const newFiles = response?.data?.correctiveFiles?.map((file) => ({
-                    documentId: file.documentId,
-                    documentName: file.documentName,
-                    documentSize: file.documentSize,
-                    documentUrl: file.documentUrl,
-                    documentType: file.documentType,
-                    uploadDate: file.uploadDate
-                }))
-                setSelectedFiles(prevFiles => [...prevFiles, ...newFiles])
                 fetchCorrectiveAction()
             } else {
                 setMessage("Failed to add corrective action.");
@@ -531,6 +502,8 @@ const CorrectiveAction = ({ invokeHistory }) => {
             setMessage("Failed to submit corrective action. Error: " + error.message);
             setSeverity('error');
             setOpen(true);
+        }finally{
+            setLoading(false)
         }
     }
 
@@ -1248,12 +1221,14 @@ const CorrectiveAction = ({ invokeHistory }) => {
                         )}
                         <div className='float-end mt-3 p-0 me-2'>
                             <div className='d-flex justify-content-end gap-3 '>
-                                <Button className='accordian_submit_btn' onClick={submit_corrective_action}>Submit</Button>
-                                <Button
+                                <Button className='accordian_submit_btn' onClick={submit_corrective_action}>
+                                    {loading ? "Processing..." : "Submit"}
+                                    </Button>
+                                {/* <Button
                                     className='accordian_cancel_btn'
                                 >
                                     Close
-                                </Button>
+                                </Button> */}
                             </div>
                         </div>
 

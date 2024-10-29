@@ -29,10 +29,10 @@ import { Snackbar } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import axios from 'axios';
 import Dialog from '@mui/material/Dialog';
-import {DialogContentText,DialogTitle} from '@mui/material';
+import { DialogContentText, DialogTitle } from '@mui/material';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import { saveRootCause, getRootCauseDetails,downloadFile,deleteFile } from '../../../api';
+import { saveRootCause, getRootCauseDetails, downloadFile, deleteFile, deleteProblemRootCause } from '../../../api';
 
 
 const VisuallyHiddenInput = styled('input')({
@@ -55,9 +55,10 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
     // const [whyInputs, setWhyInputs] = useState([
     //     { label: 'First Why', value: ['', '', ''] },
     // ]);
+    const whyLabels = ["Man", "Material", "Method", "Measurement", "Machine", "Environment"];
     const [whyInputs, setWhyInputs] = useState([
         {
-            label: "First why",
+            label: whyLabels[0],
             value: ["", "", ""],
             id: 0
         }
@@ -76,6 +77,7 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [fileToDelete, setFileToDelete] = useState(null);
     const [fileToDeleteIndex, setFileToDeleteIndex] = useState(null);
+    const [loading, setLoading] = useState(false)
 
 
     const storedUser = JSON.parse(localStorage.getItem('userDetails'));
@@ -97,20 +99,23 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
 
 
     const whyInputshandleAddRow = () => {
+        // Find the first label in whyLabels that is not already in use in whyInputs
+        const usedLabels = whyInputs.map(input => input.label);
+        const availableLabels = whyLabels.filter(label => !usedLabels.includes(label));
 
-        if (whyInputs.length < 5) {
+        if (availableLabels.length > 0) {
             const newInputs = [
                 ...whyInputs,
-                { label: `${getOrdinalWord(whyInputs.length)} why`, value: ['', '', ''] }
+                { label: availableLabels[0], value: ['', '', ''] } // Add the first available label
             ];
             setWhyInputs(newInputs);
         }
     };
-    const whyInputshandleRemoveRow = (index) => {
-        const updatedInputs = [...whyInputs];
-        updatedInputs.splice(index, 1);
-        setWhyInputs(updatedInputs);
-    };
+    // const whyInputshandleRemoveRow = (indexToRemove) => {
+    //     // Filter out the row being removed
+    //     const updatedInputs = whyInputs.filter((_, index) => index !== indexToRemove);
+    //     setWhyInputs(updatedInputs);
+    // };
 
     const whyInputshandleInputChange = (index, subIndex, value) => {
         const updatedInputs = [...whyInputs];
@@ -130,6 +135,7 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
 
     const handleRootCauseSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true)
 
         try {
             const problems = whyInputs.map((input, index) => ({
@@ -231,6 +237,8 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
             setMessage("Failed to submit Root cause analysis. Error: " + error.message);
             setSeverity('error');
             setOpen(true);
+        }finally{
+            setLoading(false)
         }
 
     }
@@ -275,7 +283,7 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
         setFilePreview(fileUrl); // Set the selected file URL
     };
 
-    const download = async (url,fileName) => {
+    const download = async (url, fileName) => {
         try {
             const payload = { documentName: fileName };
             const response = await axios.post(downloadFile, payload, { responseType: 'blob' });
@@ -323,7 +331,7 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
             if (response.status === 200) {
                 setFetchedFiles(fetchedFiles.filter(file => file.documentId !== fileToDelete.documentId));
                 setRootSelectedFiles(rootSelectedFiles.filter(file => file.documentId !== fileToDelete.documentId));
-            
+
                 setMessage("File deleted successfully.");
                 setSeverity('success');
                 setOpen(true);
@@ -342,6 +350,47 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
         }
     };
 
+    const whyInputshandleRemoveRow = async (indexToRemove) => {
+        const row = whyInputs[indexToRemove];
+        let message = "";
+
+        // Check if the row has an ID, indicating it is from the API
+        if (row.id) {
+            try {
+                const payload = {
+                    problemStageId: row.id,
+                    incidentId: id
+                };
+                console.log(payload)
+                // Make the API call to delete the row
+                await axios.post(deleteProblemRootCause, payload);
+                message = `Row with label "${row.label}" deleted from the server.`;
+                setMessage(`Row with label "${row.label}" deleted from the server.`)
+                setSeverity('success')
+                setOpen(true)
+            } catch (error) {
+                console.log('Error deleting row from server:', error);
+                setMessage("Failed to delete row from server. Please try again.");
+                setSeverity('error');
+                setOpen(true);
+                return; // Exit if there's an error in deletion
+            }
+        } else {
+            message = `Row with label "${row.label}" deleted locally.`;
+            setMessage(`Row with label "${row.label}" deleted locally.`)
+            setSeverity('success')
+            setOpen(true)
+        }
+
+        // Filter out the row from whyInputs (whether it was deleted locally or via the API)
+        const updatedInputs = whyInputs.filter((_, index) => index !== indexToRemove);
+        setWhyInputs(updatedInputs);
+
+        // Set success message based on deletion type
+        setMessage(message);
+        setSeverity('success');
+        setOpen(true);
+    };
 
     return (
         <div>
@@ -474,7 +523,7 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                                                     )}
                                                     <IconButton
                                                         onClick={whyInputshandleAddRow}
-                                                        disabled={whyInputs.length >= 5}
+                                                        disabled={whyInputs.length >= 6}
                                                     >
                                                         <AddIcon
                                                             className='blue'
@@ -547,7 +596,7 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                                                             <IconButton
                                                                 edge='end'
                                                                 aria-label='delete'
-                                                                onClick={() =>  setRootSelectedFiles(rootSelectedFiles.filter((_, i) => i !== index))}
+                                                                onClick={() => setRootSelectedFiles(rootSelectedFiles.filter((_, i) => i !== index))}
                                                             >
                                                                 <CloseIcon className='close_icon' />
                                                             </IconButton>
@@ -575,7 +624,7 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                                                                 <TextSnippetIcon style={{ color: "#533529" }} />
                                                             </span>
                                                             <p className="mb-0 ms-2">
-                                                                <a  target="_blank" rel="noopener noreferrer">
+                                                                <a target="_blank" rel="noopener noreferrer">
                                                                     {file.documentName}
                                                                 </a> ({(file.documentSize / 1024).toFixed(2)} KB)
                                                             </p>
@@ -591,8 +640,8 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                                                                 <VisibilityIcon />
                                                             </IconButton>
                                                             <IconButton edge='end' onClick={() => openDeleteDialog(file, index)}>
-                                                    <CloseIcon className='close_icon' />
-                                                </IconButton>
+                                                                <CloseIcon className='close_icon' />
+                                                            </IconButton>
                                                         </div>
                                                     </div>
                                                 </li>
@@ -605,7 +654,9 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
 
                         <div className='row accordian_row'>
                             <div className='d-flex justify-content-end gap-3 mt-3'>
-                                <Button className='accordian_submit_btn  ' style={{ float: "none", marginRight: "15px" }} onClick={handleRootCauseSubmit}>Submit</Button>
+                                <Button className='accordian_submit_btn  ' style={{ float: "none", marginRight: "15px" }} onClick={handleRootCauseSubmit}>
+                                   {loading ? "Processing..." : "Submit"}
+                                    </Button>
                                 {/* <Button className='accordian_cancel_btn'>Close</Button> */}
                             </div>
                         </div>
@@ -649,8 +700,8 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                     <DialogContentText className='mt-4'>Are you sure you want to delete the file "{fileToDelete?.documentName}"?</DialogContentText>
                 </DialogContent>
                 <DialogActions className='dialog_content'>
-                <Button className='accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button>
-                <Button className='accordian_submit_btn' onClick={closeDeleteDialog} color="primary">Cancel</Button> </DialogActions>
+                    <Button className='accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button>
+                    <Button className='accordian_submit_btn' onClick={closeDeleteDialog} color="primary">Cancel</Button> </DialogActions>
             </Dialog>
 
 

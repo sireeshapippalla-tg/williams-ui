@@ -65,13 +65,7 @@ const CreateIncident = (props) => {
 
   // const [fields, setFields] = useState(initialFields);
   const [widgets, setWidgets] = useState([]);
-  const [movingDivTop, setMovingDivTop] = useState(200);
   const [selectedFiles, setSelectedFiles] = useState([]);
-  const [fileInputKey, setFileInputKey] = useState(Date.now());
-  const [caseSummary, setCaseSummary] = useState('');
-  const [confirmAddFieldDialog, setConfirmAddFieldDialog] = useState(false)
-  const [pendingField, setPendingField] = useState(null);
-
   const [dynamicFields, setDynamicFields] = useState({})
   const [message, setMessage] = useState('');
   const [severity, setSeverity] = useState('success');
@@ -102,9 +96,9 @@ const CreateIncident = (props) => {
 
   const [departments, setDepartments] = useState([])
   const [selectedDepartment, setSelectedDepartment] = useState(null)
-  const [isAIGenerated, setIsAIGenerated] = useState(false);
   const [showModal3, setShowModal3] = useState(false);
   const [allUsers, setAllUsers] = useState([])
+  const [errors, setErrors] = useState({});
 
 
   const storedUser = JSON.parse(localStorage.getItem('userDetails'));
@@ -116,22 +110,50 @@ const CreateIncident = (props) => {
     setShowModal3(!showModal3);
   };
 
+
   // useEffect(() => {
-  //     if (data) {
-  //         // Populate the form with AI-generated data
-  //         setCaseDescription(data.description || "");
-  //         setSubject(data.title || "");
-  //         setInputs(prevState => ({
-  //             ...prevState,
-  //             Source: { ...prevState.Source, value: data.source || "" },
-  //             Category: { ...prevState.Category, value: data.category || "" },
-  //             Severity: { ...prevState.Severity, value: data.severity || "" }
-  //         }));
-  //         setSelectedDepartment({ id: 0, title: data.department || "" });
-  //         setSelectedUser(null);
-  //         setIsAIGenerated(true);
+  //   // setSubject(data.title)
+  //   // setCaseDescription(data.description);
+  //   // let isDepFound = departments.find((item) => item.title == data.department);
+  //   // if (isDepFound) {
+  //   //   setSelectedDepartment(data.department)
+  //   // } else {
+
+  //   //   let obj = {
+  //   //     id: 0,
+  //   //     title: data.department
+  //   //   }
+
+  //   //   setDepartments([...departments, obj])
+
+  //   // }
+  //   console.log(data)
+  //   if (data) {
+  //     setSubject(data.title);
+  //     setCaseDescription(data.description);
+  
+  //     let isDepFound = departments.find((item) => item.title === data.department);
+  //     if (isDepFound) {
+  //       setSelectedDepartment(data.department); // Make sure to set the found department object
+  //     } else {
+  //       let obj = {
+  //         id: 0,
+  //         title: data.department,
+  //       };
+  //       setDepartments([...departments, obj]);
+  //       setSelectedDepartment(obj); // Set the new department as selected
   //     }
-  // }, []);
+  
+  //     // Clear errors since we're populating with valid data
+  //     setErrors((prevErrors) => ({
+  //       ...prevErrors,
+  //       subject: undefined,
+  //       caseDescription: undefined,
+  //       department: undefined,
+  //       // Add other fields as needed
+  //     }));
+  //   }
+  // }, [data,departments])
 
   useEffect(() => {
     let obj = {
@@ -151,9 +173,12 @@ const CreateIncident = (props) => {
     //   }
     // setInputs({ ...obj })
     setCaseDescription(data.description);
+    setSubject(data.title)
     let isDepFound = departments.find((item) => item.title == data.department);
+
     if (isDepFound) {
       setSelectedDepartment(data.department)
+
     } else {
 
       let obj = {
@@ -165,8 +190,6 @@ const CreateIncident = (props) => {
 
     }
   }, [departments])
-
-
   const handleAddField = () => {
     setFields([...fields, { ...currentField, value: '' }]);
     setCurrentField({ type: '', label: '', options: [''] });
@@ -219,19 +242,6 @@ const CreateIncident = (props) => {
     setFieldAddDialog(false);
   };
 
-  const confirmDialogOpen = () => {
-    setConfirmAddFieldDialog(true)
-    setFieldAddDialog(false);
-  }
-  const confirmDialogClose = () => {
-    setConfirmAddFieldDialog(false)
-    setFieldAddDialog(false);
-  }
-  const handleConfirmAddField = () => {
-    setFields([...fields, pendingField]); // Add pending field to fields
-    setPendingField(null); // Clear pending field
-    setConfirmAddFieldDialog(false);
-  };
 
   const confirmDrawerOpen = () => {
     setFieldAddDialog(false);
@@ -364,6 +374,11 @@ const CreateIncident = (props) => {
     }
   }
   const handleDepartmentChange = (event, newValue) => {
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      department: undefined, 
+    }));
+
     setSelectedDepartment(newValue);
     if (newValue) {
       fetchUsersByDept(newValue.id)
@@ -374,6 +389,10 @@ const CreateIncident = (props) => {
   }
 
   const handleUserChange = (event, newValue) => {
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      assignedUser: undefined, // Clear the specific error
+    }));
     setSelectedUser(newValue);
     console.log('Selected user:', newValue);
   }
@@ -426,13 +445,96 @@ const CreateIncident = (props) => {
     }
   }
 
+  // const validateFields = () => {
+  //   // Trim and check each field to ensure it's defined and not empty
+  //   if (!subject || subject.trim() === "") {
+  //     setMessage("Subject is required.");
+  //     setSeverity("error");
+  //     setOpen(true);
+  //     return false;
+  //   }
+  //   if (!caseDescription || caseDescription.trim() === "") {
+  //     setMessage("Description is required.");
+  //     setSeverity("error");
+  //     setOpen(true);
+  //     return false;
+  //   }
+  //   if (!inputs.Source.value || !inputs.Source.value.id) {
+  //     setMessage("Source is required.");
+  //     setSeverity("error");
+  //     setOpen(true);
+  //     return false;
+  //   }
+  //   if (!inputs.Category.value || !inputs.Category.value.id) {
+  //     setMessage("Category is required.");
+  //     setSeverity("error");
+  //     setOpen(true);
+  //     return false;
+  //   }
+  //   if (!inputs.Severity.value || !inputs.Severity.value.id) {
+  //     setMessage("Severity is required.");
+  //     setSeverity("error");
+  //     setOpen(true);
+  //     return false;
+  //   }
+  //   if (!selectedDepartment || !selectedDepartment.id) {
+  //     setMessage("Department is required.");
+  //     setSeverity("error");
+  //     setOpen(true);
+  //     return false;
+  //   }
+  //   if (!selectedUser || !selectedUser.id) {
+  //     setMessage("Assigned user is required.");
+  //     setSeverity("error");
+  //     setOpen(true);
+  //     return false;
+  //   }
+  //   return true; // Return true if all fields are valid
+  // };
 
+
+  const validateFields = () => {
+    const newErrors = {};
+  
+    // Validate each field and set an error message if invalid
+    if (!subject?.trim()) {
+      newErrors.subject = "Subject is required";
+    }
+    console.log(subject)
+    if (!caseDescription?.trim()) {
+      newErrors.caseDescription = "Description is required";
+    }
+    if (!inputs.Source?.value?.id) {
+      newErrors.source = "Source is required";
+    }
+    if (!inputs.Category?.value?.id) {
+      newErrors.category = "Category is required";
+    }
+    if (!inputs.Severity?.value?.id) {
+      newErrors.severity = "Severity is required";
+    }
+    if (!selectedDepartment?.id) {
+      newErrors.department = "Department is required";
+    }
+    if (!selectedUser?.id) {
+      newErrors.assignedUser = "Assigned user is required";
+    }
+  
+    setErrors(newErrors); // Update errors state
+  
+    // Return true if no errors
+    return Object.keys(newErrors).length === 0;
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("submit")
+    // if (!validateFields()) {
+    //   console.log("Form validation failed");
+    //   setShowModal3(false)
+    //   return;
+    // }
 
     try {
-      const isAIGenerated = !!data;
 
       const payload = {
         orgId: 1,
@@ -451,19 +553,6 @@ const CreateIncident = (props) => {
         department: data ? data.department : ''
       }
       console.log("payload", payload);
-      // const payload = {
-      //     orgId: 1,
-      //     description: caseDescription,
-      //     assignedUserId: isAIGenerated ? 0 : (selectedUser ? selectedUser.id : null),
-      //     attachmentUrl: 'URL4',
-      //     incidentStatusId: 34,
-      //     title: subject,
-      //     userId: 1,
-      //     departmentId: isAIGenerated ? 0 : (selectedDepartment ? selectedDepartment.id : null),
-      //     source: isAIGenerated ? 0 : (inputs ?  inputs.Source.value : null),
-      //     category: isAIGenerated ? 0 : (inputs ? inputs.Category.value: null),
-      //     severity:isAIGenerated ? 0 : (inputs ?  inputs.Severity.value: null)
-      // };
       console.log("incdentpayload", payload)
 
       const formData = new FormData();
@@ -506,6 +595,10 @@ const CreateIncident = (props) => {
   const handleChange = (name) => async (event, newValue) => {
     console.log(`handleChange called for ${name} with newValue:`, newValue);  // Debug log
     let id;
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name.toLowerCase()]: undefined,
+    }));
     if (newValue && newValue.id) {
       id = newValue.id;
       setInputs(prevState => ({
@@ -593,17 +686,6 @@ const CreateIncident = (props) => {
 
 
 
-  const setSummaryVisible = () => {
-    if (props.isSummaryVisible == true) {
-      return true;
-    }
-    if (props.isSummaryVisible == undefined) {
-      return true;
-    }
-    return false;
-  }
-
-
 
   const handleClose = (event, reason) => {
     if (reason === 'clickaway') {
@@ -616,17 +698,11 @@ const CreateIncident = (props) => {
     const files = Array.from(event.target.files);
     setSelectedFiles((prevFiles) => [...prevFiles, ...files]);
   };
-  // const handleRemoveFile = (index) => {
-  //     setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-  // };
+
   const handleRemoveFile = (index) => {
     setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
 
-  const staticFile = {
-    name: 'file0702202413.pdf',
-    downloadLink: '#'
-  };
   return (
     <div className='right-cont'>
 
@@ -703,6 +779,9 @@ const CreateIncident = (props) => {
                             className: 'custom-input-drop' // Apply the custom class
                           }}
                           className="custom-textfield"
+                          error={!!errors[name.toLowerCase()]}
+                          helperText={errors[name.toLowerCase()]}
+                          
                         />
                       )}
                     />
@@ -732,6 +811,8 @@ const CreateIncident = (props) => {
                           className: 'custom-input-drop' // Apply the custom class
                         }}
                         className="custom-textfield"
+                        error={!!errors.department}
+                        helperText={errors.department}
                       />
                     )}
                   />
@@ -760,6 +841,9 @@ const CreateIncident = (props) => {
                           className: 'custom-input-drop' // Apply the custom class
                         }}
                         className="custom-textfield"
+                        error={!!errors.assignedUser}
+                        helperText={errors.assignedUser}
+                        
                       />
                     )}
                   />
@@ -777,7 +861,15 @@ const CreateIncident = (props) => {
                       label='Subject'
                       variant="outlined"
                       value={subject}
-                      onChange={(e) => setSubject(e.target.value)}
+                      onChange={(e) => {
+                        setSubject(e.target.value)
+                        setErrors((prevErrors) => ({
+                          ...prevErrors,
+                          subject: undefined, 
+                        }));
+                      }}
+                      error={!!errors.subject}
+                      helperText={errors.subject || ''}
                     />
                   </Form.Group>
                 </div>
@@ -797,7 +889,22 @@ const CreateIncident = (props) => {
                       minRows={3}
                       style={{ backgroundColor: "white", borderRadius: "6px" }}
                       value={caseDescription}
-                      onChange={(e) => setCaseDescription(e.target.value)}
+                      onChange={(e) => {
+                        setCaseDescription(e.target.value)
+                        setErrors((prevErrors) => ({
+                          ...prevErrors,
+                          caseDescription: undefined, 
+                        }));
+                      }}
+                      error={!!errors.caseDescription}
+                      helperText={errors.caseDescription || ''}
+                      sx={{
+                        "& .MuiFormHelperText-root": {
+                          backgroundColor: "transparent", // Ensure the helper text has no background
+                          marginLeft: 0, 
+                          padding: 0,
+                        },
+                      }}
                     />
                   </Form.Group>
                 </div>
@@ -863,7 +970,7 @@ const CreateIncident = (props) => {
                 </Col>
               </Row>
               <div className='accordian_s'>
-              <DynamicField />
+              {/* <DynamicField /> */}
             </div>
             </div>
 
@@ -875,45 +982,14 @@ const CreateIncident = (props) => {
 
           {props.isRightContentVisible == true ? <div className='col-md-4'></div> :
             <div className='col-md-4 '>
-              {/* <div className='mb-3' style={{ display: "flex", justifyContent: "end" }}>
-                                <Button
-                                    variant='outlined'
-                                    className='accordian_submit_btn'
-                                    onClick={fieldDialogOpen}
-
-                                    style={{ color: "#533529", fontWeight: "600", }}
-                                >
-                                    Create new Fields
-                                </Button>
-                            </div> */}
-
               <div className="ticket-chat attached-files mb-3 p-4" >
                 <h5 style={{ fontWeight: "600" }}>History</h5>
-                {/* <TextField
-                                    InputProps={{ className: 'custom-input' }}
-                                    className="custom-textfield"
-                                    id="outlined-basic"
-                                    // label="Organization Name"
-                                    variant="outlined"
-                                    style={{ width: "100%" }}
-                                    placeholder='Write history here...'
-                                /> */}
                 <p>History not yet created</p>
               </div>
               <div className="ticket-chat p-4">
                 <div className="ticket-chat-head">
                   <h5 style={{ fontWeight: "600", marginBottom: "20px" }}>Incident Chat</h5>
                   <div className="chat-post-box card p-4">
-                    {/* <form>
-                                            <textarea className="form-control mb-3" rows="4" style={{ backgroundColor: "#f4f4f4" }}>Post</textarea>
-                                            <div className="files-attached d-flex justify-content-between align-items-center">
-                                                <div className="post-files">
-                                                    <a href="#"><i class="la la-image"></i></a>
-                                                    <a href="#"><i class="la la-file-video"></i></a>
-                                                </div>
-                                                <button type="submit">Send</button>
-                                            </div>
-                                        </form> */}
                     <p>Incident chat created not yet, you can chat after create incident</p>
                   </div>
                 </div>
@@ -1024,18 +1100,6 @@ const CreateIncident = (props) => {
                     </Grid>
                   </Col>
                 ))}
-
-                {/* <Divider />
-                                <Button
-                                 
-                                    style={{ color: "#533529", fontWeight: "600", marginTop: "10px" }}
-
-                                    onClick={fieldDialogOpen}
-
-                                >
-                                    Create new Fields
-                                </Button> */}
-
                 <form>
                   {fields.map((field, index) => (
                     index % 2 === 0 && ( // Render two fields per row
@@ -1228,7 +1292,6 @@ const CreateIncident = (props) => {
                       </Col>
 
 
-                      {/* <Button className=' dynamic_btn' onClick={handleAddOption}>Add Option</Button> */}
                       {currentField.options.slice(1).map((option, index) => (
                         <Col md={6} className='mb-2'>
                           <Grid container alignItems="center">

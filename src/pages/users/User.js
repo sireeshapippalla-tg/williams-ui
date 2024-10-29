@@ -103,6 +103,7 @@ const User = () => {
     const [selectedUserId, setSelectedUserId] = useState(null);
     const open = Boolean(anchorEl);
     const [addUserdialogOpen, setAddUserdialogOpen] = useState(false);
+    const [loading, setLoading] = useState(false)
 
 
 
@@ -211,6 +212,10 @@ const User = () => {
 
     const handleDepartmentChange = (event, newValue) => {
         setSelectedDepartment(newValue);
+        setErrors((prevErrors) => ({
+            ...prevErrors,
+            selectedDepartment: undefined 
+        }));
     };
 
 
@@ -284,6 +289,11 @@ const User = () => {
                 value: newValue
             }
         }));
+
+        setErrors(prevErrors => ({
+            ...prevErrors,
+            [name]: newValue ? null : prevErrors[name] 
+        }));
     };
 
     const fetchUserTypesDropdown = async () => {
@@ -303,6 +313,10 @@ const User = () => {
 
     const handleuserTypeChange = (event, newValue) => {
         setSelectedUSerType(newValue);
+        setErrors((prevErrors) => ({
+            ...prevErrors,
+            selectedUserType: undefined, 
+          }));
     };
 
 
@@ -362,22 +376,6 @@ const User = () => {
         handleMenuClose(); // Close the menu
     };
 
-    // const validateFields = () => {
-    //     const newErrors = {};
-
-    //     if (!firstName) newErrors.firstName = "First Name is required.";
-    //     if (!lastName) newErrors.lastName = "Last Name is required.";
-    //     if (!email) newErrors.email = "Email is required.";
-    //     else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email is invalid.";
-    //     if (!contactNumber) newErrors.contactNumber = "Contact Number is required.";
-    //     else if (!/^\d{10}$/.test(contactNumber)) newErrors.contactNumber = "Contact Number must be 10 digits.";
-    //     if (!selectedUserType) newErrors.selectedUserType = "User Type is required.";
-    //     if (!selectedDepartment) newErrors.selectedDepartment = "Department is required.";
-
-    //     setErrors(newErrors);
-    //     return Object.keys(newErrors).length === 0;
-    // };
-
 
     const validateFields = () => {
         const newErrors = {};
@@ -390,15 +388,20 @@ const User = () => {
         else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email is invalid.";
 
         if (!contactNumber) newErrors.contactNumber = "Contact Number is required.";
-        else if (!/^\d{10}$/.test(contactNumber)) newErrors.contactNumber = "Contact Number must be 10 digits.";
+        // else if (!/^\d{10}$/.test(contactNumber)) newErrors.contactNumber = "Contact Number must be 10 digits.";
 
         // Validate Autocomplete fields (Title, Gender, UserType, Department)
-        console.log("selectedUserType", selectedUserType)
+        console.log("selectedUserType", selectedDepartment)
         if (!selectedUserType) newErrors.selectedUserType = "User Type is required.";
         if (!selectedDepartment) newErrors.selectedDepartment = "Department is required.";
 
-        if (!inputs.Title.value) newErrors.Title = "Title is required.";
-        if (!inputs.Gender.value) newErrors.Gender = "Gender is required.";
+        // if (!inputs.Title.value) newErrors.Title = "Title is required.";
+        // if (!inputs.Gender.value) newErrors.Gender = "Gender is required.";
+        Object.keys(inputs).forEach((field) => {
+            if (!inputs[field].value) {
+                newErrors[field] = `${field} is required.`; 
+            }
+        });
 
         // Set errors in state and return validation status
         setErrors(newErrors);
@@ -413,6 +416,8 @@ const User = () => {
 
         console.log(selectedUserID)
         if (!validateFields()) return;
+
+        setLoading(true)
 
         try {
 
@@ -482,6 +487,8 @@ const User = () => {
             setSeverity('error');
             setOpenSnackbar(true);
             setAddUserdialogOpen(false)
+        }finally{
+            setLoading(false)
         }
     }
 
@@ -686,8 +693,6 @@ const User = () => {
                                         options={userTypes}
                                         value={selectedUserType}
                                         onChange={handleuserTypeChange}
-                                        error={!!errors.selectedUserType}
-                                        helperText={errors.selectedUserType}
                                         getOptionLabel={(option) => option.title}
                                         renderOption={(props, option) => (
                                             <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
@@ -698,6 +703,8 @@ const User = () => {
                                             <TextField {...params}
                                                 label="User type"
                                                 variant="outlined"
+                                                error={!!errors.selectedUserType}
+                                                helperText={errors.selectedUserType}
                                                 InputProps={{
                                                     ...params.InputProps,
                                                     className: 'custom-input-drop',
@@ -758,10 +765,12 @@ const User = () => {
                                                         {...params}
                                                         label={`${name}`}
                                                         variant="outlined"
+                                                        error={!!errors[name]}
+                                                        helperText={errors[name]}
                                                         InputProps={{
                                                             ...params.InputProps,
-                                                            className: 'custom-input-drop',  // Apply the custom class
-                                                            startAdornment: (                 // Add the icon to the left
+                                                            className: 'custom-input-drop',
+                                                            startAdornment: (                
                                                                 <InputAdornment position="start">
                                                                     {icon}
                                                                 </InputAdornment>
@@ -869,6 +878,7 @@ const User = () => {
                                     }}
                                     className="custom-textfield"
                                     id="outlined-basic"
+                                    type='number'
                                     label="Contact Number"
                                     variant="outlined"
                                     style={{ width: "100%" }}
@@ -891,8 +901,6 @@ const User = () => {
                                         options={departments}
                                         value={selectedDepartment}
                                         onChange={handleDepartmentChange}
-                                        error={!!errors.selectedDepartment}
-                                        helperText={errors.selectedDepartment}
                                         getOptionLabel={(option) => option.title}
                                         renderOption={(props, option) => (
                                             <li {...props} style={{ fontSize: '12px', padding: '4px 8px' }}>
@@ -903,6 +911,8 @@ const User = () => {
                                             <TextField {...params}
                                                 label="Department"
                                                 variant="outlined"
+                                                error={!!errors.selectedDepartment}
+                                                helperText={errors.selectedDepartment}
                                                 InputProps={{
                                                     ...params.InputProps,
                                                     className: 'custom-input-drop',
@@ -932,7 +942,8 @@ const User = () => {
                                 }}
                                 onClick={handleSubmit}
                             >
-                                {dialogMode === 'add' ? 'Create User' : 'Update User'}
+                                {loading ? "Processing..." : dialogMode === 'add' ? 'Create User' : 'Update User'}
+                                {/* {dialogMode === 'add' ? 'Create User' : 'Update User'} */}
                             </Button>
                             <Button
                                 className='accordian_cancel_btn'

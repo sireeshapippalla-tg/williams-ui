@@ -8,6 +8,7 @@ import AddUser from '../pages/users/AddUser';
 import Login from '../pages/auth/Login';
 import Forgot from '../pages/auth/Forgot';
 import ProtectedRoute from './ProtectedRoute ';
+import IncidentDashboard from '../pages/IncidentDashboard';
 
 
 const MainRoutes = () => {
@@ -15,6 +16,13 @@ const MainRoutes = () => {
     <div>
         <Routes>
           {/* Protected Routes */}
+          <Route path='/incident/dashboard' 
+            element={
+              <ProtectedRoute>
+                <IncidentDashboard/>
+              </ProtectedRoute>
+            }
+             />
           <Route 
             path='/incident' 
             element={
@@ -57,7 +65,7 @@ const MainRoutes = () => {
           />
 
           {/* Public Routes */}
-          <Route path='/login' element={<Login/>}/>
+          <Route path='/' element={<Login/>}/>
           <Route path='/forgotPassword' element={<Forgot/>}/>
         </Routes>
     </div>

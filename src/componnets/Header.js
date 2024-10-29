@@ -27,7 +27,11 @@ import axios from 'axios';
 import { getNotifications } from '../api';
 import williamslogo from '../assets/images/williamslogo.jpeg';
 
+import { useGlobalState } from '../contexts/GlobalStateContext';
+
 function Header() {
+  const { notifications, fetchNotifications } = useGlobalState();
+  console.log('notifications context', notifications)
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
@@ -36,20 +40,21 @@ function Header() {
   const [notifiationData, setNotificationData] = useState([])
 
 
-  const { pathname } = useLocation();const handleProfileMenuClose = () => {
+  const { pathname } = useLocation();
+  const handleProfileMenuClose = () => {
     setAnchorEl(null);
   };
 
   const handleLogout = () => {
-      // Clear specific items from local storage
-      localStorage.removeItem('keepLoggedIn');
-      localStorage.removeItem('userDetails');
-  
-      handleProfileMenuClose();
-      navigate('/login'); 
-  
+    // Clear specific items from local storage
+    localStorage.removeItem('keepLoggedIn');
+    localStorage.removeItem('userDetails');
+
+    handleProfileMenuClose();
+    navigate('/');
+
   }
-  
+
   const renderProfileMenu = (
     <Menu
       anchorEl={anchorEl}
@@ -69,32 +74,34 @@ function Header() {
   );
 
   const SidebarItems = [
-    // { label: "Dashboard", path: "/dashboard", icon: <HomeIcon /> },
+    { label: "Dashboard", path: "/incident/dashboard", icon: <HomeIcon /> },
     { label: "Incident", path: "/incident", icon: <ReportProblemIcon /> },
     { label: "Users", path: "/users", icon: <PersonAddAltIcon /> }
   ];
 
   useEffect(() => {
     fetchNotifications();
-  }, []);
+  }, [fetchNotifications]);
 
-  const fetchNotifications = async () => {
-    try {
-      const response = await axios.post(getNotifications);
-      const data = response.data.notificationsList;
-      const formattedNotifications = data.map((notification) => ({
-        id: notification.incidentHistoryId,
-        incidentId: notification.incidentId,
-        message: notification.comments,
-        createdAt: notification.createdAt,
-        incidentRecord: notification.incidentRecord,
-        createdBy: notification.createdBy
-      }));
-      setNotificationData(formattedNotifications);
-    } catch (error) {
-      console.log('Error in fetching notifications:', error);
-    }
-  };
+
+
+  // const fetchNotifications = async () => {
+  //   try {
+  //     const response = await axios.post(getNotifications);
+  //     const data = response.data.notificationsList;
+  //     const formattedNotifications = data.map((notification) => ({
+  //       id: notification.incidentHistoryId,
+  //       incidentId: notification.incidentId,
+  //       message: notification.comments,
+  //       createdAt: notification.createdAt,
+  //       incidentRecord: notification.incidentRecord,
+  //       createdBy: notification.createdBy
+  //     }));
+  //     setNotificationData(formattedNotifications);
+  //   } catch (error) {
+  //     console.log('Error in fetching notifications:', error);
+  //   }
+  // };
 
   // const handleProfileMenuOpen = (event) => {
   //   setNotificationsAnchorEl(event.currentTarget);
@@ -130,8 +137,8 @@ function Header() {
         <Typography variant="h6" sx={{ paddingBottom: 1, fontWeight: 'bold' }}>
           Notifications
         </Typography>
-        {notifiationData && notifiationData.length > 0 ? (
-          notifiationData.map((notification) => (
+        {notifications && notifications.length > 0 ? (
+          notifications.map((notification) => (
             <MenuItem
               key={notification.id}
               onClick={() => handleNotificationClick(notification.incidentId)}
@@ -142,7 +149,7 @@ function Header() {
                   <Typography variant="subtitle1" color="textSecondary" fontWeight="bold">
                     {notification.incidentRecord}
                   </Typography>
-                  
+
                   <Tooltip title={notification.message} placement="top" arrow>
                     <Typography
                       variant="body2"
@@ -242,7 +249,7 @@ function Header() {
   //                   <span style={{fontWeight:"600"}}>
   //                   {new Date(notification.createdAt).toLocaleString()}
   //                   </span>
-                 
+
   //                 </div>
   //               </div>
   //             </div>
@@ -274,7 +281,7 @@ function Header() {
           </IconButton> */}
 
           <IconButton size="large" aria-label="show new notifications" color="inherit" onClick={handleNotificationsMenuOpen}>
-            <Badge badgeContent={notifiationData.length} color="error">
+            <Badge badgeContent={notifications.length} color="error">
               <NotificationsIcon />
             </Badge>
           </IconButton>

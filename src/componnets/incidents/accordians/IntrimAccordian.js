@@ -43,6 +43,8 @@ const IntrimAccordian = ({ invokeHistory }) => {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [fileToDelete, setFileToDelete] = useState(null);
     const [fileToDeleteIndex, setFileToDeleteIndex] = useState(null);
+    const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false)
 
     const storedUser = JSON.parse(localStorage.getItem('userDetails'));
     const userId = storedUser ? storedUser.userId : null;
@@ -165,8 +167,11 @@ const IntrimAccordian = ({ invokeHistory }) => {
     const fetchIntrimInvestigation = async () => {
         try {
             const requestBody = { orgId: 1, incidentId: id, userId: userId };
+            console.log(requestBody)
             const response = await axios.post(getIncidentInterimDetails, requestBody);
+            console.log("interim response", response)
             const intrimData = response.data.incidentInterimDetails;
+            console.log("intrimData", intrimData)
             setIntrimInvestigationData(intrimData);
             setInterimId(intrimData.interimId);
             setSelectedFiles(response.data.interimFiles);
@@ -176,12 +181,27 @@ const IntrimAccordian = ({ invokeHistory }) => {
         }
     };
 
-    const submit_Intirm_Investagation = async () => {
+    const formValidation = () => {
+        const newErrors = {};
+        if (!intrimFindings.trim()) {
+            newErrors.intrimFindings = "Findings is required"
+        }
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    }
+    const submit_Intirm_Investagation = async (e) => {
+        e.preventDefault();
+        if (!formValidation()) {
+            console.log("Form validation failed");
+            return;
+        }
+        console.log(interimId)
+        setLoading(true)
         try {
             const requestBody = {
                 findings: intrimFindings,
                 incidentId: id,
-                createdBy: 1,
+                createdBy: userId,
                 interimId: interimId ? interimId : '0',
                 flag: interimId ? 'U' : 'I'
             };
@@ -198,14 +218,12 @@ const IntrimAccordian = ({ invokeHistory }) => {
                 invokeHistory()
                 setOpen(true);
                 setInterimSelectedFiles([]);
-                setSelectedFiles(prevFiles => [...prevFiles, ...(response.data.interimFiles || [])]);
                 fetchIntrimInvestigation();
             } else if (response?.data?.statusResponse?.responseCode === 200) {
                 setMessage("Interim investigation Updated Successfully");
                 setSeverity('success');
                 setOpen(true);
                 setInterimSelectedFiles([]);
-                setSelectedFiles(prevFiles => [...prevFiles, ...(response?.data?.interimFiles || [])]);
                 fetchIntrimInvestigation();
             } else {
                 setMessage("Failed to add Interim investigation.");
@@ -216,6 +234,8 @@ const IntrimAccordian = ({ invokeHistory }) => {
             setMessage("Failed to submit interim investigation. Error: " + error.message);
             setSeverity('error');
             setOpen(true);
+        } finally {
+            setLoading(false)
         }
     };
 
@@ -242,8 +262,19 @@ const IntrimAccordian = ({ invokeHistory }) => {
                                     rows={2}
                                     placeholder='Write your findings'
                                     value={intrimFindings || ''}
-                                    onChange={(e) => setIntrimfindings(e.target.value)}
+                                    onChange={(e) => {
+                                        setIntrimfindings(e.target.value)
+                                        setErrors((prevErrors) => ({
+                                            ...prevErrors,
+                                            intrimFindings: undefined, 
+                                          }));
+                                       
+                                    }}
+                                    isInvalid={!!errors.intrimFindings}
+                                    // error={!!errors.intrimFindings}
+                                    // helperText={errors.intrimFindings}
                                 />
+                                <Form.Control.Feedback type="invalid">{errors.intrimFindings}</Form.Control.Feedback>
                             </Form.Group>
                         </div>
                         <div className='col-md-6 ps-0 file_upload upload-file-border'>
@@ -279,8 +310,8 @@ const IntrimAccordian = ({ invokeHistory }) => {
                                         <li className='mt-2'>
                                             <div className="d-flex align-items-center justify-content-between" style={{ width: "100%" }}>
                                                 <div className="d-flex align-items-center">
-                                                <span className="file-icon">
-                                                    <TextSnippetIcon style={{ color: "#533529" }} />
+                                                    <span className="file-icon">
+                                                        <TextSnippetIcon style={{ color: "#533529" }} />
                                                     </span>
                                                     <p className="mb-0 ms-2">
                                                         <a target="_blank" rel="noopener noreferrer">
@@ -300,13 +331,16 @@ const IntrimAccordian = ({ invokeHistory }) => {
                                             </div>
                                         </li>
                                     </ul>
-                                    </div>
+                                </div>
                                 </div>
                             </div>
                         ))}
                         <div className='d-flex justify-content-end gap-3 mt-3'>
-                            <Button className='accordian_submit_btn' onClick={submit_Intirm_Investagation}>Submit</Button>
-                            <Button className='accordian_cancel_btn'>Close</Button>
+                            <Button className='accordian_submit_btn' onClick={submit_Intirm_Investagation}>
+                                {loading ? "Procesing..." : "Submit"}
+
+                            </Button>
+                            {/* <Button className='accordian_cancel_btn'>Close</Button> */}
                         </div>
                     </div>
                 </AccordionDetails>
@@ -328,8 +362,8 @@ const IntrimAccordian = ({ invokeHistory }) => {
                     <DialogContentText className='mt-4'>Are you sure you want to delete the file "{fileToDelete?.documentName}"?</DialogContentText>
                 </DialogContent>
                 <DialogActions className='dialog_content'>
-                <Button className='accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button>
-                <Button className='accordian_submit_btn' onClick={closeDeleteDialog} color="primary">Cancel</Button></DialogActions>
+                    <Button className='accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button>
+                    <Button className='accordian_submit_btn' onClick={closeDeleteDialog} color="primary">Cancel</Button></DialogActions>
             </Dialog>
         </div>
     );

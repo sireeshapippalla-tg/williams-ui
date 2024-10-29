@@ -816,6 +816,7 @@ const IncidentDetails = (props) => {
     e.preventDefault();
     console.log("submit", inputs)
 
+    setLoading(true)
     try {
       const payload = {
         orgId: 1,
@@ -866,6 +867,8 @@ const IncidentDetails = (props) => {
       setSeverity('error');
       setOpen(true);
       fetchHistory();
+    }finally{
+      setLoading(false)
     }
   }
 
@@ -1188,7 +1191,10 @@ const IncidentDetails = (props) => {
                   <Button
                     className='accordian_cancel_btn float-end'
                     onClick={handleIncidentUpdate}
-                  >Update Incident</Button>
+                  >
+                    {loading? 'Processing...' : 'Update Incident'}
+                    
+                    </Button>
                 </div>
 
               </div>
