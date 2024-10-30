@@ -1002,3 +1002,12 @@ hr {
 .css-1jy569b-MuiFormLabel-root-MuiInputLabel-root{
   font-weight: 700 !important;
 }
+.modal-header-custom {
+  background-color: #533529;
+  color: white;
+}
+
+.modal-header-custom .btn-close {
+  filter: invert(1);
+  font-weight: 600 !important;
+}

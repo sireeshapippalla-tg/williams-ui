@@ -41,6 +41,7 @@ import {
   saveIncidentChart,
   getAllUsers
 } from '../../api';
+import { useGlobalState } from '../../contexts/GlobalStateContext';
 
 
 const VisuallyHiddenInput = styled('input')({
@@ -59,6 +60,8 @@ const VisuallyHiddenInput = styled('input')({
 const CreateIncident = (props) => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { fetchNotifications  } = useGlobalState();
 
   const data = location.state || {}
   console.log("location ai data", data)
@@ -327,7 +330,7 @@ const CreateIncident = (props) => {
       let sevObj;
       let catObj;
       let souObj;
-
+        console.log(sourceData, categoryData, severityData)
       if (severityData && severityData.length > 0) {
         if (data && data.severity) {
           let isSeverityFound = severityData.find((item) => item.title.toLowerCase() == data.severity.toLowerCase());
@@ -616,6 +619,7 @@ const CreateIncident = (props) => {
         setSeverity('success');
         setShowModal3(false)
         setOpen(true);
+        fetchNotifications();
         setTimeout(() => {
           navigate('/incident');
         }, 2000);
@@ -623,12 +627,14 @@ const CreateIncident = (props) => {
         setMessage("Failed to add incident.");
         setSeverity('error');
         setOpen(true);
+        fetchNotifications();
       }
     } catch (error) {
       console.error('Error:', error);
       setMessage("Failed to add incident. Error: " + error.message);
       setSeverity('error');
       setOpen(true);
+      fetchNotifications();
     }finally{
       setLoading(false)
     }

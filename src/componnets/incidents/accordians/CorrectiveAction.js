@@ -103,54 +103,103 @@ const CorrectiveAction = ({ invokeHistory }) => {
         setAiPromptOpen(true)
     };
 
+    // const createTaskhandlerwithAiPrompt = async () => {
+    //     try {
+    //         const response = await axios.post(addTasksWithAI, {
+    //             userPrompt: prompt
+    //         });
+    //         const data = response.data
+    //         setPromptData(data)
+    //         console.log('aidata', data, taskOptions)
+    //         console.log('duedateAI', data.dueDate, data.taskId)
+
+    //         const newRow = {
+    //             id: "",
+    //             task: data.taskName || '',
+    //             taskId: taskOptions.some(opt => opt.id === data.taskId) ? data.taskId : 0,
+    //             dueDate: data.dueDate || '',
+    //             resolved: data.isResolved || false,
+    //             capTaskId: "",
+    //         };
+    //         let isTaskFound = taskOptions.find((item) => item.title == data.taskName);
+    //         if (isTaskFound) {
+
+    //         } else {
+    //             setTaskOptions([...taskOptions, { id: 0, title: data.taskName }]);
+
+    //         }
+
+    //         // setCorrectiveRows((prevRows) => [...prevRows, newRow]);
+    //         setAiPromptOpen(false)
+    //         setPromt('')
+    //         if (correctiveRows && correctiveRows.length > 0) {
+    //             if (correctiveRows[0].taskId) {
+    //                 setCorrectiveRows([...correctiveRows, newRow]);
+
+    //             } else {
+    //                 setCorrectiveRows([newRow]);
+
+    //             }
+    //         } else {
+    //             setCorrectiveRows([newRow]);
+    //         }
+
+
+    //         console.log('aiproData', promptData)
+    //     } catch (error) {
+    //         console.log('Error creating incident with ai prompt:', error)
+    //     }
+
+    // }
+
     const createTaskhandlerwithAiPrompt = async () => {
         try {
+            // Ensure taskOptions is an empty array if not set
+            const initializedTaskOptions = taskOptions || [];
+
             const response = await axios.post(addTasksWithAI, {
                 userPrompt: prompt
             });
-            const data = response.data
-            setPromptData(data)
-            console.log('aidata', data, taskOptions)
-            console.log('duedateAI', data.dueDate, data.taskId)
+            const data = response.data;
+            setPromptData(data);
+
+            console.log('aidata', data, initializedTaskOptions);
+            console.log('duedateAI', data.dueDate, data.taskId);
 
             const newRow = {
                 id: "",
                 task: data.taskName || '',
-                taskId: taskOptions.some(opt => opt.id === data.taskId) ? data.taskId : 0,
+                taskId: initializedTaskOptions.some(opt => opt.id === data.taskId) ? data.taskId : 0,
                 dueDate: data.dueDate || '',
                 resolved: data.isResolved || false,
                 capTaskId: "",
             };
-            let isTaskFound = taskOptions.find((item) => item.title == data.taskName);
-            if (isTaskFound) {
 
-            } else {
-                setTaskOptions([...taskOptions, { id: 0, title: data.taskName }]);
+            const isTaskFound = initializedTaskOptions.find((item) => item.title === data.taskName);
 
+            if (!isTaskFound && data.taskName) {
+                setTaskOptions([...initializedTaskOptions, { id: 0, title: data.taskName }]);
             }
 
-            // setCorrectiveRows((prevRows) => [...prevRows, newRow]);
-            setAiPromptOpen(false)
-            setPromt('')
-            if (correctiveRows && correctiveRows.length > 0) {
-                if (correctiveRows[0].taskId) {
-                    setCorrectiveRows([...correctiveRows, newRow]);
-
+            // Close the dialog only after updating corrective rows and clearing prompt
+            setCorrectiveRows((prevRows) => {
+                if (prevRows && prevRows.length > 0 && prevRows[0].taskId) {
+                    return [...prevRows, newRow];
                 } else {
-                    setCorrectiveRows([newRow]);
-
+                    return [newRow];
                 }
-            } else {
-                setCorrectiveRows([newRow]);
-            }
+            });
 
+            setAiPromptOpen(false); // Close dialog
+            setPromt('');          // Clear prompt
 
-            console.log('aiproData', promptData)
+            console.log('aiproData', data);
+
         } catch (error) {
-            console.log('Error creating incident with ai prompt:', error)
+            console.log('Error creating incident with AI prompt:', error);
         }
+    };
 
-    }
 
     const handleClose = (event, reason) => {
         if (reason === 'clickaway') {
@@ -303,25 +352,96 @@ const CorrectiveAction = ({ invokeHistory }) => {
 
 
 
+    // const fetchTaskDropdown = async () => {
+    //     try {
+    //         const payload = {
+    //             sourceName: "Incident Task"
+    //         }
+    //         const response = await axios.post(getMastersListByType, payload)
+    //         console.log(response)
+
+    //         const taskOption = response.data.masterList.map((task) => ({
+    //             id: task.sourceId,
+    //             title: task.sourceType
+    //         }));
+    //         console.log('Mapped task options:', taskOption);
+    //         setTaskOptions(taskOption);
+    //         // console.log("taskOptions", taskOptions)
+    //         console.log(promptData)
+    //         let taskObj;
+    //         if (taskOptions && taskOptions.length > 0) {
+    //             // if (promptData && promptData.taskName) {
+    //             //     let isPromptTaskFound = taskOptions.find((item) => item.title.toLowerCase() == promptData.taskName.toLowerCase())
+
+    //             //     if (isPromptTaskFound) {
+    //             //         taskObj = isPromptTaskFound
+    //             //     } else {
+    //             //         taskObj = { id: 0, title: promptData.taskName }
+    //             //     }
+    //             // }
+
+    //             if (taskOption.length > 0 && promptData && promptData.taskName) {
+    //                 // Search in taskOption directly
+    //                 const isPromptTaskFound = taskOption.find(
+    //                     (item) => item.title.toLowerCase() === promptData.taskName.toLowerCase()
+    //                 );
+
+    //                 // Set taskObj to either the found task or a new entry
+    //                 taskObj = isPromptTaskFound || { id: 0, title: promptData.taskName };
+    //                 console.log('Task object based on promptData:', taskObj);
+    //             }
+    //         }
+    //         // setTaskOptions(taskObj)
+    //         console.log(taskOptions)
+
+    //     } catch (error) {
+    //         console.log('Failed to fetch Task dropdown options:', error)
+    //     }
+
+    // }
+
     const fetchTaskDropdown = async () => {
         try {
             const payload = {
                 sourceName: "Incident Task"
-            }
-            const response = await axios.post(getMastersListByType, payload)
-            console.log(response)
+            };
+            const response = await axios.post(getMastersListByType, payload);
 
             const taskOption = response.data.masterList.map((task) => ({
                 id: task.sourceId,
                 title: task.sourceType
             }));
+
+            console.log('Mapped task options:', taskOption);
+
+            // Set taskOptions with taskOption fetched from the API
             setTaskOptions(taskOption);
 
-        } catch (error) {
-            console.log('Failed to fetch Task dropdown options:', error)
-        }
+            // Initialize taskObj to null
+            let taskObj = null;
 
-    }
+            if (promptData && promptData.taskName) {
+                // Check if promptData.taskName exists in taskOption
+                const isPromptTaskFound = taskOption.find(
+                    (item) => item.title.toLowerCase() == promptData.taskName.toLowerCase()
+                );
+
+                // Set taskObj to the matched task or a new entry
+                taskObj = isPromptTaskFound || { id: 0, title: promptData.taskName };
+                console.log(isPromptTaskFound)
+                // If taskObj is new, add it to taskOptions
+                if (!isPromptTaskFound) {
+                    setTaskOptions((prevOptions) => [...prevOptions, taskObj]);
+                }
+                // setTaskOptions(taskObj)
+                console.log('Task object based on promptData:', taskObj);
+            }
+
+        } catch (error) {
+            console.log('Failed to fetch Task dropdown options:', error);
+        }
+    };
+
 
     const handleTaskDropdownChange = async (newValue) => {
         if (newValue && newValue.inputValue) {
@@ -359,6 +479,16 @@ const CorrectiveAction = ({ invokeHistory }) => {
         // if (!row.taskId) {
         //     validateErrors.taskId = 'Task is required';
         // }
+        // if (!row.taskId == undefined) {
+        //     validateErrors.taskId = 'Task is required or invalid';
+        // }
+
+        if (!row.taskId && !row.task) {
+            validateErrors.taskId = 'Task is required.';
+        }
+        //  else if (row.taskId === undefined || row.taskId === 0) {
+        //     validateErrors.taskId = 'Invalid task selection.';
+        // }
         if (!row.dueDate) {
             validateErrors.dueDate = 'Due date is required';
         } else if (new Date(row.dueDate) < new Date()) {
@@ -374,7 +504,7 @@ const CorrectiveAction = ({ invokeHistory }) => {
             console.log('validation failed')
             return
         }
-        
+
         setLoading(true);
         try {
             const formData = new FormData();
@@ -408,17 +538,21 @@ const CorrectiveAction = ({ invokeHistory }) => {
 
             console.log("correction action table data:", response)
             if (response.data.statusResponse.responseCode === 201) {
+                await fetchTaskDropdown();
                 await fetchTaskIncident();
                 setMessage('Task created sucessfully');
                 setSeverity('success')
                 invokeHistory()
                 setOpen(true)
+                // window.location.reload()
             } else if (response.data.statusResponse.responseCode === 200) {
                 await fetchTaskIncident();
                 setMessage('Task Updated sucessfully');
                 setSeverity('success')
                 invokeHistory()
                 setOpen(true)
+                // window.location.reload()
+
             } else {
                 setMessage("Failed to assign task.");
                 setSeverity('error');
@@ -588,7 +722,7 @@ const CorrectiveAction = ({ invokeHistory }) => {
 
             const correctiveData = response.data.incidentCorrectiveActionPlanDetails
             // setIntrimInvestigationData(intrimData)
-            setCorrectiveId(correctiveData.incidentActionPlanId)
+            setCorrectiveId(correctiveData?.incidentActionPlanId)
             console.log(correctiveId)
 
             setSelectedFiles(response.data.capFileDetails)
@@ -691,13 +825,12 @@ const CorrectiveAction = ({ invokeHistory }) => {
         }
 
         if (row.capTaskId) {
-            // If the row has a `capTaskId`, it means it's an existing row from the API, and we need to delete it on the server
             setLoading(true);
             try {
                 const formData = new FormData();
                 const payload = {
                     createdBy: 1,
-                    flag: 'D', // Use 'D' flag to indicate deletion
+                    flag: 'D',
                     incidentId: id,
                     capTaskId: row.capTaskId,
                     taskId: row.taskId,
@@ -708,7 +841,7 @@ const CorrectiveAction = ({ invokeHistory }) => {
                 console.log(payload)
 
                 formData.append('tasks', JSON.stringify(payload));
-                formData.append('files', '')
+                // formData.append('files', '')
 
                 // Call the API to delete the row
                 const response = await axios.post(saveTasksForCap, formData, {
@@ -822,7 +955,7 @@ const CorrectiveAction = ({ invokeHistory }) => {
                                                     >
 
                                                         <Autocomplete
-                                                            value={taskOptions.find((option) => option.id === row.taskId) || null}
+                                                            value={taskOptions?.find((option) => option.id === row.taskId) || null}
                                                             onChange={async (event, newValue) => {
                                                                 if (newValue) {
                                                                     if (newValue.inputValue) {
@@ -835,10 +968,10 @@ const CorrectiveAction = ({ invokeHistory }) => {
                                                                 } else {
                                                                     correctiveRowshandleChange(row.id, 'taskId', ''); // Clear the value if no task is selected
                                                                 }
-                                                                // setRowErrors((prev) => ({
-                                                                //     ...prev,
-                                                                //     [row.id]: { ...prev[row.id], taskId: undefined } 
-                                                                // }));
+                                                                setRowErrors((prev) => ({
+                                                                    ...prev,
+                                                                    [row.id]: { ...prev[row.id], taskId: undefined }
+                                                                }));
 
                                                             }}
                                                             filterOptions={(options, params) => {
@@ -861,7 +994,7 @@ const CorrectiveAction = ({ invokeHistory }) => {
                                                             selectOnFocus
                                                             clearOnBlur
                                                             handleHomeEndKeys
-                                                            options={taskOptions}
+                                                            options={taskOptions || []}
                                                             getOptionLabel={(option) => {
                                                                 if (typeof option === 'string') {
                                                                     return option;
@@ -887,8 +1020,8 @@ const CorrectiveAction = ({ invokeHistory }) => {
                                                                     {...params}
                                                                     label="Task"
                                                                     variant="outlined"
-                                                                    // error={!!(rowErrors[row.id]?.taskId)}
-                                                                    // helperText={rowErrors[row.id]?.taskId}
+                                                                    error={!!(rowErrors[row.id]?.taskId)}
+                                                                    helperText={rowErrors[row.id]?.taskId}
                                                                 />
                                                             )}
 
@@ -1377,7 +1510,7 @@ const CorrectiveAction = ({ invokeHistory }) => {
                 </AccordionDetails>
             </Accordion>
 
-            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+            <Snackbar open={open} autoHideDuration={3000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
                 <Alert onClose={handleClose} severity={severity}>
                     {message}
                 </Alert>

@@ -289,7 +289,7 @@ const DynamicFormFields = ({ incidentId }) => {
                 </Alert>
             </Snackbar>
 
-            <div style={{ background: '#533529', color: 'white', padding: '12px' }}>
+            <div style={{ background: '#533529', color: 'white', padding: '12px', cursor:"pointer" }}>
                 <div onClick={() => setIsAccordionOpen(!isAccordionOpen)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span className='accord_typo'>Additional Fields</span>
                     <ExpandMoreIcon style={{ transform: isAccordionOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', marginRight:"10px" }} />
@@ -298,7 +298,7 @@ const DynamicFormFields = ({ incidentId }) => {
 
             {isAccordionOpen && (
                 <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '1rem' }}>
-                    {loading && <CircularProgress style={{ color: '#533529', display: 'block', margin: '1rem auto' }} />}
+                    {loading && <div>Loading...</div>}
                     {(incidentFields.length > 0 || tempIncidentFields.length > 0) ? (
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
                             {[...incidentFields, ...tempIncidentFields].map((field) => (

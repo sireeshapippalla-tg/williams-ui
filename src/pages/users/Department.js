@@ -2,15 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button, Tabs, Tab, Form } from 'react-bootstrap';
 import axios from 'axios';
 import AddIcon from '@mui/icons-material/Add';
+import { Alert, Snackbar } from '@mui/material';
 
 function DepartmentModal() {
     const [showModal, setShowModal] = useState(false);
     const [activeTab, setActiveTab] = useState('departments');
     const [departments, setDepartments] = useState([]);
     const [newDeptName, setNewDeptName] = useState('');
+    const [open, setOpen] = useState(false)
+    const [message, setMessage] = useState('');
+    const [severity, setSeverity] = useState('success');
 
     const handleShow = () => setShowModal(true);
     const handleClose = () => setShowModal(false);
+
+    const handleDeptClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpen(false);
+    };
 
     const fetchDepartments = async () => {
         try {
@@ -26,12 +37,30 @@ function DepartmentModal() {
 
     const handleCreateDepartment = async () => {
         try {
-            await axios.post(`http://13.127.196.228:8084/iassure/api/users/saveDepartment?deptName=${encodeURIComponent(newDeptName)}`);
-    
+            const response = await axios.post(`http://13.127.196.228:8084/iassure/api/users/saveDepartment?deptName=${encodeURIComponent(newDeptName)}`);
+            // if (response.data.statusResponse.responseCode === 200) {
+            //     setMessage('Department created successfully!');
+            //     setSeverity('success')
+            //     setOpen(true)
+            //     setNewDeptName('')
+            //     fetchDepartments(); 
+            //     setActiveTab('departments')
+            // }else{
+            //     setMessage('Failed to add department!');
+            //     setSeverity('error')
+            //     setOpen(true)
+            // }
+            setMessage('Department created successfully!...');
+            setSeverity('success')
+            setOpen(true)
             setNewDeptName('');  // Clear input field
             fetchDepartments();  // Refresh department list
+            setActiveTab('departments')
         } catch (error) {
-            console.error('Error creating department:', error);
+            console.log('Error creating department:', error);
+            setMessage('Error creating department:', error);
+            setSeverity(error);
+            setOpen(true)
         }
     };
 
@@ -43,12 +72,12 @@ function DepartmentModal() {
 
     return (
         <div className='col-md-6 btn_incident_create incident_mbl' style={{ float: "right" }}>
-            <Button variant="primary" className='me-2' onClick={handleShow}>
+            <Button className='me-2 accordian_submit_btn' onClick={handleShow}>
                 Add Department &nbsp; <span><AddIcon /></span>
             </Button>
 
             <Modal show={showModal} onHide={handleClose} centered>
-                <Modal.Header closeButton style={{ backgroundColor: '#533529', color: 'white' }}>
+                <Modal.Header closeButton className="modal-header-custom" >
                     <Modal.Title>Manage Departments</Modal.Title>
                 </Modal.Header>
                 <Modal.Body style={{ maxHeight: '400px', overflowY: 'auto' }}>
@@ -82,6 +111,12 @@ function DepartmentModal() {
                     </Tabs>
                 </Modal.Body>
             </Modal>
+
+            <Snackbar open={open} autoHideDuration={3000} onClose={handleDeptClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert onClose={handleDeptClose} severity={severity}>
+                    {message}
+                </Alert>
+            </Snackbar>
         </div>
     );
 }
