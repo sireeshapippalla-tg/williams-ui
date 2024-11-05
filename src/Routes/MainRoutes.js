@@ -9,6 +9,8 @@ import Login from '../pages/auth/Login';
 import Forgot from '../pages/auth/Forgot';
 import ProtectedRoute from './ProtectedRoute ';
 import IncidentDashboard from '../pages/IncidentDashboard';
+import DocumentRepository from '../pages/incidents/DocumentRepository';
+import AISearchDashboard from '../componnets/incidents/AISearch';
 
 
 const MainRoutes = () => {
@@ -63,6 +65,22 @@ const MainRoutes = () => {
               </ProtectedRoute>
             }
           />
+           <Route 
+            path='/document/repository' 
+            element={
+              <ProtectedRoute>
+                <DocumentRepository/>
+              </ProtectedRoute>
+            }
+          />
+            <Route 
+            path='/document/aiSearch' 
+            element={
+              <ProtectedRoute>
+                <AISearchDashboard/>
+              </ProtectedRoute>
+            }       
+            />
 
           {/* Public Routes */}
           <Route path='/' element={<Login/>}/>

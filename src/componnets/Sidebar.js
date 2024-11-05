@@ -26,7 +26,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import Home from '../assets/images/HomeIcon.png';
 import Incident from '../assets/images/Incident.png';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-
+import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 
 
 
@@ -47,9 +47,14 @@ const SidebarItems = [
         path: "/users",
         icon: <PersonAddAltIcon />
     },
+    {
+        label : "Document Repository",
+        path: "/document/repository",
+        icon: <FolderOpenIcon/>
+    }
 ];
 
-const drawerWidth = 220;
+const drawerWidth = 260;
 
 const openedMixin = (theme) => ({
     width: drawerWidth,

@@ -21,8 +21,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Menu, MenuItem } from '@mui/material';
 
-import {  
-  getIncidentCountDetails1, 
+import {
+  getIncidentCountDetails1,
   fetchIncidentDetailsDashboard,
   getMastersListByType,
   addMasterByType,
@@ -60,8 +60,8 @@ const StyledStatusText = styled('span')(({ theme, status }) => ({
 
 const columns = [
   {
-    id:"id",
-    label:"Incident ID",
+    id: "id",
+    label: "Incident ID",
     hidden: true,
 
   },
@@ -108,9 +108,9 @@ const columns = [
   }
 ];
 
-function createData(id,incidentRecord, subject, departmentName, category, severity, created, status, action) {
+function createData(id, incidentRecord, subject, departmentName, category, severity, created, status, action) {
 
-  return {id, incidentRecord, subject, departmentName, category, severity, created, status, action };
+  return { id, incidentRecord, subject, departmentName, category, severity, created, status, action };
 }
 const getStatusColor = (status) => {
   return status === 'open' ? 'green' : 'red';
@@ -138,11 +138,11 @@ const Incident = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
- // Get the user details from localStorage
-const storedUser = JSON.parse(localStorage.getItem('userDetails'));
-const userId = storedUser ? storedUser.userId : null;
+  // Get the user details from localStorage
+  const storedUser = JSON.parse(localStorage.getItem('userDetails'));
+  const userId = storedUser ? storedUser.userId : null;
 
-console.log(userId); 
+  console.log(userId);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -389,18 +389,19 @@ console.log(userId);
               'aria-labelledby': 'add-incident-button',
             }}
           >
-            <MenuItem className="brown-menu-item" onClick={handleAiPrompt}>Create Incident by AI Prompt</MenuItem>
-            <MenuItem className="brown-menu-item" onClick={handleWithoutAiPrompt}>Create Incident without AI Prompt</MenuItem>
+            <MenuItem className="brown-menu-item" onClick={handleWithoutAiPrompt}>Create Incident</MenuItem>
+            <MenuItem className="brown-menu-item" onClick={handleAiPrompt}>Create Incident with AI Prompt</MenuItem>
+            
           </Menu>
         </div>
 
       </div>
       {isLoading ? (
-       
+
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
           <CircularProgress sx={{ color: '#533529' }} /> {/* Brown color */}
         </div>
-      
+
       ) :
         <div class="row mb-5 ">
           <div class="col-md-12">
@@ -602,62 +603,62 @@ console.log(userId);
         <div className="mt-2">
 
           <Paper className='tbl' sx={{ width: '100%', overflow: 'hidden' }}>
-          <TableContainer className='tablescroll-mobile'>
-  <Table stickyHeader aria-label="sticky table" sx={{ minWidth: 650 }}>
-    <TableHead>
-      <TableRow>
-        {columns.map((column) => (
-          !column.hidden && ( // Only render if column is not hidden
-            <TableCell
-              key={column.id}
-              align={column.align}
-              style={{ minWidth: column.minWidth }}
-            >
-              {column.label}
-            </TableCell>
-          )
-        ))}
-      </TableRow>
-    </TableHead>
-    {isLoading ? (
-      <div>Loading...</div>
-    ) : (
-      <TableBody>
-        {rows
-          .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-          .map((row) => (
-            <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-              {columns.map((column) => {
-                if (column.hidden) return null; // Skip hidden columns
-                const value = row[column.id];
-                if (column.id === 'status') {
-                  return (
-                    <StyledStatusTableCell key={column.id} align={column.align} status={row.status}>
-                      <StyledStatusText status={row.status}>
-                        {value}
-                      </StyledStatusText>
-                    </StyledStatusTableCell>
-                  );
-                }
-                return (
-                  <TableCell
-                    style={{ cursor: "pointer" }}
-                    key={column.id}
-                    align={column.align}
-                    onClick={() => clickHandlerresolve(row.id)}
-                  >
-                    {column.format && typeof value === 'number'
-                      ? column.format(value)
-                      : value}
-                  </TableCell>
-                );
-              })}
-            </StyledTableRow>
-          ))}
-      </TableBody>
-    )}
-  </Table>
-</TableContainer>
+            <TableContainer className='tablescroll-mobile'>
+              <Table stickyHeader aria-label="sticky table" sx={{ minWidth: 650 }}>
+                <TableHead>
+                  <TableRow>
+                    {columns.map((column) => (
+                      !column.hidden && ( // Only render if column is not hidden
+                        <TableCell
+                          key={column.id}
+                          align={column.align}
+                          style={{ minWidth: column.minWidth }}
+                        >
+                          {column.label}
+                        </TableCell>
+                      )
+                    ))}
+                  </TableRow>
+                </TableHead>
+                {isLoading ? (
+                  <div>Loading...</div>
+                ) : (
+                  <TableBody>
+                    {rows
+                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .map((row) => (
+                        <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code}>
+                          {columns.map((column) => {
+                            if (column.hidden) return null; // Skip hidden columns
+                            const value = row[column.id];
+                            if (column.id === 'status') {
+                              return (
+                                <StyledStatusTableCell key={column.id} align={column.align} status={row.status}>
+                                  <StyledStatusText status={row.status}>
+                                    {value}
+                                  </StyledStatusText>
+                                </StyledStatusTableCell>
+                              );
+                            }
+                            return (
+                              <TableCell
+                                style={{ cursor: "pointer" }}
+                                key={column.id}
+                                align={column.align}
+                                onClick={() => clickHandlerresolve(row.id)}
+                              >
+                                {column.format && typeof value === 'number'
+                                  ? column.format(value)
+                                  : value}
+                              </TableCell>
+                            );
+                          })}
+                        </StyledTableRow>
+                      ))}
+                  </TableBody>
+                )}
+              </Table>
+            </TableContainer>
             <div>
               <TablePagination
                 rowsPerPageOptions={[5, 10, 20, 40, 100]}
@@ -701,3 +702,5 @@ console.log(userId);
 }
 
 export default Incident
+
+
