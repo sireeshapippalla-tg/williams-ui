@@ -20,7 +20,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   },
 }));
 
-const SearchResults = ({ results }) => {
+const SearchResults = ({ results, onViewDocument }) => {
   if (!results || (Array.isArray(results) && results.length === 0)) {
     return (
       <div className="text-center p-4 text-gray-500">
@@ -40,95 +40,78 @@ const SearchResults = ({ results }) => {
             <h3 className="font-medium text-lg">{result.fileName}</h3>
           </div>
           {result.content && (
-            <div className="text-gray-600">
+            <div className="text-gray-600 mb-3">
               <div className="bg-gray-50 p-3 rounded border">
                 <p>{result.content}</p>
               </div>
             </div>
           )}
+          <Button variant="outlined" onClick={() => onViewDocument(result.fileName)}>
+            View
+          </Button>
         </div>
       ))}
     </div>
   );
 };
 
-const SearchHistoryModal = ({ isOpen, onClose, history, onRerunSearch, onClearHistory, onRemoveItem }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center pt-20 overflow-y-auto">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
-        <div className="flex justify-between items-center p-4 border-b">
-          <div className="flex items-center gap-2">
-            <History className="w-5 h-5 text-gray-500" />
-            <h2 className="text-xl font-semibold">Recent Searches</h2>
-          </div>
-          <div className="flex items-center gap-2">
-            {history.length > 0 && (
-              <button
-                onClick={onClearHistory}
-                className="flex items-center gap-1 text-sm text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="w-4 h-4" />
-                Clear All
-              </button>
-            )}
-            <button
-              onClick={onClose}
-              className="p-1 hover:bg-gray-100 rounded-full"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        <div className="max-h-[60vh] overflow-y-auto p-4">
-          {history.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">
-              No search history yet
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {history.slice().reverse().map((item, index) => (
-                <div key={index} className="border rounded-lg p-3">
-                  <div className="flex justify-between items-start mb-2">
-                    <button
-                      onClick={() => {
-                        onRerunSearch(item.query);
-                        onClose();
-                      }}
-                      className="font-medium text-blue-600 hover:underline"
-                    >
-                      "{item.query}"
-                    </button>
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm text-gray-500">
-                        {new Date(item.timestamp).toLocaleTimeString()}
-                      </div>
-                      <button
-                        onClick={() => onRemoveItem(index)}
-                        className="p-1 text-gray-400 hover:text-red-500"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
+const SearchHistoryModal = ({ isOpen, onClose, history, onRerunSearch, onClearHistory, onRemoveItem }) => (
+  <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
+    <DialogTitle>
+      Recent Searches
+      <IconButton aria-label="close" onClick={onClose} style={{ position: 'absolute', right: 8, top: 8 }}>
+        <CloseIcon />
+      </IconButton>
+    </DialogTitle>
+    <DialogContent dividers>
+      {history.length === 0 ? (
+        <Typography variant="body2" color="textSecondary" align="center" className="py-8">
+          No search history yet
+        </Typography>
+      ) : (
+        <div className="space-y-4">
+          {history.slice().reverse().map((item, index) => (
+            <div key={index} className="border rounded-lg p-3">
+              <div className="flex justify-between items-start mb-2">
+                <Button
+                  onClick={() => {
+                    onRerunSearch(item.query);
+                    onClose();
+                  }}
+                  color="primary"
+                  className="font-medium"
+                >
+                  "{item.query}"
+                </Button>
+                <div className="flex items-center gap-2">
+                  <div className="text-sm text-gray-500">
+                    {new Date(item.timestamp).toLocaleTimeString()}
                   </div>
-                  <div className="pl-4 border-l-2 border-gray-200">
-                    <SearchResults results={item.results} />
-                  </div>
+                  <IconButton
+                    onClick={() => onRemoveItem(index)}
+                    className="p-1 text-gray-400 hover:text-red-500"
+                    size="small"
+                  >
+                    <X className="w-4 h-4" />
+                  </IconButton>
                 </div>
-              ))}
+              </div>
             </div>
-          )}
+          ))}
         </div>
-      </div>
-    </div>
-  );
-};
-
-
-
-const AISearchDashboard = ({ onClose, history, onRerunSearch, onClearHistory, onRemoveItem }) => {
+      )}
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={onClearHistory} color="secondary">
+        Clear All
+      </Button>
+      <Button onClick={onClose} color="primary">
+        Close
+      </Button>
+    </DialogActions>
+  </Dialog>
+);
+const AISearchDashboard = () => {
   const [prompt, setPrompt] = useState('');
   const [searchResults, setSearchResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -138,15 +121,18 @@ const AISearchDashboard = ({ onClose, history, onRerunSearch, onClearHistory, on
     { type: 'bot', content: "Hi! I can help you search through your documents. What would you like to find?" },
   ]);
 
-  const [open, setOpen] = React.useState(false);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [currentDocument, setCurrentDocument] = useState(null);
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-  const handleClose = () => {
-    setOpen(false);
+  const openDocumentViewer = (fileName) => {
+    setCurrentDocument(`/documents/${fileName}`);
+    setIsViewerOpen(true);
   };
 
+  const closeDocumentViewer = () => {
+    setIsViewerOpen(false);
+    setCurrentDocument(null);
+  };
 
   const clearHistory = () => {
     setSearchHistory([]);
@@ -218,15 +204,12 @@ const AISearchDashboard = ({ onClose, history, onRerunSearch, onClearHistory, on
           <h1 className="h4 font-weight-bold">AI Document Search</h1>
           <div className="d-flex gap-2">
             <button
-              onClick={() => setOpen(true)}
+              onClick={() => setIsHistoryModalOpen(true)}
               className="btn btn-outline-secondary d-flex align-items-center gap-2"
             >
               <History size={18} />
               <span>{searchHistory.length} Recent Searches</span>
             </button>
-            {/* <button onClick={onClose} className="btn btn-light">
-              <X size={18} />
-            </button> */}
           </div>
         </div>
 
@@ -266,8 +249,8 @@ const AISearchDashboard = ({ onClose, history, onRerunSearch, onClearHistory, on
                     <button
                       onClick={() => handleSubmit()}
                       disabled={isLoading}
-                      className="btn btn-primary m-auto "
-                      style={{padding:"14px"}}
+                      className="btn btn-primary m-auto"
+                      style={{ padding: "14px" }}
                     >
                       {isLoading ? (
                         <span className="spinner-border spinner-border-sm" />
@@ -289,7 +272,7 @@ const AISearchDashboard = ({ onClose, history, onRerunSearch, onClearHistory, on
               </div>
               <div className="card-body overflow-auto">
                 {searchResults ? (
-                  <SearchResults results={searchResults} />
+                  <SearchResults results={searchResults} onViewDocument={openDocumentViewer} />
                 ) : (
                   <div className="text-center text-secondary">
                     Your search results will appear here
@@ -310,134 +293,37 @@ const AISearchDashboard = ({ onClose, history, onRerunSearch, onClearHistory, on
         />
       </div>
 
-      <Dialog open={open} onClose={handleClose} 
-       fullWidth
-       maxWidth="lg" // Options: xs, sm, md, lg, xl, or false
-       sx={{ '& .MuiDialog-paper': { width: '600px', maxWidth: 'none' } }}
-      >
-        <DialogTitle className='dialog_head'>Recent Searches</DialogTitle>
-        <DialogContent className='dialog_content'>
-          <DialogContentText className='mt-4'>
-          {history?.length > 0 ? (
-            <div className="space-y-4">
-              {history?.slice().reverse().map((item, index) => (
-                <div key={index} className="border rounded-lg p-3">
-                  <div className="flex justify-between items-start mb-2">
-                    <button
-                      onClick={() => {
-                        onRerunSearch(item.query);
-                        onClose();
-                      }}
-                      className="font-medium text-blue-600 hover:underline"
-                    >
-                      "{item.query}"
-                    </button>
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm text-gray-500">
-                        {new Date(item.timestamp).toLocaleTimeString()}
-                      </div>
-                      <button
-                        onClick={() => onRemoveItem(index)}
-                        className="p-1 text-gray-400 hover:text-red-500"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="pl-4 border-l-2 border-gray-200">
-                    <SearchResults results={item.results} />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-          ) : (
-            <div className="text-center text-gray-500 py-8">
-              No search history yet
-            </div>
-          )}
-            </DialogContentText>
-        </DialogContent>
-        <DialogActions className='dialog_content'>
-          {/* <Button className='accordian_cancel_btn' onClick={confirmDeleteFile} color="secondary">Delete</Button> */}
-          <Button className='accordian_submit_btn' onClick={handleClose} color="primary">Close</Button>
-        </DialogActions>
-      </Dialog>
-{/* 
-      <BootstrapDialog
-        onClose={handleClose}
-        aria-labelledby="customized-dialog-title"
-        open={open}
-        fullWidth
-        maxWidth="lg" // Options: xs, sm, md, lg, xl, or false
-        sx={{ '& .MuiDialog-paper': { width: '600px', maxWidth: 'none' } }}
-
-      >
-        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-          Recent Searches
+      {/* Document Viewer Modal */}
+      <Dialog open={isViewerOpen} onClose={closeDocumentViewer} fullWidth maxWidth="md">
+        <DialogTitle>
+          Document Viewer
+          <IconButton aria-label="close" onClick={closeDocumentViewer} style={{ position: 'absolute', right: 8, top: 8 }}>
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
-        <IconButton
-          aria-label="close"
-          onClick={handleClose}
-          sx={(theme) => ({
-            position: 'absolute',
-            right: 8,
-            top: 8,
-            color: theme.palette.grey[500],
-          })}
-        >
-          <CloseIcon />
-        </IconButton>
-        <DialogContent dividers>
-          {history?.length > 0 ? (
-            <div className="space-y-4">
-              {history?.slice().reverse().map((item, index) => (
-                <div key={index} className="border rounded-lg p-3">
-                  <div className="flex justify-between items-start mb-2">
-                    <button
-                      onClick={() => {
-                        onRerunSearch(item.query);
-                        onClose();
-                      }}
-                      className="font-medium text-blue-600 hover:underline"
-                    >
-                      "{item.query}"
-                    </button>
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm text-gray-500">
-                        {new Date(item.timestamp).toLocaleTimeString()}
-                      </div>
-                      <button
-                        onClick={() => onRemoveItem(index)}
-                        className="p-1 text-gray-400 hover:text-red-500"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="pl-4 border-l-2 border-gray-200">
-                    <SearchResults results={item.results} />
-                  </div>
-                </div>
-              ))}
-            </div>
-
+        <DialogContent>
+          {currentDocument ? (
+            <iframe
+              src={currentDocument}
+              title="Document Viewer"
+              width="100%"
+              height="600px"
+              style={{ border: 'none' }}
+            />
           ) : (
-            <div className="text-center text-gray-500 py-8">
-              No search history yet
-            </div>
+            <Typography variant="body2" color="textSecondary">
+              Document not found.
+            </Typography>
           )}
         </DialogContent>
         <DialogActions>
-          <Button autoFocus onClick={handleClose} variant='contained'>
-            Cancel
+          <Button onClick={closeDocumentViewer} color="primary">
+            Close
           </Button>
         </DialogActions>
-      </BootstrapDialog> */}
+      </Dialog>
     </div>
   );
 };
 
 export default AISearchDashboard;
-
-
