@@ -392,46 +392,101 @@
 
 import React, { useState } from 'react';
 import { MessageCircle, Send, Code2, History, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Tooltip, Typography } from "@mui/material";
 // import SuggestionCard from '../componnets/SugestionCard';
 import DynamicTable from '../componnets/incidents/DynamicTable';
 import SendIcon from '@mui/icons-material/Send';
+import fevicon from '../assets/images/fevicon.png'
 
 const HistoryItem = ({ item, onLoad }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="border rounded-lg overflow-hidden hover:border-blue-500 transition-colors">
-      <div 
-        className="p-4 bg-gray-50 border-b cursor-pointer flex items-start gap-2"
+    // <div className="border rounded-lg overflow-hidden hover:border-blue-500 transition-colors">
+    //   <div
+    //     className="p-4 bg-gray-50 border-b cursor-pointer flex items-start gap-2"
+    //     onClick={() => setIsExpanded(!isExpanded)}
+    //   >
+    //     {isExpanded ? (
+    //       <ChevronDown className="w-5 h-5 mt-1 text-gray-500 flex-shrink-0" />
+    //     ) : (
+    //       <ChevronRight className="w-5 h-5 mt-1 text-gray-500 flex-shrink-0" />
+    //     )}
+    //     <div className="flex-grow">
+    //       <div className="flex justify-between items-center mb-2">
+    //         <span className="text-sm text-gray-500">{item.timestamp}</span>
+    //         {/* <button
+    //           onClick={(e) => {
+    //             e.stopPropagation();
+    //             onLoad(item);
+    //           }}
+    //           className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
+    //         >
+    //           Load Query
+    //         </button> */}
+    //       </div>
+    //       <div className="font-medium">Query: {item.prompt}</div>
+    //     </div>
+    //   </div>
+    //   {isExpanded && (
+    //     <div className="p-4 border-t max-h-[300px] overflow-auto">
+    //       {item.tableData ? (
+    //         <DynamicTable data={Array.isArray(item.tableData) ? item.tableData : [item.tableData]} />
+    //       ) : (
+    //         <p className="text-gray-500">No data available for this query</p>
+    //       )}
+    //     </div>
+    //   )}
+    // </div>
+    <div className="border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+      <div
+        className="p-4 bg-light cursor-pointer flex items-start gap-3"
         onClick={() => setIsExpanded(!isExpanded)}
+        style={{
+          backgroundColor: "#f9fafb",
+          borderBottom: "1px solid #e0e0e0",
+        }}
       >
         {isExpanded ? (
-          <ChevronDown className="w-5 h-5 mt-1 text-gray-500 flex-shrink-0" />
+          <ChevronDown style={{ fontSize: 20, color: "#616161", float:"right"  }} />
         ) : (
-          <ChevronRight className="w-5 h-5 mt-1 text-gray-500 flex-shrink-0" />
+          <ChevronRight style={{ fontSize: 20, color: "#616161", float:"right" }} />
         )}
         <div className="flex-grow">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-gray-500">{item.timestamp}</span>
-            {/* <button
+          <div className="d-flex justify-content-between align-items-center mb-1">
+            <Typography variant="caption" color="textSecondary">
+              {item.timestamp}
+            </Typography>
+            {/* <Button
+              variant="outlined"
+              size="small"
               onClick={(e) => {
                 e.stopPropagation();
                 onLoad(item);
               }}
-              className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
+              style={{
+                borderColor: "#1976d2",
+                color: "#1976d2",
+                fontSize: "0.75rem",
+                padding: "2px 8px",
+              }}
             >
               Load Query
-            </button> */}
+            </Button> */}
           </div>
-          <div className="font-medium">Query: {item.prompt}</div>
+          <Typography variant="subtitle2" color="textPrimary" fontWeight="medium">
+            Query: {item.prompt}
+          </Typography>
         </div>
       </div>
       {isExpanded && (
-        <div className="p-4 border-t max-h-[300px] overflow-auto">
+        <div className="p-3 border-top" style={{ backgroundColor: "#ffffff", maxHeight: 300, overflowY: "auto" }}>
           {item.tableData ? (
             <DynamicTable data={Array.isArray(item.tableData) ? item.tableData : [item.tableData]} />
           ) : (
-            <p className="text-gray-500">No data available for this query</p>
+            <Typography variant="body2" color="textSecondary">
+              No data available for this query
+            </Typography>
           )}
         </div>
       )}
@@ -449,6 +504,8 @@ const IncidentDashboard = () => {
   const [messages, setMessages] = useState([
     { type: 'bot', content: "Hi! I'm your AI assistant." },
   ]);
+
+  const [showDialog, setShowDialog] = useState(false);
 
   const handleInputChange = (event) => {
     setPrompt(event.target.value);
@@ -478,7 +535,7 @@ const IncidentDashboard = () => {
 
       const data = await response.json();
       setJsonData(data);
-      
+
       // Add to history
       const historyItem = {
         timestamp: new Date().toLocaleString(),
@@ -492,21 +549,23 @@ const IncidentDashboard = () => {
         { type: 'bot', content: "I've processed your data and generated a table view." },
       ]);
 
-      try {
-        const suggestionResponse = await fetch('http://13.127.196.228:8084/iassure/api/incident/getSuggestions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ userPrompt: prompt })
-        });
+      setShowDialog(false)
 
-        const suggestionData = await suggestionResponse.json();
-        const parsedSuggestions = JSON.parse(suggestionData[0]);
-        setSuggestions(parsedSuggestions.suggestions);
-      } catch (suggestionError) {
-        console.error("Error fetching suggestions:", suggestionError);
-      }
+      // try {
+      //   const suggestionResponse = await fetch('http://13.127.196.228:8084/iassure/api/incident/getSuggestions', {
+      //     method: 'POST',
+      //     headers: {
+      //       'Content-Type': 'application/json'
+      //     },
+      //     body: JSON.stringify({ userPrompt: prompt })
+      //   });
+
+      //   const suggestionData = await suggestionResponse.json();
+      //   const parsedSuggestions = JSON.parse(suggestionData[0]);
+      //   setSuggestions(parsedSuggestions.suggestions);
+      // } catch (suggestionError) {
+      //   console.error("Error fetching suggestions:", suggestionError);
+      // }
 
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -514,6 +573,7 @@ const IncidentDashboard = () => {
         ...prev,
         { type: 'bot', content: "Sorry, I encountered an error while fetching the data. Please try again." },
       ]);
+      // setShowDialog(false)
     } finally {
       setIsLoading(false);
       setPrompt('');
@@ -525,78 +585,34 @@ const IncidentDashboard = () => {
     setPrompt(item.prompt);
     setShowHistory(false);
   };
+  const historyOpen = (event) => {
+    console.log("history clcik")
+    event.preventDefault();
+    setShowHistory(open)
+  }
 
   return (
+
     <div className="min-vh-100 bg-light py-4">
       <div className="container-lg">
         <div className="row g-4">
-          {/* Chat Section */}
-          <div className="col-lg-6">
-            <div className="card shadow-sm">
-              <div className="card-header d-flex align-items-center justify-content-between">
-                <div className="d-flex align-items-center gap-2">
-                  <i className="bi bi-chat-dots text-primary"></i>
-                  <h2 className="h5 mb-0">AI Assistant</h2>
-                </div>
-                <button
-                  onClick={() => setShowHistory(true)}
-                  className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1"
-                >
-                  <History className="w-4 h-4" />
-                  <span>History</span>
-                </button>
-              </div>
-
-              <div className="card-body overflow-auto" style={{ maxHeight: "400px" }}>
-                {messages.map((message, index) => (
-                  <div key={index} className={`d-flex ${message.type === 'user' ? 'justify-content-end' : 'justify-content-start'} mb-3`}>
-                    <div className={`p-3 rounded ${message.type === 'user' ? 'bg-primary text-white' : 'bg-light text-dark'}`}>
-                      {message.content}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="card-body border-top">
-                {suggestions.length > 0 && (
-                  <div className="mb-3">
-                    {suggestions.map((suggestion, index) => (
-                      <div className="d-grid gap-2 mb-2" key={index}>
-                        <button className="btn btn-outline-secondary" onClick={() => setPrompt(suggestion)}>
-                          {suggestion}
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div className="position-relative">
-                  <input
-                    type="text"
-                    value={prompt}
-                    onChange={handleInputChange}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Enter your query..."
-                    className="form-control pe-5"
-                  />
-                  <button
-                    onClick={handleSubmit}
-                    disabled={isLoading}
-                    className="position-absolute end-0 top-50 translate-middle-y btn btn-primary me-2"
-                  >
-                    {isLoading ? (
-                      <span className="spinner-border spinner-border-sm" />
-                    ) : (
-                      <SendIcon />
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
+          {/* Button to Open AI Assistant Dialog */}
+          <div className="col-12" style={{ display: "flex", justifyContent: "space-between" }}>
+            {/* <Button   onClick={() => setShowDialog(true)}>               
+             <img src={fevicon} alt="AI Assistant Icon" style={{ width: "30px", height: "30px",}} />
+            </Button> */}
+            <Tooltip title="Hi! I'm your AI assistant." arrow placement="top">
+              <Button onClick={() => setShowDialog(true)}>
+                <img src={fevicon} alt="AI Assistant Icon" style={{ width: "40px", height: "40px", marginRight: "8px" }} />
+              </Button>
+            </Tooltip>
+            <Button type='button' onClick={() => setShowHistory(true)}>
+              <History />
+            </Button>
           </div>
 
-          {/* Generated Table Section */}
-          <div className="col-lg-6">
+          {/* Full Width Generated Response Section */}
+          <div className="col-12">
             <div className="card shadow-sm h-100">
               <div className="card-header d-flex align-items-center gap-2">
                 <i className="bi bi-code-slash text-secondary"></i>
@@ -616,38 +632,93 @@ const IncidentDashboard = () => {
         </div>
       </div>
 
-      {/* History Modal */}
-      {showHistory && (
-        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Query History</h5>
-                <button 
-                  type="button" 
-                  className="btn-close"
-                  onClick={() => setShowHistory(false)}
-                ></button>
+      {/* AI Assistant Dialog */}
+      <Dialog open={showDialog} onClose={() => setShowDialog(false)} fullWidth maxWidth="md">
+        <DialogTitle className="d-flex align-items-center justify-content-between dialog_head">
+          <span>AI Assistant</span>
+
+        </DialogTitle>
+        <DialogContent dividers className='dialog_content'>
+          {/* Chat Messages Section */}
+          <div className="overflow-auto" style={{ maxHeight: "400px" }}>
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`d-flex ${message.type === "user" ? "justify-content-end" : "justify-content-start"} mb-3`}
+              >
+                <div className={`p-3 rounded ${message.type === "user" ? "bg-primary text-white" : "bg-light text-dark"}`}>
+                  {message.content}
+                </div>
               </div>
-              <div className="modal-body">
-                {history.length === 0 ? (
-                  <p className="text-center text-muted">No history yet</p>
-                ) : (
-                  <div className="d-flex flex-column gap-3">
-                    {history.map((item, index) => (
-                      <HistoryItem 
-                        key={index} 
-                        item={item} 
-                        onLoad={loadHistoryItem}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
-      )}
+
+          {/* Suggestions Section */}
+
+          {/* {suggestions.length > 0 && (
+            <div className="mb-3">
+              {suggestions.map((suggestion, index) => (
+                <Button key={index} variant="outlined" fullWidth onClick={() => setPrompt(suggestion)}>
+                  {suggestion}
+                </Button>
+              ))}
+            </div>
+          )} */}
+
+          {/* Input Section */}
+          <div className="position-relative mt-3">
+            <input
+              type="text"
+              value={prompt}
+              onChange={handleInputChange}
+              placeholder="Enter your query..."
+              className="form-control pe-5"
+            />
+            <Button
+              onClick={handleSubmit}
+              disabled={isLoading}
+              className="position-absolute end-0 top-50 translate-middle-y btn accordian_cancel_btn me-2"
+            >
+              {isLoading ? <span className="spinner-border spinner-border-sm" /> : <SendIcon />}
+            </Button>
+          </div>
+        </DialogContent>
+        <DialogActions className='dialog_content'>
+          <Button onClick={() => setShowDialog(false)} color="primary" className=' accordian_cancel_btn'>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* History Modal */}
+
+      <Dialog open={showHistory} onClose={() => setShowHistory(false)} fullWidth maxWidth="md">
+        <DialogTitle className='dialog_head'>
+          Query History
+        </DialogTitle>
+        <DialogContent dividers className='dialog_content'>
+          {history.length === 0 ? (
+            <p className="text-center text-muted">No history yet</p>
+          ) : (
+            <div className="d-flex flex-column gap-3">
+              {history.map((item, index) => (
+                <HistoryItem
+                  key={index}
+                  item={item}
+                  onLoad={loadHistoryItem}
+                />
+              ))}
+            </div>
+          )}
+        </DialogContent>
+        <DialogActions className='dialog_content'>
+          <Button onClick={() => setShowHistory(false)} className=' accordian_cancel_btn'>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
     </div>
   );
 };

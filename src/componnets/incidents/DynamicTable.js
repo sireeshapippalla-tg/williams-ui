@@ -41,59 +41,7 @@ const DynamicTable = ({ data }) => {
     }
   
     return (
-      // <div className="w-100">
-      //   <div className="input-group mb-3">
-      //     <span className="input-group-text">
-      //       <Search className="text-secondary" />
-      //     </span>
-      //     <input
-      //       type="text"
-      //       placeholder="Search..."
-      //       className="form-control"
-      //       value={searchTerm}
-      //       onChange={(e) => setSearchTerm(e.target.value)}
-      //     />
-      //   </div>
-  
-      //   <div className="table-responsive border rounded">
-      //     <table className="table table-bordered table-hover" >
-      //       <thead className="table-light">
-      //         <tr>
-      //           {columns.map((column, index) => (
-      //             <th
-      //               key={index}
-      //               className="px-4 py-2 text-start text-secondary"
-      //             >
-      //               {column}
-      //             </th>
-      //           ))}
-      //         </tr>
-      //       </thead>
-      //       <tbody>
-      //         {filteredData.map((row, rowIndex) => (
-      //           <tr key={rowIndex}>
-      //             {columns.map((column, colIndex) => (
-      //               <td key={colIndex} className="px-4 py-2 text-secondary">
-      //                 {formatValue(row[column])}
-      //               </td>
-      //             ))}
-      //           </tr>
-      //         ))}
-      //       </tbody>
-      //     </table>
-      //   </div>
-  
-      //   {filteredData.length === 0 && (
-      //     <div className="text-center p-4 text-muted">
-      //       No results found
-      //     </div>
-      //   )}
-  
-      //   <div className="mt-2 text-secondary">
-      //     Showing {filteredData.length} of {data.length} entries
-      //   </div>
-      // </div>
-      <Paper elevation={3} sx={{ overflow: 'hidden' }}>
+      <Paper elevation={3} sx={{ overflow: 'hidden' }} className='tbl' >
         <div style={{ padding: '1rem' }}>
           <TextField
             variant="outlined"
@@ -108,7 +56,7 @@ const DynamicTable = ({ data }) => {
           />
         </div>
         <TableContainer sx={{ maxHeight: 400 }}>
-          <Table stickyHeader>
+          <Table stickyHeader className='tablescroll-mobile'>
             <TableHead>
               <TableRow>
                 {columns.map((column, index) => (

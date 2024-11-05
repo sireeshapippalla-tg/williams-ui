@@ -1219,17 +1219,8 @@ const IncidentDetails = (props) => {
 
             {/* Right content */}
             <div className='col-md-4 '>
-              <div className='mb-3' style={{ display: "flex", justifyContent: "end" }}>
-                {/* <Button
-                  variant='outlined'
-                  className='accordian_submit_btn'
-                  onClick={fieldDialogOpen}
-
-                  style={{ color: "#533529", fontWeight: "600", }}
-                >
-                  Create new Fields
-                </Button>*/}
-              </div><div className="card mb-3" style={{ minHeight: "110px", maxHeight: "110px", overflowY: "auto" }}>
+              <div style={{ display: "flex", justifyContent: "end" }}>
+              </div><div className="card mb-3" style={{ minHeight: "200px", maxHeight: "200px", overflowY: "auto" }}>
                 <div
                   className="card-header"
                   style={{
@@ -1248,7 +1239,7 @@ const IncidentDetails = (props) => {
                     style={{
                       fontSize: "14px",
                       display: "-webkit-box",
-                      WebkitLineClamp: 3,
+                      WebkitLineClamp: 6,
                       WebkitBoxOrient: "vertical",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
