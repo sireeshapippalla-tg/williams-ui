@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
-import { Search, Upload, Folder, File, ChevronRight, ChevronDown, X, MessageCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Search, Upload, Folder, File, ChevronRight, ChevronDown, X, MessageCircle, Trash2 } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Modal, Button } from 'react-bootstrap';
 
 const DocumentRepository = () => {
-    const navigate = useNavigate()
-    const [folders, setFolders] = useState([
+    const navigate = useNavigate();
+    const location = useLocation();
+    const searchedFileName = location.state?.searchedFileName;
+    const [fileNotFound, setFileNotFound] = useState(false);
+
+    // Initial folders structure
+    const initialFolders = [
         {
             id: '1',
             name: 'Documents',
@@ -29,14 +34,48 @@ const DocumentRepository = () => {
             parentId: null,
             isExpanded: true,
         },
-    ]);
+    ];
 
+    // Retrieve folders from localStorage if available
+    const getInitialFolders = () => {
+        const storedFolders = localStorage.getItem('folders');
+        return storedFolders ? JSON.parse(storedFolders) : initialFolders;
+    };
+
+    const [folders, setFolders] = useState(getInitialFolders);
     const [selectedFolder, setSelectedFolder] = useState(folders[0]);
     const [searchTerm, setSearchTerm] = useState('');
     const [showAISearch, setShowAISearch] = useState(false);
     const [showAddFolderModal, setShowAddFolderModal] = useState(false);
     const [newFolderName, setNewFolderName] = useState('');
 
+    useEffect(() => {
+        if (searchedFileName) {
+            let fileFound = false;
+            let folderWithFile = null;
+
+            folders.forEach(folder => {
+                const foundFile = folder.files.find(file => file.name === searchedFileName);
+                if (foundFile) {
+                    fileFound = true;
+                    folderWithFile = folder;
+                }
+            });
+
+            if (fileFound) {
+                setSelectedFolder(folderWithFile);
+                setFileNotFound(false);
+            } else {
+                setFileNotFound(true);
+                alert(`File "${searchedFileName}" was not found in the repository.`);
+            }
+        }
+    }, [searchedFileName, folders]);
+
+    // Save folders to localStorage whenever they change
+    useEffect(() => {
+        localStorage.setItem('folders', JSON.stringify(folders));
+    }, [folders]);
 
     const ALLOWED_TYPES = [
         'application/pdf',
@@ -44,8 +83,6 @@ const DocumentRepository = () => {
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'text/plain',
     ];
-
-
 
     const formatFileSize = (bytes) => {
         if (bytes === 0) return '0 Bytes';
@@ -77,18 +114,14 @@ const DocumentRepository = () => {
                     : folder
             );
 
-            // Update selected folder to reflect new files
             const updatedSelectedFolder = updatedFolders.find(folder => folder.id === selectedFolder.id);
             setSelectedFolder(updatedSelectedFolder);
 
             return updatedFolders;
         });
-
-
     };
 
     const handleFileDelete = (fileId) => {
-
         setFolders((prevFolders) => {
             const updatedFolders = prevFolders.map((folder) =>
                 folder.id === selectedFolder.id
@@ -109,6 +142,13 @@ const DocumentRepository = () => {
                 ? { ...folder, isExpanded: !folder.isExpanded }
                 : folder
         ));
+    };
+
+    const handleFolderDelete = (folderId) => {
+        setFolders((prevFolders) => prevFolders.filter(folder => folder.id !== folderId));
+        if (selectedFolder && selectedFolder.id === folderId) {
+            setSelectedFolder(null);
+        }
     };
 
     const RenderFolder = ({ folder, depth = 0 }) => {
@@ -143,6 +183,15 @@ const DocumentRepository = () => {
                     <span className="ms-auto text-muted small">
                         {folder.files.length} files
                     </span>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleFolderDelete(folder.id);
+                        }}
+                        className="btn btn-outline-danger btn-sm"
+                    >
+                        <Trash2 style={{ width: '1rem', height: '1rem' }} />
+                    </button>
                 </div>
                 {folder.isExpanded && childFolders.map(childFolder => (
                     <RenderFolder
@@ -152,10 +201,8 @@ const DocumentRepository = () => {
                     />
                 ))}
             </div>
-
         );
     };
-
 
     const handleAddFolder = () => {
         setShowAddFolderModal(true);
@@ -172,17 +219,14 @@ const DocumentRepository = () => {
         setFolders([...folders, newFolder]);
         setSelectedFolder(newFolder);
         setShowAddFolderModal(false);
-        setNewFolderName(''); 
+        setNewFolderName('');
     };
 
-
-    // Function to filter files based on the search term
     const getFilteredFiles = () => {
         if (!searchTerm) {
-            return selectedFolder.files;
+            return selectedFolder?.files || [];
         }
 
-        // Search across all folders
         return folders
             .flatMap(folder => folder.files)
             .filter(file => file.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -190,9 +234,16 @@ const DocumentRepository = () => {
 
     return (
         <div className="p-4">
+            {fileNotFound && searchedFileName && (
+                <div className="alert alert-warning mb-4" role="alert">
+                    The file "{searchedFileName}" was not found in the repository.
+                </div>
+            )}
+
             <div className="mb-4 d-flex gap-2">
                 <div className="position-relative flex-grow-1">
-                    <Search className="position-absolute start-0 top-50 translate-middle-y text-muted" style={{ width: '1.25rem', height: '1.25rem', marginLeft: '1rem' }} />
+                    <Search className="position-absolute start-0 top-50 translate-middle-y text-muted" 
+                           style={{ width: '1.25rem', height: '1.25rem', marginLeft: '1rem' }} />
                     <input
                         type="text"
                         value={searchTerm}
@@ -212,7 +263,7 @@ const DocumentRepository = () => {
 
             <div className="row">
                 <div className="col-md-4 mb-4">
-                    <div className="border rounded p-3" style={{backgroundColor:"#f8f9fa"}}>
+                    <div className="border rounded p-3">
                         <div className="d-flex justify-content-between mb-3">
                             <h2 className="h6">Folders</h2>
                             <button
@@ -254,11 +305,12 @@ const DocumentRepository = () => {
                             </div>
 
                             <div className="list-group">
-
                                 {getFilteredFiles().map(file => (
                                     <div
                                         key={file.id}
-                                        className="d-flex align-items-center gap-3 list-group-item list-group-item-action"
+                                        className={`d-flex align-items-center gap-3 list-group-item list-group-item-action ${
+                                            searchedFileName === file.name ? 'bg-light' : ''
+                                        }`}
                                     >
                                         <File className="text-muted" style={{ width: '1.25rem', height: '1.25rem' }} />
                                         <div className="flex-grow-1">
@@ -293,6 +345,7 @@ const DocumentRepository = () => {
                     )}
                 </div>
             </div>
+
             <Modal show={showAddFolderModal} onHide={() => setShowAddFolderModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>New Folder</Modal.Title>
@@ -316,7 +369,6 @@ const DocumentRepository = () => {
                 </Modal.Footer>
             </Modal>
         </div>
-
     );
 };
 
