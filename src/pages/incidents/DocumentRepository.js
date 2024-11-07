@@ -203,7 +203,7 @@ const DocumentRepository = () => {
                 </div>
                 <button
                     onClick={() => navigate('/document/aiSearch')}
-                    className="btn btn-primary d-flex align-items-center gap-2"
+                    className="btn d-flex align-items-center gap-2 accordian_submit_btn"
                 >
                     <MessageCircle style={{ width: '1.25rem', height: '1.25rem' }} />
                     AI Search
