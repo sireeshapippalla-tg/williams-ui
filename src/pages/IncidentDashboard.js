@@ -593,14 +593,10 @@ const IncidentDashboard = () => {
 
   return (
 
-    <div className="min-vh-100 bg-light py-4">
-      <div className="container-lg">
+    <div className="bg-light py-4" style={{ overflow: "hidden" }}>
+      {/* <div className="container-lg">
         <div className="row g-4">
-          {/* Button to Open AI Assistant Dialog */}
           <div className="col-12" style={{ display: "flex", justifyContent: "space-between" }}>
-            {/* <Button   onClick={() => setShowDialog(true)}>               
-             <img src={fevicon} alt="AI Assistant Icon" style={{ width: "30px", height: "30px",}} />
-            </Button> */}
             <Tooltip title="Hi! I'm your AI assistant." arrow placement="top">
               <Button onClick={() => setShowDialog(true)}>
                 <img src={fevicon} alt="AI Assistant Icon" style={{ width: "40px", height: "40px", marginRight: "8px" }} />
@@ -611,7 +607,6 @@ const IncidentDashboard = () => {
             </Button>
           </div>
 
-          {/* Full Width Generated Response Section */}
           <div className="col-12">
             <div className="card shadow-sm h-100">
               <div className="card-header d-flex align-items-center gap-2">
@@ -630,7 +625,41 @@ const IncidentDashboard = () => {
             </div>
           </div>
         </div>
+      </div> */}
+        <div className="container-lg py-4" style={{ minHeight: "77vh" }}>
+    <div className="row g-4">
+      {/* Button to Open AI Assistant Dialog */}
+      <div className="col-12" style={{ display: "flex", justifyContent: "space-between" }}>
+        <Tooltip title="Hi! I'm your AI assistant." arrow placement="top">
+          <Button onClick={() => setShowDialog(true)}>
+            <img src={fevicon} alt="AI Assistant Icon" style={{ width: "40px", height: "40px", marginRight: "8px" }} />
+          </Button>
+        </Tooltip>
+        <Button type="button" onClick={() => setShowHistory(true)}>
+          <History />
+        </Button>
       </div>
+
+      {/* Full Width Generated Response Section */}
+      <div className="col-12">
+        <div className="card shadow-sm h-100">
+          <div className="card-header d-flex align-items-center gap-2 p-3" style={{color:"white", backgroundColor:"#7d4f3d"}}>
+            <i className="bi bi-code-slash text-secondary"></i>
+            <span className="fw-medium">Generated Response</span>
+          </div>
+          <div className="card-body" style={{ overflowY: "auto", maxHeight: "500px" }}>
+            {jsonData ? (
+              <DynamicTable data={Array.isArray(jsonData) ? jsonData : [jsonData]} />
+            ) : (
+              <div className="d-flex justify-content-center align-items-center h-100 text-secondary">
+                Your response will appear here
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
       {/* AI Assistant Dialog */}
       <Dialog open={showDialog} onClose={() => setShowDialog(false)} fullWidth maxWidth="md">
