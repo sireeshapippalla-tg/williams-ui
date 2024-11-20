@@ -221,7 +221,7 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                 setRootSelectedFiles([])
                 fetch_rootcause_analysis()
             } else {
-                setMessage("Failed to add Preventive action.");
+                setMessage("Failed to add Root cause analysis");
                 setSeverity('error');
                 invokeHistory()
                 setOpen(true);
@@ -360,20 +360,20 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                 console.log(payload)
                 // Make the API call to delete the row
                 await axios.post(deleteProblemRootCause, payload);
-                message = `Row with label "${row.label}" deleted from the server.`;
-                setMessage(`Row with label "${row.label}" deleted from the server.`)
+                message = `"${row.label}" deleted successfully.`;
+                setMessage(`"${row.label}" deleted successfully.`)
                 setSeverity('success')
                 setOpen(true)
             } catch (error) {
                 console.log('Error deleting row from server:', error);
-                setMessage("Failed to delete row from server. Please try again.");
+                setMessage("Failed to delete . Please try again.");
                 setSeverity('error');
                 setOpen(true);
                 return; // Exit if there's an error in deletion
             }
         } else {
-            message = `Row with label "${row.label}" deleted locally.`;
-            setMessage(`Row with label "${row.label}" deleted locally.`)
+            message = ` "${row.label}" deleted Successfully.`;
+            setMessage(`Row with label "${row.label}" deleted Successfully.`)
             setSeverity('success')
             setOpen(true)
         }

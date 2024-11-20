@@ -30,7 +30,7 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
 
   const { id } = useParams();
 
-  const{fetchNotifications} = useGlobalState()
+  const { fetchNotifications } = useGlobalState()
 
   const [loading, setLoading] = useState(false)
   const [selectedSection, setSelectedSection] = useState(SECTION_IDS.interimInvestigation);
@@ -260,7 +260,7 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
         : selectedSection === SECTION_IDS.correctiveAction
           ? correctiveAction.cc
           : preventiveAction.cc
-   
+
     if (!cc || !cc.id) {
       newErrors.cc = "CC is required"
     }
@@ -392,15 +392,14 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
                                 : preventiveAction.assignTo
                           }
                           // loading={assignToOptions.length === 0}
-                          onChange={(event, newValue) =>
-                          {
+                          onChange={(event, newValue) => {
                             handleFieldChange(selectedSection, 'assignTo', newValue)
                             setErrors((prevErrors) => ({
                               ...prevErrors,
-                              assignTo: undefined, 
+                              assignTo: undefined,
                             }));
                           }
-                         
+
                           }
                           getOptionLabel={(option) => option.title || ''}
                           renderInput={(params) => (
@@ -429,14 +428,14 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
                                 ? correctiveAction.cc
                                 : preventiveAction.cc
                           }
-                          onChange={(event, newValue) =>{
+                          onChange={(event, newValue) => {
                             handleFieldChange(selectedSection, 'cc', newValue)
                             setErrors((prevErrors) => ({
                               ...prevErrors,
-                              cc: undefined, 
+                              cc: undefined,
                             }));
                           }
-                           
+
                           }
                           renderInput={(params) => (
                             <TextField {...params}
@@ -480,12 +479,17 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
             <div className='row'>
               <div className='col-md-9'>
                 <Form.Group controlId='exampleForm.ControlTextarea1'>
-                  <Form.Label className='text_color mb-0'>Comments</Form.Label>
+                  {/* <Form.Label className='text_color mb-0'>Comments</Form.Label> */}
+                  <Form.Label className="text_color mb-0">
+                    Comments<span style={{ color: 'red' }}> *</span>
+                  </Form.Label>
+                 
                   <Form.Control
                     as='textarea'
                     rows={2}
                     placeholder='Write your comments'
                     value={comments}
+                    required
                     onChange={(e) => {
                       setComments(e.target.value)
                       setErrors((prevErrors) => ({
@@ -518,7 +522,7 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
         <div className='accordian_s'>
           <IntrimAccordian selectedSection={selectedSection} invokeHistory={invokeHistory} />
           <RootCauseAnalysisAccordian selectedSection={selectedSection} invokeHistory={invokeHistory} />
-          {selectedSection === SECTION_IDS.correctiveAction && <CorrectiveAction invokeHistory={invokeHistory} />}
+          {selectedSection === SECTION_IDS.correctiveAction && <CorrectiveAction invokeHistory={invokeHistory} selectedDepartment = {selectedDepartment}/>}
           {selectedSection === SECTION_IDS.preventiveAction && <Preventivections invokeHistory={invokeHistory} />}
         </div>
       </div>

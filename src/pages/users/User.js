@@ -40,6 +40,8 @@ import CallIcon from '@mui/icons-material/Call';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import Modal from 'react-bootstrap/Modal';
 import { getAllUsers, getAllDepartments, getMastersListByType, createUser, getUserTypes, deleteUser, getUsersById } from '../../api';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+
 
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -214,7 +216,7 @@ const User = () => {
         setSelectedDepartment(newValue);
         setErrors((prevErrors) => ({
             ...prevErrors,
-            selectedDepartment: undefined 
+            selectedDepartment: undefined
         }));
     };
 
@@ -292,7 +294,7 @@ const User = () => {
 
         setErrors(prevErrors => ({
             ...prevErrors,
-            [name]: newValue ? null : prevErrors[name] 
+            [name]: newValue ? null : prevErrors[name]
         }));
     };
 
@@ -315,8 +317,8 @@ const User = () => {
         setSelectedUSerType(newValue);
         setErrors((prevErrors) => ({
             ...prevErrors,
-            selectedUserType: undefined, 
-          }));
+            selectedUserType: undefined,
+        }));
     };
 
 
@@ -399,7 +401,7 @@ const User = () => {
         // if (!inputs.Gender.value) newErrors.Gender = "Gender is required.";
         Object.keys(inputs).forEach((field) => {
             if (!inputs[field].value) {
-                newErrors[field] = `${field} is required.`; 
+                newErrors[field] = `${field} is required.`;
             }
         });
 
@@ -487,7 +489,7 @@ const User = () => {
             setSeverity('error');
             setOpenSnackbar(true);
             setAddUserdialogOpen(false)
-        }finally{
+        } finally {
             setLoading(false)
         }
     }
@@ -568,24 +570,28 @@ const User = () => {
         <div className='border-0'>
             <div className='row' style={{ marginBottom: "15px" }}>
                 <div className='col-md-6 route-head incident_mbl'>
-                    <h3 className='mb-0'>Users</h3>
+                    <h3 className='mb-0'>Admin Pannel</h3>
                     <div>
-                        <Link href="#">Dashboard</Link> <span> / Users</span>
+                        <Link href="#">Dashboard</Link> <span> / Admin Pannel</span>
 
                     </div>
                 </div>
-                <div className='col-md-6 btn_incident_create incident_mbl' style={{ float: "right" }}>
-                <DepartmentModal />
-                </div>
+                {/* <div className='col-md-6 btn_incident_create incident_mbl' style={{ float: "right" }}>
+                    <DepartmentModal onUpdateDepartments={fetchDepartments} />
+                </div> */}
                 <div className='col-md-6 btn_incident_create incident_mbl' style={{ float: "right" }}>
                     <Button className='me-2'
+                        startIcon={<PersonAddIcon />}
                         onClick={() => {
                             setDialogMode('add');
                             setAddUserdialogOpen(true)
-
                         }}
                     >
-                        Add User &nbsp; <span><AddIcon /></span></Button>
+                        Add User
+                        {/* <span><AddIcon /></span> */}
+                    </Button>
+                    <DepartmentModal onUpdateDepartments={fetchDepartments} />
+
                 </div>
 
 
@@ -611,7 +617,22 @@ const User = () => {
                                     </TableRow>
                                 </TableHead>
                                 {isLoading ?
-                                    <div >Loading...</div>
+                                      <TableBody>
+                                      <TableRow>
+                                          <TableCell colSpan={columns.length} style={{ textAlign: 'center', height: '300px' }}>
+                                              <div
+                                                  style={{
+                                                      display: 'flex',
+                                                      justifyContent: 'center',
+                                                      alignItems: 'center',
+                                                      height: '100%',
+                                                  }}
+                                              >
+                                                  <CircularProgress />
+                                              </div>
+                                          </TableCell>
+                                      </TableRow>
+                                  </TableBody>
                                     :
                                     <TableBody>
                                         {rows
@@ -770,7 +791,7 @@ const User = () => {
                                                         InputProps={{
                                                             ...params.InputProps,
                                                             className: 'custom-input-drop',
-                                                            startAdornment: (                
+                                                            startAdornment: (
                                                                 <InputAdornment position="start">
                                                                     {icon}
                                                                 </InputAdornment>

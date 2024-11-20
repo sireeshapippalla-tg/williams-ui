@@ -96,6 +96,7 @@ const Login = () => {
 
                 // Store user details in localStorage 
                 localStorage.setItem('userDetails', JSON.stringify(response.data.userLoginDetails));
+                localStorage.setItem('userTypeId', JSON.stringify(response.data.userLoginDetails.userTypeId));
 
                 // Navigate to the /incident page
                 setMessage("Login successfully!");

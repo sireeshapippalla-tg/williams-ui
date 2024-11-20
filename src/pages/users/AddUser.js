@@ -172,7 +172,7 @@ const AddUser = () => {
                     setSeverity('success');
                     setOpen(true);
                     // Optionally navigate or perform other actions
-                    setTimeout(() => navigate('/users'), 2000);
+                    setTimeout(() => navigate('/admin/pannel'), 2000);
                 } else if (responseCode === 409) {
                     onClickAddUserDialogClose()
                     setMessage(responseMessage || 'Email already exists');

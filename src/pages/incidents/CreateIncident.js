@@ -114,68 +114,12 @@ const CreateIncident = (props) => {
     setShowModal3(!showModal3);
   };
 
-
-  // useEffect(() => {
-  //   // setSubject(data.title)
-  //   // setCaseDescription(data.description);
-  //   // let isDepFound = departments.find((item) => item.title == data.department);
-  //   // if (isDepFound) {
-  //   //   setSelectedDepartment(data.department)
-  //   // } else {
-
-  //   //   let obj = {
-  //   //     id: 0,
-  //   //     title: data.department
-  //   //   }
-
-  //   //   setDepartments([...departments, obj])
-
-  //   // }
-  //   console.log(data)
-  //   if (data) {
-  //     setSubject(data.title);
-  //     setCaseDescription(data.description);
-
-  //     let isDepFound = departments.find((item) => item.title === data.department);
-  //     if (isDepFound) {
-  //       setSelectedDepartment(data.department); // Make sure to set the found department object
-  //     } else {
-  //       let obj = {
-  //         id: 0,
-  //         title: data.department,
-  //       };
-  //       setDepartments([...departments, obj]);
-  //       setSelectedDepartment(obj); // Set the new department as selected
-  //     }
-
-  //     // Clear errors since we're populating with valid data
-  //     setErrors((prevErrors) => ({
-  //       ...prevErrors,
-  //       subject: undefined,
-  //       caseDescription: undefined,
-  //       department: undefined,
-  //       // Add other fields as needed
-  //     }));
-  //   }
-  // }, [data,departments])
-
   useEffect(() => {
     let obj = {
       Source: { value: data.source, options: [] },
       Category: { value: data.category, options: [] },
       Severity: { value: data.severity, options: [] },
     }
-
-    // {
-    //     severity: 'Severe',
-    //     description: 
-    //       'This is a severe incident reported via email in the retail department.',
-    //     source: 'Email',
-    //     category: 'Incident',
-    //     title: 'Severe Retail Incident',
-    //     department: 'Retail'
-    //   }
-    // setInputs({ ...obj })
     setCaseDescription(data.description);
     setSubject(data.title)
     let isDepFound = departments.find((item) => item.title == data.department);
@@ -489,58 +433,11 @@ const CreateIncident = (props) => {
     }
   }
 
-  // const validateFields = () => {
-  //   // Trim and check each field to ensure it's defined and not empty
-  //   if (!subject || subject.trim() === "") {
-  //     setMessage("Subject is required.");
-  //     setSeverity("error");
-  //     setOpen(true);
-  //     return false;
-  //   }
-  //   if (!caseDescription || caseDescription.trim() === "") {
-  //     setMessage("Description is required.");
-  //     setSeverity("error");
-  //     setOpen(true);
-  //     return false;
-  //   }
-  //   if (!inputs.Source.value || !inputs.Source.value.id) {
-  //     setMessage("Source is required.");
-  //     setSeverity("error");
-  //     setOpen(true);
-  //     return false;
-  //   }
-  //   if (!inputs.Category.value || !inputs.Category.value.id) {
-  //     setMessage("Category is required.");
-  //     setSeverity("error");
-  //     setOpen(true);
-  //     return false;
-  //   }
-  //   if (!inputs.Severity.value || !inputs.Severity.value.id) {
-  //     setMessage("Severity is required.");
-  //     setSeverity("error");
-  //     setOpen(true);
-  //     return false;
-  //   }
-  //   if (!selectedDepartment || !selectedDepartment.id) {
-  //     setMessage("Department is required.");
-  //     setSeverity("error");
-  //     setOpen(true);
-  //     return false;
-  //   }
-  //   if (!selectedUser || !selectedUser.id) {
-  //     setMessage("Assigned user is required.");
-  //     setSeverity("error");
-  //     setOpen(true);
-  //     return false;
-  //   }
-  //   return true; // Return true if all fields are valid
-  // };
 
 
   const validateFields = () => {
     const newErrors = {};
 
-    // Validate each field and set an error message if invalid
     if (!subject?.trim()) {
       newErrors.subject = "Subject is required";
     }
@@ -586,7 +483,7 @@ const CreateIncident = (props) => {
         sourceId: inputs.Source.value ? inputs.Source.value.id ? inputs.Source.value.id : 0 : null,
         categoryId: inputs.Category.value ? inputs.Category.value.id ? inputs.Category.value.id : 0 : null,
         severityId: inputs.Severity.value ? inputs.Severity.value.id ? inputs.Severity.value.id : 0 : null,
-        departmentId: selectedDepartment ? selectedDepartment.id : null, // Add departmentId to the payload
+        departmentId: selectedDepartment ? selectedDepartment.id : null, 
         assignedUserId: selectedUser ? selectedUser.id : null,
         incidentStatusId: 34,
         title: subject,
@@ -642,7 +539,7 @@ const CreateIncident = (props) => {
 
 
   const handleChange = (name) => async (event, newValue) => {
-    console.log(`handleChange called for ${name} with newValue:`, newValue);  // Debug log
+    console.log(`handleChange called for ${name} with newValue:`, newValue); 
     let id;
     setErrors((prevErrors) => ({
       ...prevErrors,
@@ -654,7 +551,7 @@ const CreateIncident = (props) => {
         ...prevState,
         [name]: {
           ...prevState[name],
-          value: newValue,  // Ensure value is updated
+          value: newValue, 
           sourceId: id
         }
       }));

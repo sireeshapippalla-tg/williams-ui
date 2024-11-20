@@ -50,7 +50,7 @@ const MainRoutes = () => {
             }
           />
           <Route 
-            path='/users' 
+            path='/admin/pannel' 
             element={
               <ProtectedRoute>
                 <User/>
@@ -58,7 +58,7 @@ const MainRoutes = () => {
             }
           />
           <Route 
-            path='/users/adduser' 
+            path='/admin/pannel/adduser' 
             element={
               <ProtectedRoute>
                 <AddUser/>
