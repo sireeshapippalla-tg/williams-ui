@@ -616,7 +616,7 @@ const CorrectiveAction = ({ invokeHistory, selectedDepartment }) => {
                 setOpen(true)
                 // window.location.reload()
             } else if (response.data.statusResponse.responseCode === 200) {
-                await fetchTaskbyDepartment()
+                await fetchTaskbyDepartment(selectedDepartment.id)
                 await fetchTaskIncident();
                 setMessage('Task Updated sucessfully');
                 setSeverity('success')
