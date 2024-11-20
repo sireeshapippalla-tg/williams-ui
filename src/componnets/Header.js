@@ -26,6 +26,7 @@ import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 import axios from 'axios';
 import { getNotifications } from '../api';
 import williamslogo from '../assets/images/williamslogo.jpeg';
+import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 
 import { useGlobalState } from '../contexts/GlobalStateContext';
 
@@ -54,6 +55,7 @@ function Header() {
 
   }
 
+
   const renderProfileMenu = (
     <Menu
       anchorEl={anchorEl}
@@ -72,10 +74,23 @@ function Header() {
     </Menu>
   );
 
+  const userID = localStorage.getItem('userTypeId')
+  console.log(userID)
+
   const SidebarItems = [
     { label: "Dashboard", path: "/incident/dashboard", icon: <HomeIcon /> },
     { label: "Incident", path: "/incident", icon: <ReportProblemIcon /> },
-    { label: "Users", path: "/users", icon: <PersonAddAltIcon /> }
+    // { label: "Users", path: "/admin/pannel", icon: <PersonAddAltIcon /> }
+    ...(userID == 1 ? [{
+      label: "Users",
+      path: "/admin/pannel",
+      icon: <PersonAddAltIcon />
+    }] : []),
+    {
+      label: "Document Repository",
+      path: "/document/repository",
+      icon: <FolderOpenIcon />
+    }
   ];
 
   useEffect(() => {

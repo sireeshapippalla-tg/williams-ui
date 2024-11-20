@@ -289,13 +289,13 @@ const DynamicFormFields = ({ incidentId }) => {
                 </Alert>
             </Snackbar>
 
-            <div style={{ background: '#533529', color: 'white', padding: '12px', cursor:"pointer" }}>
+            <div style={{ background: '#533529', color: 'white', padding: '12px', cursor: "pointer" }}>
                 <div onClick={() => setIsAccordionOpen(!isAccordionOpen)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span className='accord_typo'>Additional Fields</span>
-                    <ExpandMoreIcon style={{ transform: isAccordionOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', marginRight:"10px" }} />
+                    <ExpandMoreIcon style={{ transform: isAccordionOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', marginRight: "10px" }} />
                 </div>
             </div>
-
+            {/* 
             {isAccordionOpen && (
                 <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '1rem' }}>
                     {loading && <div>Loading...</div>}
@@ -352,7 +352,72 @@ const DynamicFormFields = ({ incidentId }) => {
                         <button className='accordian_submit_btn' onClick={handleSubmit}>Submit</button>
                     </div>
                 </div>
+            )} */}
+            {isAccordionOpen && (
+                <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '1rem' }}>
+                    {loading ? (
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+                            <CircularProgress />
+                        </div>
+                    ) : (
+                        <>
+                            {(incidentFields.length > 0 || tempIncidentFields.length > 0) ? (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+                                    {[...incidentFields, ...tempIncidentFields].map((field) => (
+                                        <div key={field.fieldId} style={{ flex: `0 0 calc(33.33% - 1rem)`, boxSizing: 'border-box' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                <div style={{ flex: 1 }}>
+                                                    {field.type === 'text' ? (
+                                                        <TextField
+                                                            label={field.label}
+                                                            variant="outlined"
+                                                            className="custom-textfield w-100"
+                                                            InputProps={{ className: 'custom-input' }}
+                                                            value={field.value || ""}
+                                                            onChange={(e) => handleFieldChange(field.fieldId, e.target.value)}
+                                                        />
+                                                    ) : (
+                                                        <Autocomplete
+                                                            options={field.options}
+                                                            value={field.options.find(option => option.value === field.value) || null}
+                                                            onChange={(event, newValue) => handleFieldChange(field.fieldId, newValue ? newValue.value : "")}
+                                                            inputValue={field.value || ''}
+                                                            getOptionLabel={(option) => (option && option.value ? option.value : '')}
+                                                            renderInput={(params) => <TextField {...params} label={field.label} variant="outlined" />}
+                                                        />
+                                                    )}
+                                                </div>
+                                                <div
+                                                    onClick={() => handleDeleteField(field.fieldId)}
+                                                    style={{ padding: '0.5rem', color: '#9CA3AF', cursor: 'pointer', backgroundColor: 'transparent' }}
+                                                >
+                                                    <Trash2 style={{ height: '16px', width: '16px', color:"red" }} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <Typography variant="body1" color="textSecondary" style={{ textAlign: 'center', padding: '1rem' }}>
+                                    No fields available. Please click on "Add Fields" to add new fields.
+                                </Typography>
+                            )}
+                            <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between' }}>
+                                <button className='accordian_cancel_btn'
+                                    onClick={(event) => {
+                                        event.preventDefault();
+                                        setIsModalOpen(true);
+                                    }}
+                                >
+                                    <Plus style={{ height: '16px', width: '16px' }} /> Add Fields
+                                </button>
+                                <button className='accordian_submit_btn' onClick={handleSubmit}>Submit</button>
+                            </div>
+                        </>
+                    )}
+                </div>
             )}
+
 
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}
             // loading={loading}
@@ -413,7 +478,7 @@ const DynamicFormFields = ({ incidentId }) => {
                                                         onClick={() => handleDeleteField(field.fieldId)}
                                                         style={{ color: '#9CA3AF' }}
                                                     >
-                                                        <Trash2 style={{ fontSize: '20px', color: '#d9534f'  }} />
+                                                        <Trash2 style={{ fontSize: '20px', color: '#d9534f' }} />
                                                     </IconButton>
                                                 </div>
                                             </Grid>
@@ -501,12 +566,12 @@ const DynamicFormFields = ({ incidentId }) => {
                                             variant="text"
                                             style={{
                                                 textTransform: 'capitalize',
-                                                 color:"#533529",
+                                                color: "#533529",
                                                 padding: '8px 12px',
                                                 fontWeight: '600'
                                             }}
                                         >
-                                           Click here to Add Option
+                                            Click here to Add Option
                                         </Button>
                                     </div>
                                 )}
@@ -524,7 +589,7 @@ const DynamicFormFields = ({ incidentId }) => {
                                         fontWeight: '600',
                                         textTransform: 'capitalize',
                                         boxShadow: '0px 3px 6px rgba(0, 0, 0, 0.1)',
-                                       
+
                                     }}
                                 >
                                     Create Field

@@ -40,5 +40,7 @@ export const addTasksWithAI = BASE_API_URL + 'incident/addTasksWithAI'
 export const deleteProblemRootCause = BASE_API_URL + 'incident/deleteProblemRootCause'
 export const addDashboardWithAI = BASE_API_URL + 'incident/addDashboardWithAI'
 export const getSuggestions = BASE_API_URL + 'incident/getSuggestions'
+export const getTasksByDepartment = BASE_API_URL + 'incident/getTasksByDepartment'
+export const saveTasksForDepartment = BASE_API_URL + 'incident/saveTasksForDepartment'
 
 export const config = 'IAssure'

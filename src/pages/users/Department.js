@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Tabs, Tab, Form } from 'react-bootstrap';
+import { Modal,  Tabs, Tab, Form } from 'react-bootstrap';
 import axios from 'axios';
 import AddIcon from '@mui/icons-material/Add';
-import { Alert, Snackbar } from '@mui/material';
+import { Alert, Snackbar, Button, } from '@mui/material';
+import LibraryAddIcon from '@mui/icons-material/LibraryAdd';
 
-function DepartmentModal() {
+function DepartmentModal({ onUpdateDepartments }) {
     const [showModal, setShowModal] = useState(false);
     const [activeTab, setActiveTab] = useState('departments');
     const [departments, setDepartments] = useState([]);
@@ -56,6 +57,7 @@ function DepartmentModal() {
             setNewDeptName('');  // Clear input field
             fetchDepartments();  // Refresh department list
             setActiveTab('departments')
+            onUpdateDepartments();
         } catch (error) {
             console.log('Error creating department:', error);
             setMessage('Error creating department:', error);
@@ -71,9 +73,14 @@ function DepartmentModal() {
     }, [activeTab]);
 
     return (
-        <div className='col-md-6 btn_incident_create incident_mbl' style={{ float: "right" }}>
-            <Button className='me-2 accordian_submit_btn' onClick={handleShow}>
-                Add Department &nbsp; <span><AddIcon /></span>
+        <div className='col-md-6 btn_incident_create ' style={{ float: "right", borderRadius: "6px" }}>
+          
+            <Button className='me-2'
+                startIcon={<LibraryAddIcon />}
+                onClick={handleShow}
+            >
+                 Add Department
+                {/* <span><AddIcon /></span> */}
             </Button>
 
             <Modal show={showModal} onHide={handleClose} centered>

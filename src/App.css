@@ -1011,3 +1011,15 @@ hr {
   filter: invert(1);
   font-weight: 600 !important;
 }
+@keyframes blink {
+  0%, 100% {
+      opacity: 1; /* Fully visible */
+  }
+  50% {
+      opacity: 0; /* Fully invisible */
+  }
+}
+
+.blink {
+  animation: blink 1s infinite; /* 1-second animation repeating infinitely */
+}
