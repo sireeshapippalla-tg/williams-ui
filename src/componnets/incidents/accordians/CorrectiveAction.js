@@ -608,7 +608,7 @@ const CorrectiveAction = ({ invokeHistory, selectedDepartment }) => {
             console.log("correction action table data:", response)
             if (response.data.statusResponse.responseCode === 201) {
                 // await fetchTaskDropdown();
-                await fetchTaskbyDepartment()
+                await fetchTaskbyDepartment(selectedDepartment.id)
                 await fetchTaskIncident();
                 setMessage('Task created sucessfully');
                 setSeverity('success')
@@ -616,6 +616,7 @@ const CorrectiveAction = ({ invokeHistory, selectedDepartment }) => {
                 setOpen(true)
                 // window.location.reload()
             } else if (response.data.statusResponse.responseCode === 200) {
+                await fetchTaskbyDepartment(selectedDepartment.id)
                 await fetchTaskIncident();
                 setMessage('Task Updated sucessfully');
                 setSeverity('success')
@@ -627,7 +628,7 @@ const CorrectiveAction = ({ invokeHistory, selectedDepartment }) => {
                 setMessage("Failed to assign task.");
                 setSeverity('error');
                 invokeHistory()
-                fetchTaskIncident();
+                await fetchTaskIncident();
                 setOpen(true);
             }
         } catch (error) {
@@ -940,8 +941,6 @@ const CorrectiveAction = ({ invokeHistory, selectedDepartment }) => {
                 });
                 console.log(response)
                 if (response.data.statusResponse.responseCode === 203) {
-                    // Successfully deleted from the server, now remove locally
-                    // setCorrectiveRows((prevRows) => prevRows.filter((r) => r.id !== row.id));
                     fetchTaskIncident()
                     setMessage('Task deleted successfully');
                     setSeverity('success');
