@@ -525,7 +525,7 @@ const IncidentDashboard = () => {
     setMessages((prev) => [...prev, { type: 'user', content: prompt }]);
 
     try {
-      const response = await fetch('http://localhost:8084/iassure/api/incident/addDashboardWithAI', {
+      const response = await fetch('http://13.127.196.228:8084/iassure/api/incident/addDashboardWithAI', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -585,11 +585,7 @@ const IncidentDashboard = () => {
     setPrompt(item.prompt);
     setShowHistory(false);
   };
-  const historyOpen = (event) => {
-    console.log("history clcik")
-    event.preventDefault();
-    setShowHistory(open)
-  }
+ 
 
   return (
 

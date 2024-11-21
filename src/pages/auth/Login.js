@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useLocation } from 'react-router-dom';
 import { TextField, IconButton, InputAdornment, Button, Checkbox, FormControlLabel } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
@@ -11,6 +11,7 @@ import { login } from '../../api';
 
 const Login = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [keepLoggedIn, setKeepLoggedIn] = useState(false);
@@ -97,13 +98,14 @@ const Login = () => {
                 // Store user details in localStorage 
                 localStorage.setItem('userDetails', JSON.stringify(response.data.userLoginDetails));
                 localStorage.setItem('userTypeId', JSON.stringify(response.data.userLoginDetails.userTypeId));
-
+                const redirectUrl = new URLSearchParams(location.search).get('redirect');
+                
                 // Navigate to the /incident page
                 setMessage("Login successfully!");
                 setSeverity('success');
                 setOpen(true);
                 setTimeout(() => {
-                    navigate('/incident/dashboard');
+                    navigate(redirectUrl || '/incident/dashboard');
                 }, 2000);
              
             }

@@ -71,7 +71,7 @@ const VisuallyHiddenInput = styled('input')({
 const IncidentDetails = (props) => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { fetchNotifications } = useGlobalState();
+  const { fetchNotifications  } = useGlobalState();
   const [loading, setLoading] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false)
   const [message, setMessage] = useState('');
@@ -871,7 +871,7 @@ const IncidentDetails = (props) => {
       setSeverity('error');
       setOpen(true);
       fetchHistory();
-    } finally {
+    }finally{
       setLoading(false)
     }
   }
@@ -885,35 +885,14 @@ const IncidentDetails = (props) => {
       </div>
     );
   }
-const incidentStatus =incidentDetails.status
+
 
   return (
     <div>
       <div className="page-header">
         <div className="row align-items-center">
-          <div className="col-md-5" 
-          // style={{ position: 'relative' }}
-          >
+          <div className="col-md-4">
             <h3 className="page-title mb-0">Incident Details</h3>
-           
-          </div>
-          <div className='col-md-7'>
-          <div
-              style={{
-                // position: 'absolute',
-                // top: '-10px',
-                // right: '100px',
-                padding: '5px 10px',
-                borderRadius: '5px',
-                color: incidentStatus === 'Open' ? 'red' : incidentStatus === 'In Progress' ? 'blue' : 'green',
-                // backgroundColor: incidentStatus === 'Open' ? '#28a745' : '#dc3545',
-                fontSize: '0.9rem',
-                fontWeight: 'bold',
-              }}
-              className={`status-badge blink`}
-            >
-              {incidentStatus}
-            </div>
           </div>
         </div>
       </div>
@@ -1217,9 +1196,9 @@ const incidentStatus =incidentDetails.status
                     className='accordian_cancel_btn float-end'
                     onClick={handleIncidentUpdate}
                   >
-                    {loading ? 'Processing...' : 'Update Incident'}
-
-                  </Button>
+                    {loading? 'Processing...' : 'Update Incident'}
+                    
+                    </Button>
                 </div>
 
               </div>
