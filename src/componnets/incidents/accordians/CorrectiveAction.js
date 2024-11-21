@@ -486,7 +486,7 @@ const CorrectiveAction = ({ invokeHistory, selectedDepartment }) => {
                     const newTaskOption = {
                         // title: newValue.inputValue,
                         id: response.data.tasks.taskId,
-                        title:response.data.tasks,taskName,                       
+                        title:response.data.tasks.taskName,                       
                         deptId: response.data.tasks.departmentId
                     };
                     setTaskOptions(prev => [...prev, newTaskOption]);

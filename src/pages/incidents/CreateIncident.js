@@ -1,7 +1,7 @@
 import React from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from '@mui/material/Button';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import TextField from '@mui/material/TextField';
 import { useEffect } from 'react';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
@@ -42,6 +42,8 @@ import {
   getAllUsers
 } from '../../api';
 import { useGlobalState } from '../../contexts/GlobalStateContext';
+import PhotoCamera from '../../componnets/PhotoCamera';
+import CaptureOrUploadPhoto from '../../componnets/CaptureOrUploadPhoto';
 
 
 const VisuallyHiddenInput = styled('input')({
@@ -61,7 +63,7 @@ const CreateIncident = (props) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { fetchNotifications  } = useGlobalState();
+  const { fetchNotifications } = useGlobalState();
 
   const data = location.state || {}
   console.log("location ai data", data)
@@ -195,8 +197,9 @@ const CreateIncident = (props) => {
     setFieldAddDialog(false);
     // setDrawerOpen(true)
   }
-  const handleFileChange = (e) => {
-    setSelectedFiles([...e.target.files]);
+  const handleFileChange = (files) => {
+    // setSelectedFiles([...e.target.files]);
+    setSelectedFiles(files);
   };
 
 
@@ -274,7 +277,7 @@ const CreateIncident = (props) => {
       let sevObj;
       let catObj;
       let souObj;
-        console.log(sourceData, categoryData, severityData)
+      console.log(sourceData, categoryData, severityData)
       if (severityData && severityData.length > 0) {
         if (data && data.severity) {
           let isSeverityFound = severityData.find((item) => item.title.toLowerCase() == data.severity.toLowerCase());
@@ -483,7 +486,7 @@ const CreateIncident = (props) => {
         sourceId: inputs.Source.value ? inputs.Source.value.id ? inputs.Source.value.id : 0 : null,
         categoryId: inputs.Category.value ? inputs.Category.value.id ? inputs.Category.value.id : 0 : null,
         severityId: inputs.Severity.value ? inputs.Severity.value.id ? inputs.Severity.value.id : 0 : null,
-        departmentId: selectedDepartment ? selectedDepartment.id : null, 
+        departmentId: selectedDepartment ? selectedDepartment.id : null,
         assignedUserId: selectedUser ? selectedUser.id : null,
         incidentStatusId: 34,
         title: subject,
@@ -504,7 +507,7 @@ const CreateIncident = (props) => {
         })
       }
 
-      console.log('formdata payload:', formData)
+      console.log('formdata payload:', selectedFiles)
       const response = await axios.post(addIncident, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -532,14 +535,14 @@ const CreateIncident = (props) => {
       setSeverity('error');
       setOpen(true);
       fetchNotifications();
-    }finally{
+    } finally {
       setLoading(false)
     }
   }
 
 
   const handleChange = (name) => async (event, newValue) => {
-    console.log(`handleChange called for ${name} with newValue:`, newValue); 
+    console.log(`handleChange called for ${name} with newValue:`, newValue);
     let id;
     setErrors((prevErrors) => ({
       ...prevErrors,
@@ -551,7 +554,7 @@ const CreateIncident = (props) => {
         ...prevState,
         [name]: {
           ...prevState[name],
-          value: newValue, 
+          value: newValue,
           sourceId: id
         }
       }));
@@ -649,6 +652,10 @@ const CreateIncident = (props) => {
     setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
 
+  const handleImageSubmit = (image) => {
+    console.log('Submitted Image:', image);
+  };
+
   return (
     <div className='right-cont'>
 
@@ -722,7 +729,7 @@ const CreateIncident = (props) => {
                           variant="outlined"
                           InputProps={{
                             ...params.InputProps,
-                            className: 'custom-input-drop' // Apply the custom class
+                            className: 'custom-input-drop'
                           }}
                           className="custom-textfield"
                           error={!!errors[name.toLowerCase()]}
@@ -754,7 +761,7 @@ const CreateIncident = (props) => {
                         variant="outlined"
                         InputProps={{
                           ...params.InputProps,
-                          className: 'custom-input-drop' // Apply the custom class
+                          className: 'custom-input-drop'
                         }}
                         className="custom-textfield"
                         error={!!errors.department}
@@ -852,9 +859,11 @@ const CreateIncident = (props) => {
             </Row>
 
             <div className="attached-files-info ">
-              <Row style={{ padding: "10px" }}>
-                <Col md={12} className='' style={{ margin: "12px 0px 0px 0px", backgroundColor: "white", borderRadius: "6px" }}>
-                  <Button
+              <Row className='mt-3'>
+                <Col md={12} className='' 
+                // style={{ margin: "12px 0px 0px 0px", backgroundColor: "white", borderRadius: "6px" }}
+                >
+                  {/* <Button
                     component='label'
 
                     style={{ color: "black" }}
@@ -870,11 +879,12 @@ const CreateIncident = (props) => {
                   </Button>
                   <span className='vertical-line'></span>
 
-                  <span style={{ marginLeft: "10px" }}> {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : 'No file chosen'}</span>
+                  <span style={{ marginLeft: "10px" }}> {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : 'No file chosen'}</span> */}
+                   <CaptureOrUploadPhoto onFileChange={handleFileChange} />
                 </Col>
                 <Col md={12} className='mt-3 p-0'>
 
-                  {selectedFiles && selectedFiles.length > 0 ?
+                  {/* {selectedFiles && selectedFiles.length > 0 ?
                     <div className="attached-files">
                       <ul>
                         {selectedFiles.map((file, index) => (
@@ -905,12 +915,14 @@ const CreateIncident = (props) => {
                       </ul>
                     </div>
                     : ""
-                  }
+                  } */}
 
                 </Col>
               </Row>
+
               <div className='accordian_s'>
-                {/* <DynamicField /> */}
+                          
+              {/* <CaptureOrUploadPhoto onImageSubmit={handleImageSubmit}/> */}
               </div>
             </div>
 
@@ -938,6 +950,9 @@ const CreateIncident = (props) => {
               {/* <Button className='accordian_submit_btn mt-3' style={{ color: "#533529", fontWeight: "600", float: "inline-end" }} onClick={toggleModal3}>Create incident</Button> */}
               <Button className='accordian_submit_btn mt-3' style={{ color: "#533529", fontWeight: "600", float: "inline-end" }} onClick={toggleModal3}>Create incident</Button>
 
+
+
+              
             </div>
           }
 
