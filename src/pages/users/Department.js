@@ -26,7 +26,7 @@ function DepartmentModal({ onUpdateDepartments }) {
 
     const fetchDepartments = async () => {
         try {
-            const response = await axios.post('http://13.127.196.228:8084/iassure/api/users/getAllDepartments');
+            const response = await axios.post('http://3.27.226.110:8084/iassure/api/users/getAllDepartments');
             const departmentData = response.data;
 
             // Map department data including IDs and names
@@ -38,7 +38,7 @@ function DepartmentModal({ onUpdateDepartments }) {
 
     const handleCreateDepartment = async () => {
         try {
-            const response = await axios.post(`http://13.127.196.228:8084/iassure/api/users/saveDepartment?deptName=${encodeURIComponent(newDeptName)}`);
+            const response = await axios.post(`http://3.27.226.110:8084/iassure/api/users/saveDepartment?deptName=${encodeURIComponent(newDeptName)}`);
             // if (response.data.statusResponse.responseCode === 200) {
             //     setMessage('Department created successfully!');
             //     setSeverity('success')
