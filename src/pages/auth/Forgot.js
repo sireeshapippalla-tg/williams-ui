@@ -77,7 +77,7 @@ const ForgotPassword = () => {
 
         try {
             const payload = { username: userName, password: newPassword };
-            const response = await axios.post('http://13.127.196.228:8084/iassure/api/users/forgotPassword', payload);
+            const response = await axios.post('http://3.27.226.110:8084/iassure/api/users/forgotPassword', payload);
             console.log(response);
             if (response.data.responseCode === 200) {
                 // setSuccessMessage('Password changed successfully!');

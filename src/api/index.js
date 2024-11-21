@@ -1,4 +1,4 @@
-export const BASE_API_URL = 'http://13.127.196.228:8084/iassure/api/';
+export const BASE_API_URL = 'http://3.27.226.110:8084/iassure/api/';
 // export const METERSLIS = BASE_API_URL +
 export const fetchIncidentDetailsDashboard = BASE_API_URL + 'incident/fetchIncidentDetailsDashboard'   //{"orgId":1,"incidentStatusId":34,"userId":1}
 export const getMastersListByType = BASE_API_URL + 'incident/getMastersListByType'   //{"sourceName":"Incident Status / Incident Source / Incident Category / Incident Severity"}
