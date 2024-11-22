@@ -101,9 +101,19 @@
 
 
 
+
 @media only screen and (max-width:767px) {
+    .deaprtment-responsive{
+        /* width: 200px !important; */
+    }
+    .responsive-btn{
+        margin-top: 10px;
+    }
+
     .incident_mbl {
-        width: 50% !important;
+        font-size: 12px;
+        width: 100% !important;
+        float: left !important;
     }
 
     .mbl-sidebar {
@@ -137,18 +147,27 @@
     .sidebar-arrow-mbl {
         display: block !important;
     }
+
     .sidebar_collapse {
         display: none;
     }
+
     .mblDrawer {
         display: block;
-    
+
     }
 
 }
 
 
 @media only screen and (max-width:599px) {
+    .deaprtment-responsive{
+        width: 200px !important;
+    }
+    .user-responsive-btn{
+        /* float: right !important; */
+        font-size: 12px;
+    }
     .card_incident {
         width: 100% !important;
         min-width: 100% !important;
@@ -156,7 +175,36 @@
 
     .btn_incident_create {
         margin-top: 10px !important;
+        width: 100% !important;
+        float: left !important;
     }
+
+    /* .incident_mbl {
+        width: 100% !important;
+    } */
+    .incident_mbl {
+        font-size: 12px;
+        width: 100% !important;
+        float: left !important;
+    }
+  
+    .user-table-button-responsive button {
+        width: 100% !important;
+        margin-top: 10px !important;
+    }
+
+    .table-responsive-container {
+        width: 250px;
+        min-width: 100%;
+        max-width: 100%;
+        overflow-x: scroll;
+    }
+    .responsive-btn{
+        margin-top: 10px;
+    }
+
+    .btn_incident_create button { float:left !important}
+
 
     .header-mobi {
         display: block !important;
@@ -196,9 +244,14 @@
     .mbl_mb {
         margin-bottom: 10px;
     }
+
     .mblDrawer {
         display: block;
-    
+
+    }
+    .drawer-width-mbl{
+        width:300px !important;
+        overflow-x: scroll;
     }
 
 }

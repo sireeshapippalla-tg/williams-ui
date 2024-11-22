@@ -408,7 +408,7 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                 </AccordionSummary>
                 <AccordionDetails>
                     <div>
-                        <div className=' pb-3'>
+                        <div className='table-responsive-container pb-3'>
 
                             <TableContainer className='border tbl_scrool'>
                                 <Table >

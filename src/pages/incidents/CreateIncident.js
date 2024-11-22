@@ -858,12 +858,12 @@ const CreateIncident = (props) => {
               </Col>
             </Row>
 
-            <div className="attached-files-info ">
-              <Row className='mt-3'>
-                <Col md={12} className='' 
-                // style={{ margin: "12px 0px 0px 0px", backgroundColor: "white", borderRadius: "6px" }}
+            <div className="attached-files-info mt-3">
+              <Row className='m-0'>
+                <Col md={12} className=''
+                  style={{ backgroundColor: "white", borderRadius: "6px" }}
                 >
-                  {/* <Button
+                  <Button
                     component='label'
 
                     style={{ color: "black" }}
@@ -879,12 +879,12 @@ const CreateIncident = (props) => {
                   </Button>
                   <span className='vertical-line'></span>
 
-                  <span style={{ marginLeft: "10px" }}> {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : 'No file chosen'}</span> */}
-                   <CaptureOrUploadPhoto onFileChange={handleFileChange} />
+                  <span style={{ marginLeft: "10px" }}> {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : 'No file chosen'}</span>
+                  {/* <CaptureOrUploadPhoto onFileChange={handleFileChange} /> */}
                 </Col>
                 <Col md={12} className='mt-3 p-0'>
 
-                  {/* {selectedFiles && selectedFiles.length > 0 ?
+                  {selectedFiles && selectedFiles.length > 0 ?
                     <div className="attached-files">
                       <ul>
                         {selectedFiles.map((file, index) => (
@@ -897,14 +897,14 @@ const CreateIncident = (props) => {
                                 <p className="mb-0 ms-2">{file.name}</p>
                               </div>
                               <div className="file-actions file-left-content">
-                                <div className="file-download me-2">
+                                {/* <div className="file-download me-2">
                                   <a href="#">
                                     <ArrowDownwardIcon style={{ marginRight: "5px" }} />
                                   </a>
                                 </div>
                                 <IconButton>
                                   <VisibilityIcon />
-                                </IconButton>
+                                </IconButton> */}
                                 <IconButton edge='end' aria-label='delete' onClick={() => handleRemoveFile(index)}>
                                   <CloseIcon className='close_icon' />
                                 </IconButton>
@@ -915,14 +915,14 @@ const CreateIncident = (props) => {
                       </ul>
                     </div>
                     : ""
-                  } */}
+                  }
 
                 </Col>
               </Row>
 
               <div className='accordian_s'>
-                          
-              {/* <CaptureOrUploadPhoto onImageSubmit={handleImageSubmit}/> */}
+
+                {/* <CaptureOrUploadPhoto onImageSubmit={handleImageSubmit}/> */}
               </div>
             </div>
 
@@ -948,11 +948,13 @@ const CreateIncident = (props) => {
 
               </div>
               {/* <Button className='accordian_submit_btn mt-3' style={{ color: "#533529", fontWeight: "600", float: "inline-end" }} onClick={toggleModal3}>Create incident</Button> */}
-              <Button className='accordian_submit_btn mt-3' style={{ color: "#533529", fontWeight: "600", float: "inline-end" }} onClick={toggleModal3}>Create incident</Button>
+              <Button className='accordian_submit_btn mt-3'
+                style={{ color: "#533529", fontWeight: "600", float: "inline-end" }}
+                onClick={toggleModal3}>Create incident</Button>
 
 
 
-              
+
             </div>
           }
 

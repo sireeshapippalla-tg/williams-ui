@@ -355,21 +355,15 @@ const Incident = () => {
 
     <div className='border-0'>
       <div className='row mb-3'>
-        <div className='col-md-6 route-head incident_mbl'>
+        <div className='col-md-6 col-sm-12 route-head incident_mbl'>
           <h3 className='mb-0'>Incidents</h3>
           <div>
             <Link href="#">Home</Link> <span> / Incidents</span>
 
           </div>
         </div>
-        {/* <div className='col-md-6 btn_incident_create incident_mbl' style={{ float: "right" }}>
-          <Button className='me-2 '
 
-            onClick={handeClickAiPromptDialog}
-          >
-            Add New Incident &nbsp; <span><AddIcon /></span></Button>
-        </div> */}
-        <div className='col-md-6 btn_incident_create incident_mbl' style={{ float: "right" }}>
+        <div className='col-md-6 col-sm-12 btn_incident_create incident_mbl' style={{ float: "right" }}>
           <Button
             className='me-2'
             aria-controls={open ? 'add-incident-menu' : undefined}
@@ -391,7 +385,7 @@ const Incident = () => {
           >
             <MenuItem className="brown-menu-item" onClick={handleWithoutAiPrompt}>Create Incident</MenuItem>
             <MenuItem className="brown-menu-item" onClick={handleAiPrompt}>Create Incident with AI Prompt</MenuItem>
-            
+
           </Menu>
         </div>
 
@@ -600,77 +594,82 @@ const Incident = () => {
 
 
 
-        <div className="mt-2">
+        <div className="table-responsive-container">
 
-          <Paper className='tbl' sx={{ width: '100%', overflow: 'hidden' }}>
-            <TableContainer className='tablescroll-mobile'>
-              <Table stickyHeader aria-label="sticky table" sx={{ minWidth: 650 }}>
-                <TableHead>
-                  <TableRow>
-                    {columns.map((column) => (
-                      !column.hidden && ( // Only render if column is not hidden
-                        <TableCell
-                          key={column.id}
-                          align={column.align}
-                          style={{ minWidth: column.minWidth }}
-                        >
-                          {column.label}
-                        </TableCell>
-                      )
-                    ))}
-                  </TableRow>
-                </TableHead>
-                {isLoading ? (
-                  <div>Loading...</div>
-                ) : (
-                  <TableBody>
-                    {rows
-                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                      .map((row) => (
-                        <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-                          {columns.map((column) => {
-                            if (column.hidden) return null; // Skip hidden columns
-                            const value = row[column.id];
-                            if (column.id === 'status') {
-                              return (
-                                <StyledStatusTableCell key={column.id} align={column.align} status={row.status}>
-                                  <StyledStatusText status={row.status}>
-                                    {value}
-                                  </StyledStatusText>
-                                </StyledStatusTableCell>
-                              );
-                            }
+        <Paper className='tbl mt-2'
+        // sx={{ width: '100%', overflow: 'hidden' }}
+        >
+          <TableContainer className='tablescroll-mobile' sx={{ overflowX: 'auto' }}>
+            <Table stickyHeader res aria-label="sticky table"
+              // sx={{ minWidth: 650 }}
+             
+            >
+              <TableHead>
+                <TableRow>
+                  {columns.map((column) => (
+                    !column.hidden && ( // Only render if column is not hidden
+                      <TableCell
+                        key={column.id}
+                        align={column.align}
+                        style={{ minWidth: column.minWidth }}
+                      >
+                        {column.label}
+                      </TableCell>
+                    )
+                  ))}
+                </TableRow>
+              </TableHead>
+              {isLoading ? (
+                <div>Loading...</div>
+              ) : (
+                <TableBody>
+                  {rows
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => (
+                      <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code}>
+                        {columns.map((column) => {
+                          if (column.hidden) return null; // Skip hidden columns
+                          const value = row[column.id];
+                          if (column.id === 'status') {
                             return (
-                              <TableCell
-                                style={{ cursor: "pointer" }}
-                                key={column.id}
-                                align={column.align}
-                                onClick={() => clickHandlerresolve(row.id)}
-                              >
-                                {column.format && typeof value === 'number'
-                                  ? column.format(value)
-                                  : value}
-                              </TableCell>
+                              <StyledStatusTableCell key={column.id} align={column.align} status={row.status}>
+                                <StyledStatusText status={row.status}>
+                                  {value}
+                                </StyledStatusText>
+                              </StyledStatusTableCell>
                             );
-                          })}
-                        </StyledTableRow>
-                      ))}
-                  </TableBody>
-                )}
-              </Table>
-            </TableContainer>
-            <div>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 20, 40, 100]}
-                component="div"
-                count={rows.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </div>
-          </Paper>
+                          }
+                          return (
+                            <TableCell
+                              style={{ cursor: "pointer" }}
+                              key={column.id}
+                              align={column.align}
+                              onClick={() => clickHandlerresolve(row.id)}
+                            >
+                              {column.format && typeof value === 'number'
+                                ? column.format(value)
+                                : value}
+                            </TableCell>
+                          );
+                        })}
+                      </StyledTableRow>
+                    ))}
+                </TableBody>
+              )}
+            </Table>
+          </TableContainer>
+          <div>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 20, 40, 100]}
+              component="div"
+              count={rows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </div>
+        </Paper>
         </div>
       </div>
       {/* Ai promt diapog */}

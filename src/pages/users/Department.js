@@ -83,7 +83,7 @@ function DepartmentModal({ onUpdateDepartments }) {
                 {/* <span><AddIcon /></span> */}
             </Button>
 
-            <Modal show={showModal} onHide={handleClose} centered>
+            <Modal show={showModal} onHide={handleClose} centered >
                 <Modal.Header closeButton className="modal-header-custom" >
                     <Modal.Title>Manage Departments</Modal.Title>
                 </Modal.Header>

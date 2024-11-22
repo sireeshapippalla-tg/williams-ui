@@ -1066,3 +1066,10 @@ video {
 .mediabutton:hover{
   background-position: 100%;
 }
+
+.table-responsive-container{
+  overflow: hidden;
+}
+
+
+

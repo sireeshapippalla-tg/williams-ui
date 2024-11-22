@@ -267,7 +267,7 @@ const CorrectiveAction = ({ invokeHistory, selectedDepartment }) => {
     useEffect(() => {
         console.log("Updated taskOptions:", taskOptions);
     }, [taskOptions]);
-    
+
 
     const fetchTaskbyDepartment = async (departmentId) => {
         setLoading(true);
@@ -486,7 +486,7 @@ const CorrectiveAction = ({ invokeHistory, selectedDepartment }) => {
                     const newTaskOption = {
                         // title: newValue.inputValue,
                         id: response.data.tasks.taskId,
-                        title:response.data.tasks.taskName,                       
+                        title: response.data.tasks.taskName,
                         deptId: response.data.tasks.departmentId
                     };
                     setTaskOptions(prev => [...prev, newTaskOption]);
@@ -984,13 +984,14 @@ const CorrectiveAction = ({ invokeHistory, selectedDepartment }) => {
                     </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                    <div className='pb-3'>
+                    <div className='pb-3 table-responsive-container'>
                         <Button
                             className='mb-3 accordian_cancel_btn mt-2'
                             style={{ float: "right" }}
                             onClick={handleAiPrompt}
                         >
-                            Create Task with AI Prompt </Button>
+                            Create Task with AI Prompt
+                        </Button>
                         <TableContainer className='border tbl_scrool'>
                             <Table >
                                 <TableHead>

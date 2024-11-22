@@ -505,7 +505,7 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
                   </Form.Control.Feedback>
                 </Form.Group>
               </div>
-              <div className='mb-3 col-md-12 float-right'>
+              <div className='mb-3 col-md-12 float-right responsive-btn'>
                 <Button className='close_incident_btn' onClick={handleSubmitTaskAssign}>
                   {loading ? 'Procesing...' : 'Submit'}
 

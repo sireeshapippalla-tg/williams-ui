@@ -31,20 +31,14 @@ const CaptureOrUploadPhoto = ({ onFileChange }) => {
         const newImages = [...images, capturedImage]
         setImages(newImages);
         onFileChange(newImages.concat(uploadedFiles));
-        setCameraOpen(false); // Close the camera dialog after capture
+        setCameraOpen(false);
     };
 
-    // Handle uploading files
-    //   const handleFileSelect = (event) => {
-    //     const files = Array.from(event.target.files);
-    //     setUploadedFiles([...uploadedFiles, ...files]);
-    //     event.target.value = ''; // Clear the input after selection
-    //   };
     const handleFileSelect = (event) => {
         const files = Array.from(event.target.files);
         const newFiles = [...uploadedFiles, ...files];
         setUploadedFiles(newFiles);
-        onFileChange(images.concat(newFiles)); // Pass uploaded files along with captured images
+        onFileChange(images.concat(newFiles));
     };
 
     const handleDeleteFile = (index, isImage) => {
@@ -502,8 +496,6 @@ const CaptureOrUploadPhoto = ({ onFileChange }) => {
                 </DialogActions>
             </Dialog>
         </Box>
-
-
     );
 };
 

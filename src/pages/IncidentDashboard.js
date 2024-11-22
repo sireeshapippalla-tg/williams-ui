@@ -448,9 +448,9 @@ const HistoryItem = ({ item, onLoad }) => {
         }}
       >
         {isExpanded ? (
-          <ChevronDown style={{ fontSize: 20, color: "#616161", float:"right"  }} />
+          <ChevronDown style={{ fontSize: 20, color: "#616161", float: "right" }} />
         ) : (
-          <ChevronRight style={{ fontSize: 20, color: "#616161", float:"right" }} />
+          <ChevronRight style={{ fontSize: 20, color: "#616161", float: "right" }} />
         )}
         <div className="flex-grow">
           <div className="d-flex justify-content-between align-items-center mb-1">
@@ -585,31 +585,33 @@ const IncidentDashboard = () => {
     setPrompt(item.prompt);
     setShowHistory(false);
   };
- 
+
 
   return (
 
     <div className="bg-light py-4" style={{ overflow: "hidden" }}>
-      {/* <div className="container-lg">
+      <div className="container-lg py-4" style={{ minHeight: "77vh" }}>
         <div className="row g-4">
+          {/* Button to Open AI Assistant Dialog */}
           <div className="col-12" style={{ display: "flex", justifyContent: "space-between" }}>
             <Tooltip title="Hi! I'm your AI assistant." arrow placement="top">
               <Button onClick={() => setShowDialog(true)}>
                 <img src={fevicon} alt="AI Assistant Icon" style={{ width: "40px", height: "40px", marginRight: "8px" }} />
               </Button>
             </Tooltip>
-            <Button type='button' onClick={() => setShowHistory(true)}>
+            <Button type="button" onClick={() => setShowHistory(true)}>
               <History />
             </Button>
           </div>
 
+          {/* Full Width Generated Response Section */}
           <div className="col-12">
             <div className="card shadow-sm h-100">
-              <div className="card-header d-flex align-items-center gap-2">
+              <div className="card-header d-flex align-items-center gap-2 p-3" style={{ color: "white", backgroundColor: "#7d4f3d" }}>
                 <i className="bi bi-code-slash text-secondary"></i>
                 <span className="fw-medium">Generated Response</span>
               </div>
-              <div className="card-body overflow-auto">
+              <div className="card-body" style={{ overflowY: "auto", maxHeight: "500px" }}>
                 {jsonData ? (
                   <DynamicTable data={Array.isArray(jsonData) ? jsonData : [jsonData]} />
                 ) : (
@@ -621,41 +623,7 @@ const IncidentDashboard = () => {
             </div>
           </div>
         </div>
-      </div> */}
-        <div className="container-lg py-4" style={{ minHeight: "77vh" }}>
-    <div className="row g-4">
-      {/* Button to Open AI Assistant Dialog */}
-      <div className="col-12" style={{ display: "flex", justifyContent: "space-between" }}>
-        <Tooltip title="Hi! I'm your AI assistant." arrow placement="top">
-          <Button onClick={() => setShowDialog(true)}>
-            <img src={fevicon} alt="AI Assistant Icon" style={{ width: "40px", height: "40px", marginRight: "8px" }} />
-          </Button>
-        </Tooltip>
-        <Button type="button" onClick={() => setShowHistory(true)}>
-          <History />
-        </Button>
       </div>
-
-      {/* Full Width Generated Response Section */}
-      <div className="col-12">
-        <div className="card shadow-sm h-100">
-          <div className="card-header d-flex align-items-center gap-2 p-3" style={{color:"white", backgroundColor:"#7d4f3d"}}>
-            <i className="bi bi-code-slash text-secondary"></i>
-            <span className="fw-medium">Generated Response</span>
-          </div>
-          <div className="card-body" style={{ overflowY: "auto", maxHeight: "500px" }}>
-            {jsonData ? (
-              <DynamicTable data={Array.isArray(jsonData) ? jsonData : [jsonData]} />
-            ) : (
-              <div className="d-flex justify-content-center align-items-center h-100 text-secondary">
-                Your response will appear here
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
       {/* AI Assistant Dialog */}
       <Dialog open={showDialog} onClose={() => setShowDialog(false)} fullWidth maxWidth="md">
@@ -671,7 +639,13 @@ const IncidentDashboard = () => {
                 key={index}
                 className={`d-flex ${message.type === "user" ? "justify-content-end" : "justify-content-start"} mb-3`}
               >
-                <div className={`p-3 rounded ${message.type === "user" ? "bg-primary text-white" : "bg-light text-dark"}`}>
+                <div
+                  className={'p-3 rounded'}
+                  style={{
+                    backgroundColor: message.type === "user" ? "#533529" : 'transparent',
+                    color: message.type === "user" ? '#fff' : '#533529'
+                  }}
+                >
                   {message.content}
                 </div>
               </div>

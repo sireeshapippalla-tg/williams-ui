@@ -71,7 +71,7 @@ const VisuallyHiddenInput = styled('input')({
 const IncidentDetails = (props) => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { fetchNotifications  } = useGlobalState();
+  const { fetchNotifications } = useGlobalState();
   const [loading, setLoading] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false)
   const [message, setMessage] = useState('');
@@ -871,7 +871,7 @@ const IncidentDetails = (props) => {
       setSeverity('error');
       setOpen(true);
       fetchHistory();
-    }finally{
+    } finally {
       setLoading(false)
     }
   }
@@ -899,7 +899,7 @@ const IncidentDetails = (props) => {
       <hr style={{ border: "1px solid white" }} />
       <div className='row'>
         <div className="ticket-detail-head">
-          <div className='row'>
+          <div className='row mb-2'>
             <div className='col-md-8 '>
               {loading ? (
                 // Show a spinner or loading message when data is being fetched
@@ -1196,9 +1196,9 @@ const IncidentDetails = (props) => {
                     className='accordian_cancel_btn float-end'
                     onClick={handleIncidentUpdate}
                   >
-                    {loading? 'Processing...' : 'Update Incident'}
-                    
-                    </Button>
+                    {loading ? 'Processing...' : 'Update Incident'}
+
+                  </Button>
                 </div>
 
               </div>
@@ -1211,9 +1211,7 @@ const IncidentDetails = (props) => {
                 </div>
               </div>
 
-              <div>
-                <Button className='accordian_submit_btn' onClick={toggleModal3}>Close Incident</Button>
-              </div>
+
             </div>
 
 
@@ -1420,6 +1418,9 @@ const IncidentDetails = (props) => {
                 {/* ))} */}
               </div>
             </div>
+          </div>
+          <div>
+            <Button className='accordian_submit_btn' onClick={toggleModal3}>Close Incident</Button>
           </div>
         </div>
       </div>

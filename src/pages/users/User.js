@@ -579,7 +579,7 @@ const User = () => {
                 {/* <div className='col-md-6 btn_incident_create incident_mbl' style={{ float: "right" }}>
                     <DepartmentModal onUpdateDepartments={fetchDepartments} />
                 </div> */}
-                <div className='col-md-6 btn_incident_create incident_mbl' style={{ float: "right" }}>
+                <div className='col-md-6 col-sm-12 btn_incident_create incident_mbl user-responsive-btn' style={{ float: "right" }}>
                     <Button className='me-2'
                         startIcon={<PersonAddIcon />}
                         onClick={() => {
@@ -588,7 +588,6 @@ const User = () => {
                         }}
                     >
                         Add User
-                        {/* <span><AddIcon /></span> */}
                     </Button>
                     <DepartmentModal onUpdateDepartments={fetchDepartments} />
 
@@ -599,7 +598,7 @@ const User = () => {
 
             <div className="row">
 
-                <div className="mt-2">
+                <div className="mt-2 table-responsive-container">
                     <Paper className='tbl' sx={{ width: '100%', overflow: 'hidden' }}>
                         <TableContainer className='tablescroll-mobile'>
                             <Table stickyHeader aria-label="sticky table" sx={{ minWidth: 650 }}>
@@ -642,9 +641,9 @@ const User = () => {
                                                     {columns.map((column) => {
                                                         const value = row[column.id];
                                                         return (
-                                                            <TableCell key={column.id} align={column.align}>
+                                                            <TableCell key={column.id} align={column.align} >
                                                                 {column.id === 'action' ? (
-                                                                    <>
+                                                                    <div className='user-table-button-responsive'>
                                                                         <Button
                                                                             variant="contained"
                                                                             color="primary"
@@ -663,7 +662,7 @@ const User = () => {
                                                                         >
                                                                             Delete
                                                                         </Button>
-                                                                    </>
+                                                                    </div>
                                                                 ) : (
                                                                     column.format && typeof value === 'number'
                                                                         ? column.format(value)
@@ -704,7 +703,7 @@ const User = () => {
                 onClose={toggleDrawer(false)}
                 onOpen={toggleDrawer(true)}
             >
-                <Box sx={{ width: 450, padding: 2 }}>
+                <Box sx={{ width: 450, padding: 2 }} className="drawer-width-mbl">
                     <form>
                         <Row>
                             <Col md={12} sm={12} className="mb-3">
