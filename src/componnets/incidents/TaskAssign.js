@@ -143,7 +143,7 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
       const response = await axios.post(getEmployeesAndManager, requestBody);
       const fetchedEmployees = response.data.map((emp) => ({
         id: emp.userId,
-        title: emp.userName,
+        title: emp.fullName,
       }));
       setAssignToOptions(fetchedEmployees);
     } catch (error) {

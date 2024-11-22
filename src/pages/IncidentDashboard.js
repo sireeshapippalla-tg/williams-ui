@@ -445,16 +445,25 @@ const HistoryItem = ({ item, onLoad }) => {
         style={{
           backgroundColor: "#f9fafb",
           borderBottom: "1px solid #e0e0e0",
+          flexWrap: "wrap", 
         }}
       >
         {isExpanded ? (
-          <ChevronDown style={{ fontSize: 20, color: "#616161", float: "right" }} />
+          <ChevronDown style={{ fontSize: 20, color: "#616161", 
+            float: "right"
+            // marginLeft: "auto"
+           }} />
         ) : (
-          <ChevronRight style={{ fontSize: 20, color: "#616161", float: "right" }} />
+          <ChevronRight style={{ fontSize: 20, color: "#616161", 
+            float: "right" 
+            // marginLeft: "auto"
+          }}
+            
+             />
         )}
         <div className="flex-grow">
           <div className="d-flex justify-content-between align-items-center mb-1">
-            <Typography variant="caption" color="textSecondary">
+            <Typography variant="caption" color="textSecondary"  className="text-truncate">
               {item.timestamp}
             </Typography>
             {/* <Button
@@ -474,13 +483,13 @@ const HistoryItem = ({ item, onLoad }) => {
               Load Query
             </Button> */}
           </div>
-          <Typography variant="subtitle2" color="textPrimary" fontWeight="medium">
+          <Typography variant="subtitle2" color="textPrimary" fontWeight="medium"   className="truncate">
             Query: {item.prompt}
           </Typography>
         </div>
       </div>
       {isExpanded && (
-        <div className="p-3 border-top" style={{ backgroundColor: "#ffffff", maxHeight: 300, overflowY: "auto" }}>
+        <div className="p-3 border-top" style={{ backgroundColor: "#ffffff", maxHeight: 300, overflowY: "auto",  wordWrap: "break-word", }}>
           {item.tableData ? (
             <DynamicTable data={Array.isArray(item.tableData) ? item.tableData : [item.tableData]} />
           ) : (

@@ -133,11 +133,11 @@ export default function Sidebar() {
             path: "/admin/pannel",
             icon: <PersonAddAltIcon />
         }] : []),
-        {
-            label: "Document Repository",
-            path: "/document/repository",
-            icon: <FolderOpenIcon />
-        }
+        // {
+        //     label: "Document Repository",
+        //     path: "/document/repository",
+        //     icon: <FolderOpenIcon />
+        // }
     ];
 
 

@@ -41,7 +41,7 @@ const DynamicTable = ({ data }) => {
   }
 
   return (
-    <Paper elevation={3} sx={{ overflow: 'hidden' }} className='tbl' >
+    <Paper elevation={3} sx={{ overflow: 'hidden' }} className='tbl table-responsive-container' >
       <div style={{ padding: '1rem' }}>
         <TextField
           variant="outlined"

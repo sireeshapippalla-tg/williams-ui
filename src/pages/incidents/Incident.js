@@ -363,7 +363,7 @@ const Incident = () => {
           </div>
         </div>
 
-        <div className='col-md-6 col-sm-12 btn_incident_create incident_mbl' style={{ float: "right" }}>
+        <div className='col-md-6 col-sm-12 btn_incident_create incident_mbl incident-create-btn-resonsive' style={{ float: "right" }}>
           <Button
             className='me-2'
             aria-controls={open ? 'add-incident-menu' : undefined}
