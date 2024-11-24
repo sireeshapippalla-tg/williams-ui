@@ -253,7 +253,7 @@ const IntrimAccordian = ({ invokeHistory }) => {
                 </AccordionSummary>
                 <AccordionDetails>
                     <div className='row'>
-                        <div className='col-md-6 pe-3'>
+                        <div className='col-md-6 col-sm-12 pe-3'>
                             <Form.Group controlId='exampleForm.ControlTextarea1'>
                                 <Form.Control
                                     style={{ backgroundColor: "#f1f0ef" }}
@@ -277,12 +277,12 @@ const IntrimAccordian = ({ invokeHistory }) => {
                                 <Form.Control.Feedback type="invalid">{errors.intrimFindings}</Form.Control.Feedback>
                             </Form.Group>
                         </div>
-                        <div className='col-md-6 ps-0 file_upload upload-file-border'>
+                        <div className='col-md-6 col-sm-12 ps-0 file_upload upload-file-border fileupload_responsive'>
                             <Button component='label' style={{ color: "black" }}>Choose file
                                 <VisuallyHiddenInput type='file' multiple onChange={handleFileSelect} />
                             </Button>
                             <span className='vertical-line'></span>
-                            <span style={{ marginLeft: "10px" }}>
+                            <span style={{ marginLeft: "10px" }} className='responsive_span'>
                                 {interimSelectedFiles.length > 0 ? `${interimSelectedFiles.length} file(s) selected` : 'No file chosen'}
                             </span>
                         </div>

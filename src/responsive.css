@@ -38,7 +38,9 @@
 @media only screen and (max-width:1024px) {}
 
 
-@media only screen and (max-width:1024px) {}
+@media only screen and (max-width:1024px) {    .userCancel_btn{
+    margin-top: 10px !important;
+}}
 
 
 @media only screen and (max-width:995px) {
@@ -63,10 +65,18 @@
     .sidebar-arrow-mbl {
         display: block !important;
     }
-
+    .userCancel_btn{
+        margin-top: 10px !important;
+    }
     /* .sidebar_collapse {
         display: none;
     } */
+    .table-responsive-container {
+        width: 250px;
+        min-width: 100%;
+        max-width: 100%;
+        overflow-x: scroll;
+    }
 
 
 
@@ -91,18 +101,70 @@
     .tbl_scrool {
         max-width: 650px;
     }
+    .userCancel_btn{
+        margin-top: 10px !important;
+    }
+    .table-responsive-container {
+        width: 250px !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: scroll !important;
+    }
 }
 
 @media only screen and (max-width:879px) {
     .sidebar-arrow-mbl {
         display: none !important;
     }
+    .userCancel_btn{
+        margin-top: 10px !important;
+    }
+    .table-responsive-container {
+        width: 250px !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: scroll !important;
+    }
+}
+
+@media only screen and (min-width:768px) {
+    .flex-grow {
+        flex: 1 0 100%;
+        /* Make the content take the full width on smaller screens */
+    }
+
+    nav {
+        display: block !important;
+    }
+    
+    .MuiTableCell-root {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .MuiTableContainer-root {
+        max-height: 350px;
+    }
+    .responsive-btn {
+        margin-top: 10px;
+    }
+    .userCancel_btn{
+        margin-top: 10px !important;
+    }
+       .table-responsive-container {
+        width: 250px !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: scroll !important;
+    }
+
 }
 
 
-
-
 @media only screen and (max-width:767px) {
+    .userCancel_btn{
+        margin-top: 10px !important;
+    }
     .flex-grow {
         flex: 1 0 100%;
         /* Make the content take the full width on smaller screens */
@@ -164,11 +226,31 @@
         display: block;
 
     }
+    .table-responsive-container {
+        width: 250px !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: scroll !important;
+    }
 
 }
 
 
 @media only screen and (max-width:599px) {
+    .fileupload_responsive{
+        padding: 0px;
+        width: 92%;
+        margin: 10px;
+        
+    }
+    .responsive_span{
+        margin: 0px !important;
+        font-size: 14px !important;
+    }
+    .william_logo_responsive{
+        /* height: 20px; */
+        width: 160px;
+    }
     .incident-create-btn-resonsive{
         width: 100% !important;
     }
@@ -207,10 +289,10 @@
     }
 
     .table-responsive-container {
-        width: 250px;
-        min-width: 100%;
-        max-width: 100%;
-        overflow-x: scroll;
+        width: 100px !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: scroll !important;
     }
 
     .responsive-btn {
@@ -276,10 +358,3 @@
 
 
 
-@media only screen and (min-width:768px) {
-
-    nav {
-        display: block !important;
-    }
-
-}

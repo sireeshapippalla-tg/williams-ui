@@ -229,53 +229,6 @@ function Header() {
   };
 
 
-
-  // const renderNotificationsMenu = (
-  //   <Menu
-  //     anchorEl={notificationsAnchorEl}
-  //     open={Boolean(notificationsAnchorEl)}
-  //     onClose={handleNotificationsMenuClose}
-  //     anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-  //     transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-  //     sx={{
-  //       mt: 4,
-  //       // maxWidth: 300,
-  //       maxHeight: 400, // Set maximum height for the menu
-  //     }}
-  //   >
-  //     <div className='notifications'>
-  //       <h6 className='ps-2 pt-2'>Notfications</h6>
-  //       <hr />
-  //       {notifiationData && notifiationData.length > 0 ? (
-  //         notifiationData.map((notification) => (
-  //           <MenuItem>
-  //             <div className='row'>
-  //               <div className='col-md-2'>
-  //                 <span className="history_bg">
-  //                   { notification.createdBy? notification.createdBy.charAt(0).toUpperCase() : "?"}
-  //                 </span>
-  //               </div>
-  //               <div className='col-md-10'>
-  //                 <div>
-  //                   {notification.message}
-  //                 </div>
-  //                 <div>
-  //                   <span style={{fontWeight:"600"}}>
-  //                   {new Date(notification.createdAt).toLocaleString()}
-  //                   </span>
-
-  //                 </div>
-  //               </div>
-  //             </div>
-  //           </MenuItem>
-  //         ))
-  //       ) : (
-  //         <MenuItem onClick={handleNotificationsMenuClose}>No new notifications</MenuItem>
-  //       )}
-  //     </div>
-  //   </Menu>
-  // );
-
   return (
     <header className='shadow-sm'>
       <div className='col-md-12 d-flex justify-content-between'>
@@ -284,7 +237,7 @@ function Header() {
         </IconButton>
 
         <div className='col-md-6 d-flex header-mobi'>
-          <img src={williamslogo} style={{ height: "45px" }} alt="Logo" />
+          <img src={williamslogo} style={{ height: "45px" }} className='william_logo_responsive' alt="Logo" />
         </div>
 
         <Box className='head_right_icons' sx={{ display: { xs: 'none', md: 'flex' } }}>

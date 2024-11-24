@@ -1540,7 +1540,7 @@ const CorrectiveAction = ({ invokeHistory, selectedDepartment }) => {
                     </div>
                     <div className='row'>
                         <div className='col-md-6 pe-3'>
-                            <div className='ps-0 file_upload upload-file-border'>
+                            <div className='ps-0 file_upload upload-file-border fileupload_responsive'>
                                 <Button
                                     component='label'
 
@@ -1556,7 +1556,7 @@ const CorrectiveAction = ({ invokeHistory, selectedDepartment }) => {
                                     />
                                 </Button>
                                 <span className='vertical-line'></span>
-                                <span style={{ marginLeft: "10px" }}> {correctiveSelectedFiles.length > 0 ? `${correctiveSelectedFiles.length} file(s) selected` : 'No file chosen'}</span>
+                                <span style={{ marginLeft: "10px" }} className='responsive_span'> {correctiveSelectedFiles.length > 0 ? `${correctiveSelectedFiles.length} file(s) selected` : 'No file chosen'}</span>
                             </div>
                         </div>
                         <div className='col-md-6 pe-3 mbl_mb'>

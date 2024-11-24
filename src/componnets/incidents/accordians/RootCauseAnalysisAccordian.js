@@ -415,7 +415,7 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                                     <TableHead>
                                         <TableRow>
                                             <TableCell></TableCell>{' '}
-                                            {/* Placeholder for vertical heading */}
+                                         
                                             <TableCell>
                                                 <div className='accordian_tbl_txt'>Why did this specific issue occur?</div>
                                             </TableCell>
@@ -430,7 +430,7 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                                                 </div>
                                             </TableCell >
                                             <TableCell >
-                                                {/* <div className='trianglediv'><em className='triangle'></em>Action</div> */}
+                                                
                                             </TableCell>
                                         </TableRow>
                                     </TableHead>
@@ -466,9 +466,6 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                                             <TableRow key={index}>
                                                 <TableCell style={{ minWidth: "150px", textAlign: "center" }}>
                                                     <label className='accordian_tbl_txt'>{input.label}</label>
-                                                    {/* <label className='accordian_tbl_txt'>{`${numberToWords(
-                                                        index + 1
-                                                    )} why`}</label> */}
                                                 </TableCell>
                                                 <TableCell style={{ minWidth: "150px" }}>
                                                     <textarea
@@ -571,7 +568,7 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                                     <Form.Control.Feedback type="invalid">{errors.summary}</Form.Control.Feedback>
                                 </Form.Group>
                             </div>
-                            <div className='col-md-6 ps-0 file_upload upload-file-border'>
+                            <div className='col-md-6 ps-0 file_upload upload-file-border fileupload_responsive'>
                                 <Button
                                     component='label'
                                     style={{ color: "black" }}
@@ -585,7 +582,7 @@ const RootCauseAnalysisAccordian = ({ invokeHistory }) => {
                                     />
                                 </Button>
                                 <span className='vertical-line'></span>
-                                <span style={{ marginLeft: "10px" }}> {rootSelectedFiles.length > 0 ? `${rootSelectedFiles.length} file(s) selected` : 'No file chosen'}</span>
+                                <span style={{ marginLeft: "10px" }} className='responsive_span' > {rootSelectedFiles.length > 0 ? `${rootSelectedFiles.length} file(s) selected` : 'No file chosen'}</span>
                             </div>
                         </div>
                         {rootSelectedFiles.length > 0 && (

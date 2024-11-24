@@ -891,8 +891,22 @@ const IncidentDetails = (props) => {
     <div>
       <div className="page-header">
         <div className="row align-items-center">
-          <div className="col-md-4">
+          <div className="col-md-5">
             <h3 className="page-title mb-0">Incident Details</h3>
+
+          </div>
+          <div className="col-md-7">
+
+            <h6 className={`incident_status ${incidentDetails.status === "Open"
+              ? "status-open"
+              : incidentDetails.status === "Resolved"
+                ? "status-resolved"
+                : incidentDetails.status === "In Progress"
+                  ? "status-In-Progress"
+                  : ""
+              }`}
+
+            >{incidentDetails.status}</h6>
           </div>
         </div>
       </div>
@@ -900,7 +914,7 @@ const IncidentDetails = (props) => {
       <div className='row'>
         <div className="ticket-detail-head">
           <div className='row mb-2'>
-            <div className='col-md-8 '>
+            <div className='col-lg-8 col-md-12'>
               {loading ? (
                 // Show a spinner or loading message when data is being fetched
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: "20px" }}>
@@ -1216,7 +1230,7 @@ const IncidentDetails = (props) => {
 
 
             {/* Right content */}
-            <div className='col-md-4 '>
+            <div className='col-lg-4 col-md-12'>
               <div style={{ display: "flex", justifyContent: "end" }}>
               </div><div className="card mb-3" style={{ minHeight: "200px", maxHeight: "200px", overflowY: "auto" }}>
                 <div

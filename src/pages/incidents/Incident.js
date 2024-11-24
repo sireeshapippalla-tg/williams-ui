@@ -480,12 +480,12 @@ const Incident = () => {
       }
 
       <div className="row">
-        <div className="col-sm-6 col-md-6 col-lg-3 col-xl-2 col-12 mb-2">
+        {/* <div className="col-sm-6 col-md-6 col-lg-3 col-xl-2 col-12 mb-2">
           <TextField
             InputProps={{ className: 'custom-input' }}
             className="custom-textfield"
             id="outlined-basic"
-            label="Organization Name"
+            label="Department Name"
             variant="outlined"
             style={{ width: "100%" }}
           />
@@ -590,7 +590,7 @@ const Incident = () => {
         </div>
         <div className="col-sm-6 col-md-6 col-lg-3 col-xl-2 col-12 mb-2">
           <Button variant="fw-bold " className='search_btn'>Search</Button>
-        </div>
+        </div> */}
 
 
 

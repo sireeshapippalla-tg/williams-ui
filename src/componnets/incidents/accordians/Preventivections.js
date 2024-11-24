@@ -286,7 +286,7 @@ const Preventivections = ({ invokeHistory }) => {
                                  <Form.Control.Feedback type="invalid">{errors.preventiveFindings}</Form.Control.Feedback>
                             </Form.Group>
                         </div>
-                        <div className='col-md-6 ps-0 file_upload upload-file-border'>
+                        <div className='col-md-6 ps-0 file_upload upload-file-border fileupload_responsive'>
                             {/* <div className='col-md-12  file_upload'>
                                 <input class="form-control" type="file" id="formFileMultiple" multiple onChange={preventiveHandleFileChange} />
                             </div> */}
@@ -305,7 +305,7 @@ const Preventivections = ({ invokeHistory }) => {
                                 />
                             </Button>
                             <span className='vertical-line'></span>
-                            <span style={{ marginLeft: "10px" }}> {preventiveSelectedFiles.length > 0 ? `${preventiveSelectedFiles.length} file(s) selected` : 'No file chosen'}</span>
+                            <span style={{ marginLeft: "10px" }} className='responsive_span'> {preventiveSelectedFiles.length > 0 ? `${preventiveSelectedFiles.length} file(s) selected` : 'No file chosen'}</span>
 
                         </div>
                     </div>

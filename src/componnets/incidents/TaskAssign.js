@@ -519,6 +519,7 @@ const TaskAssign = ({ selectedDepartment, invokeHistory }) => {
 
 
         {/* Accordians */}
+        
         <div className='accordian_s'>
           <IntrimAccordian selectedSection={selectedSection} invokeHistory={invokeHistory} />
           <RootCauseAnalysisAccordian selectedSection={selectedSection} invokeHistory={invokeHistory} />

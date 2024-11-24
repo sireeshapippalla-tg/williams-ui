@@ -966,7 +966,7 @@ const User = () => {
                                 {/* {dialogMode === 'add' ? 'Create User' : 'Update User'} */}
                             </Button>
                             <Button
-                                className='accordian_cancel_btn'
+                                className='accordian_cancel_btn userCancel_btn'
                                 style={{
                                     color: "#533529",
                                     fontWeight: "600",
