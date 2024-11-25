@@ -79,7 +79,7 @@
         width: 250px;
         min-width: 100%;
         max-width: 100%;
-        overflow-x: scroll;
+        /* overflow-x: scroll; */
     }
 
 
@@ -111,7 +111,7 @@
         width: 250px !important;
         min-width: 100% !important;
         max-width: 100% !important;
-        overflow-x: scroll !important;
+        /* overflow-x: scroll !important; */
     }
 
  
@@ -127,7 +127,7 @@
         width: 250px !important;
         min-width: 100% !important;
         max-width: 100% !important;
-        overflow-x: scroll !important;
+        /* overflow-x: scroll !important; */
     }
 }
 
@@ -161,7 +161,7 @@
         width: 250px !important;
         min-width: 100% !important;
         max-width: 100% !important;
-        overflow-x: scroll !important;
+        /* overflow-x: scroll !important; */
     }
     .responsive_span {
         margin: 0px !important;
@@ -242,7 +242,7 @@
         width: 250px !important;
         min-width: 100% !important;
         max-width: 100% !important;
-        overflow-x: scroll !important;
+        /* overflow-x: scroll !important; */
     }
     .responsive_span {
         margin: 0px !important;
