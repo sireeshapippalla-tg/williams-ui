@@ -38,12 +38,19 @@
 @media only screen and (max-width:1024px) {}
 
 
-@media only screen and (max-width:1024px) {    .userCancel_btn{
-    margin-top: 10px !important;
-}}
+@media only screen and (max-width:1024px) {
+    .userCancel_btn {
+        margin-top: 10px !important;
+
+    }
+}
 
 
 @media only screen and (max-width:995px) {
+    .userCancel_btn {
+        margin-top: 10px !important;
+    }
+
     .calendar_align DatePicker {
         width: 100%;
     }
@@ -65,9 +72,11 @@
     .sidebar-arrow-mbl {
         display: block !important;
     }
-    .userCancel_btn{
+
+    .userCancel_btn {
         margin-top: 10px !important;
     }
+
     /* .sidebar_collapse {
         display: none;
     } */
@@ -101,14 +110,20 @@
     .tbl_scrool {
         max-width: 650px;
     }
-    .userCancel_btn{
+
+    .userCancel_btn {
         margin-top: 10px !important;
     }
+
     .table-responsive-container {
         width: 250px !important;
         min-width: 100% !important;
         max-width: 100% !important;
         overflow-x: scroll !important;
+    }
+
+    .userCancel_btn {
+        margin-top: 10px !important;
     }
 }
 
@@ -116,9 +131,11 @@
     .sidebar-arrow-mbl {
         display: none !important;
     }
-    .userCancel_btn{
+
+    .userCancel_btn {
         margin-top: 10px !important;
     }
+
     .table-responsive-container {
         width: 250px !important;
         min-width: 100% !important;
@@ -136,7 +153,7 @@
     nav {
         display: block !important;
     }
-    
+
     .MuiTableCell-root {
         padding: 10px;
         font-size: 14px;
@@ -145,26 +162,34 @@
     .MuiTableContainer-root {
         max-height: 350px;
     }
+
     .responsive-btn {
         margin-top: 10px;
     }
-    .userCancel_btn{
+
+    .userCancel_btn {
         margin-top: 10px !important;
     }
-       .table-responsive-container {
+
+    .table-responsive-container {
         width: 250px !important;
         min-width: 100% !important;
         max-width: 100% !important;
         overflow-x: scroll !important;
+    }
+    .responsive_span {
+        margin: 0px !important;
+        font-size: 14px !important;
     }
 
 }
 
 
 @media only screen and (max-width:767px) {
-    .userCancel_btn{
+    .userCancel_btn {
         margin-top: 10px !important;
     }
+
     .flex-grow {
         flex: 1 0 100%;
         /* Make the content take the full width on smaller screens */
@@ -177,7 +202,7 @@
     }
 
     .responsive-btn {
-        margin-top: 10px;
+        margin-top: 10px !important;
     }
 
     .incident_mbl {
@@ -226,34 +251,43 @@
         display: block;
 
     }
+
     .table-responsive-container {
         width: 250px !important;
         min-width: 100% !important;
         max-width: 100% !important;
         overflow-x: scroll !important;
     }
+    .responsive_span {
+        margin: 0px !important;
+        font-size: 14px !important;
+    }
 
 }
 
 
 @media only screen and (max-width:599px) {
-    .fileupload_responsive{
+    .fileupload_responsive {
         padding: 0px;
         width: 92%;
         margin: 10px;
-        
+
     }
-    .responsive_span{
+
+    .responsive_span {
         margin: 0px !important;
         font-size: 14px !important;
     }
-    .william_logo_responsive{
+
+    .william_logo_responsive {
         /* height: 20px; */
         width: 160px;
     }
-    .incident-create-btn-resonsive{
+
+    .incident-create-btn-resonsive {
         width: 100% !important;
     }
+
     .deaprtment-responsive {
         width: 200px !important;
     }
@@ -354,7 +388,3 @@
     }
 
 }
-
-
-
-

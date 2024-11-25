@@ -668,7 +668,7 @@ const CreateIncident = (props) => {
             </h5>
           }
           <hr className='white-line' />
-          <div className='col-md-8 '>
+          <div className='col-lg-8 col-md-12'>
             <Row>
               {Object.entries(inputs).map(([name, { value, options }], index) => (
                 <Col key={index} md={4} sm={4} className="mb-3">
@@ -932,8 +932,8 @@ const CreateIncident = (props) => {
           {console.log("issummary", props.isSummaryVisible)}
           {/* right content */}
 
-          {props.isRightContentVisible == true ? <div className='col-md-4'></div> :
-            <div className='col-md-4 '>
+          {props.isRightContentVisible == true ? <div className='col-lg-4 col-md-12'></div> :
+            <div className='col-lg-4 col-md-12'>
               <div className="ticket-chat attached-files mb-3 p-4" >
                 <h5 style={{ fontWeight: "600" }}>History</h5>
                 <p>History not yet created</p>
