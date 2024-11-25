@@ -141,10 +141,15 @@ const User = () => {
         setContactNumber('')
         setSelectedUSerType(null);
         setSelectedDepartment(null);
-        setInputs({
-            Title: { value: null, options: [] },
-            Gender: { value: null, options: [] },
-        });
+        // setInputs({
+        //     Title: { value: null, options: [] },
+        //     Gender: { value: null, options: [] },
+        // });
+        setInputs((prevState) => ({
+            ...prevState,
+            Title: { ...prevState.Title, value: null },
+            Gender: { ...prevState.Gender, value: null },
+        }));
 
         setErrors({});
 
@@ -154,10 +159,16 @@ const User = () => {
 
     useEffect(() => {
         fetchDepartments();
-        fetchDropdowns();
+        // fetchDropdowns();
         fetchUserTypesDropdown();
         fetchAllUsers();
-    }, [])
+    }, []);
+
+    useEffect(() => {
+        if (!inputs.Gender.options.length || !inputs.Title.options.length) {
+            fetchDropdowns();
+        }
+    }, [inputs]);
 
     useEffect(() => {
         console.log('Current userIdRef:', userIdRef.current);
@@ -448,7 +459,6 @@ const User = () => {
 
                 if (responseCode === 200) {
                     setAddUserdialogOpen(false)
-                    resetFields();
                     setMessage(responseMessage);
                     setSeverity('success');
                     setOpenSnackbar(true);
@@ -460,7 +470,6 @@ const User = () => {
                     fetchAllUsers()
                 } else if (responseCode === 409) {
                     onClickAddUserDialogClose()
-                    resetFields();
                     setMessage(responseMessage || 'Email already exists');
                     setSeverity('error');
                     resetFields()
@@ -579,7 +588,7 @@ const User = () => {
                 {/* <div className='col-md-6 btn_incident_create incident_mbl' style={{ float: "right" }}>
                     <DepartmentModal onUpdateDepartments={fetchDepartments} />
                 </div> */}
-                <div className='col-md-6 col-sm-12 btn_incident_create incident_mbl user-responsive-btn' style={{ float: "right" }}>
+                <div className=' col-lg-6 col-md-12 col-sm-12 btn_incident_create incident_mbl user-responsive-btn' style={{ float: "right" }}>
                     <Button className='me-2'
                         startIcon={<PersonAddIcon />}
                         onClick={() => {
@@ -656,6 +665,7 @@ const User = () => {
                                                                             Edit
                                                                         </Button>
                                                                         <Button
+                                                                        className='userCancel_btn'
                                                                             variant="contained"
                                                                             color="error"
                                                                             onClick={() => handleDeleteDialog(row.userId)}
@@ -966,7 +976,7 @@ const User = () => {
                                 {/* {dialogMode === 'add' ? 'Create User' : 'Update User'} */}
                             </Button>
                             <Button
-                                className='accordian_cancel_btn userCancel_btn'
+                                className='accordian_cancel_btn '
                                 style={{
                                     color: "#533529",
                                     fontWeight: "600",

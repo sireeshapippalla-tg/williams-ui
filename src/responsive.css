@@ -35,22 +35,19 @@
 }
 
 
-@media only screen and (max-width:1024px) {}
+@media only screen and (max-width:1024px) { 
+    .userCancel_btn{
+    margin-top: 10px !important;
+}}
 
 
 @media only screen and (max-width:1024px) {
-    .userCancel_btn {
-        margin-top: 10px !important;
-
-    }
 }
 
 
 @media only screen and (max-width:995px) {
-    .userCancel_btn {
-        margin-top: 10px !important;
-    }
 
+   
     .calendar_align DatePicker {
         width: 100%;
     }
@@ -73,9 +70,7 @@
         display: block !important;
     }
 
-    .userCancel_btn {
-        margin-top: 10px !important;
-    }
+ 
 
     /* .sidebar_collapse {
         display: none;
@@ -111,9 +106,6 @@
         max-width: 650px;
     }
 
-    .userCancel_btn {
-        margin-top: 10px !important;
-    }
 
     .table-responsive-container {
         width: 250px !important;
@@ -122,9 +114,7 @@
         overflow-x: scroll !important;
     }
 
-    .userCancel_btn {
-        margin-top: 10px !important;
-    }
+ 
 }
 
 @media only screen and (max-width:879px) {
@@ -132,9 +122,6 @@
         display: none !important;
     }
 
-    .userCancel_btn {
-        margin-top: 10px !important;
-    }
 
     .table-responsive-container {
         width: 250px !important;
@@ -145,6 +132,7 @@
 }
 
 @media only screen and (min-width:768px) {
+  
     .flex-grow {
         flex: 1 0 100%;
         /* Make the content take the full width on smaller screens */
@@ -167,9 +155,7 @@
         margin-top: 10px;
     }
 
-    .userCancel_btn {
-        margin-top: 10px !important;
-    }
+ 
 
     .table-responsive-container {
         width: 250px !important;
