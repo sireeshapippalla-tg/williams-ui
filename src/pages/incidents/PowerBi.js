@@ -3,7 +3,6 @@ import React from 'react'
 const PowerBi = () => {
   return (
     <div>
-      <h1>Power BI Report</h1>
       <iframe
         title="IAssure_Incidents"
         width="1140"
