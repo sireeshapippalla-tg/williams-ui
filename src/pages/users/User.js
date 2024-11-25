@@ -579,9 +579,9 @@ const User = () => {
         <div className='border-0'>
             <div className='row' style={{ marginBottom: "15px" }}>
                 <div className='col-md-6 route-head incident_mbl'>
-                    <h3 className='mb-0'>Admin Pannel</h3>
+                    <h3 className='mb-0'>Admin Panel</h3>
                     <div>
-                        <Link href="#">Dashboard</Link> <span> / Admin Pannel</span>
+                        <Link href="#">Dashboard</Link> <span> / Admin Panel</span>
 
                     </div>
                 </div>
