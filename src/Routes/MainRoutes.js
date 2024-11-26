@@ -19,14 +19,14 @@ const MainRoutes = () => {
     <div>
       <Routes>
         {/* Protected Routes */}
-        <Route path='/incident/dashboard'
+        <Route path='/incident/dashboard1'
           element={
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
           }
         />
-        <Route path='/incident/dashboard1'
+        <Route path='/incident/dashboard'
           element={
             <ProtectedRoute>
 

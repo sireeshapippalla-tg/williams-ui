@@ -1103,7 +1103,7 @@ const IncidentDetails = (props) => {
                             />
                           </Button>
                           <span className='vertical-line'></span>
-                          <span style={{ marginLeft: "10px" }}> {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : 'No file chosen'}</span>
+                          <span className='responsive_span' style={{ marginLeft: "10px" }}> {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : 'No file chosen'}</span>
                         </div>
                       </Col>
 

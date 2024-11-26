@@ -105,7 +105,7 @@ const Login = () => {
                 setSeverity('success');
                 setOpen(true);
                 setTimeout(() => {
-                    navigate(redirectUrl || '/incident/dashboard');
+                    navigate(redirectUrl || '/incident');
                 }, 2000);
              
             }
