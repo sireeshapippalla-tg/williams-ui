@@ -643,18 +643,5 @@ header h3 {
     background-color: #fff;
 }
 
-/* .form-focus {
-    height: 50px;
-    position: relative;
-} */
-.calendar_align .css-10o2lyd-MuiStack-root>.MuiTextField-root {
-    min-width: 100%;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-}
 
-.calendar_align input {
-    padding: 11px 10px;
-}
 

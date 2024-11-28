@@ -4,7 +4,8 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import IncidentDashboard from '../IncidentDashboard';
-import PowerBi from './PowerBi';
+import MainDashboard from './MainDashboard';
+// import PowerBi from './PowerBi';
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -51,7 +52,8 @@ const Dashboard = () => {
                     </Tabs>
                 </Box>
                 <CustomTabPanel value={value} index={0}>
-                    <PowerBi/>
+                    <MainDashboard/>
+                    {/* <PowerBi/> */}
                 </CustomTabPanel>
                 <CustomTabPanel value={value} index={1}>
                     <IncidentDashboard/>

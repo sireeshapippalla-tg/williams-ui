@@ -372,5 +372,14 @@
         width: 300px !important;
         overflow-x: scroll;
     }
+    .incident-dashboard-count{
+        margin-bottom: 10px;
+    }
+    .total-icident-dashboard{
+        margin: 1px;
+    }
+    .source-div{
+        margin-bottom: 10px;
+    }
 
 }

@@ -519,10 +519,17 @@ input {
 }
 
 .css-s0ns04-MuiAutocomplete-root .MuiOutlinedInput-root,
-.css-ka7ti6-MuiAutocomplete-root .MuiOutlinedInput-root,
-.css-o9k5xi-MuiInputBase-root-MuiOutlinedInput-root {
+.css-ka7ti6-MuiAutocomplete-root .MuiOutlinedInput-root
+
+/* .css-o9k5xi-MuiInputBase-root-MuiOutlinedInput-root  */
+  {
   background-color: white !important;
 }
+
+/* .css-o9k5xi-MuiInputBase-root-MuiOutlinedInput-root {
+color: white !important;
+} */
+
 
 .add-Field-btn {
   font-weight: bold !important;
@@ -659,10 +666,50 @@ div.modal_bg_body .modal-body {
 
 .calendar_align .css-z3c6am-MuiFormControl-root-MuiTextField-root {
   width: 100%;
+  color: white !important;
+  border: 1px solid white !important
 }
 
 .calendar_align .css-nxo287-MuiInputBase-input-MuiOutlinedInput-input {
-  padding: 12.5px 14px;
+  padding: 14px 14px;
+  color: white !important;
+}
+
+.calendar_align .css-nxo287-MuiInputBase-input-MuiOutlinedInput-input {
+  background-color: #533529 !important;
+  color: white !important;
+}
+
+.calendar_align .css-z3c6am-MuiFormControl-root-MuiTextField-root label {
+  color: white !important;
+  text-align: center !important;
+}
+
+.calendar_align .css-o9k5xi-MuiInputBase-root-MuiOutlinedInput-root button {
+  color: white !important;
+}
+
+.select-icon .css-hfutr2-MuiSvgIcon-root-MuiSelect-icon {
+  color: white !important
+}
+
+.select-icon .css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input {
+  padding: 14px !important;
+}
+
+.total-icident-dashboard {
+  /* display: flex;
+  flex-direction: column; */
+  align-items: center;
+  text-align: center;
+  background-color: white;
+  color: #533529;
+  height: 100%;
+}
+
+.total-icident-dashboard h5,
+h4 {
+  font-weight: 800;
 }
 
 .tablescroll-mobile {
@@ -944,6 +991,7 @@ a {
 hr {
   border: 1px solid #ffffff !important;
 }
+
 .notifications hr {
   border: 1px solid black !important;
 }
@@ -965,7 +1013,7 @@ hr {
 }
 
 
-.wraper{
+.wraper {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -973,6 +1021,7 @@ hr {
   width: 100%;
 
 }
+
 .login {
   width: 350px;
   height: min-content;
@@ -980,6 +1029,7 @@ hr {
   padding: 20px;
 
 }
+
 .login h5 {
   text-align: center;
   color: rgb(83 53 41);
@@ -989,7 +1039,8 @@ hr {
 .corrective-list li {
   padding: 0px !important;
 }
- .file-name span{
+
+.file-name span {
   color: rgb(121, 69, 48);
   font-size: 14px;
   font-weight: 600;
@@ -999,9 +1050,10 @@ hr {
   border-color: rgba(0, 0, 0, 0.5) !important;
 }
 
-.css-1jy569b-MuiFormLabel-root-MuiInputLabel-root{
+.css-1jy569b-MuiFormLabel-root-MuiInputLabel-root {
   font-weight: 700 !important;
 }
+
 .modal-header-custom {
   background-color: #533529;
   color: white;
@@ -1011,21 +1063,30 @@ hr {
   filter: invert(1);
   font-weight: 600 !important;
 }
+
 @keyframes blink {
-  0%, 100% {
-      opacity: 1; /* Fully visible */
+
+  0%,
+  100% {
+    opacity: 1;
+    /* Fully visible */
   }
+
   50% {
-      opacity: 0; /* Fully invisible */
+    opacity: 0;
+    /* Fully invisible */
   }
 }
 
 .blink {
-  animation: blink 1s infinite; /* 1-second animation repeating infinitely */
+  animation: blink 1s infinite;
+  /* 1-second animation repeating infinitely */
 }
-.camera{
+
+.camera {
   position: relative;
 }
+
 .result {
   position: fixed;
   top: 0;
@@ -1034,19 +1095,21 @@ hr {
   height: 100%;
   display: flex;
   align-items: center;
-  background-color: rgba(0,0,0,0.9);
+  background-color: rgba(0, 0, 0, 0.9);
   transition: 0.4s;
 }
 
 .result.hasPhoto {
   left: 0;
 }
+
 video {
   width: 100%;
   max-width: 100%;
   height: auto;
 }
-.mediabutton{
+
+.mediabutton {
   position: absolute;
   bottom: 20px;
   left: 20px;
@@ -1063,17 +1126,19 @@ video {
   transition: 0.4s;
   cursor: pointer;
 }
-.mediabutton:hover{
+
+.mediabutton:hover {
   background-position: 100%;
 }
 
-.table-responsive-container{
+.table-responsive-container {
   overflow: hidden;
 }
 
 .incident_status {
   font-weight: bold;
-  animation: blink 1s infinite; /* Blinking animation */
+  animation: blink 1s infinite;
+  /* Blinking animation */
   /* position: relative; */
   /* top: 20px; */
   /* left: 200px; */
@@ -1082,23 +1147,87 @@ video {
 /* Color for 'Open' status */
 .status-open {
   color: red;
+
 }
 
 /* Color for 'Resolved' status */
 .status-resolved {
   color: green;
 }
-.status-In-Progress{
+
+.status-In-Progress {
   color: orange;
 }
 
 @keyframes blink {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
 }
 
+.dashboard-header {
+  color: white;
+  background-color: #533529;
+  text-align: center;
+  font-size: 20px !important;
+  font-weight: 500 !important;
+  padding: 10px;
+}
 
+.custom-card {
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  /* align-items: center; */
+  background-color: #533529;
+  color: white;
+}
+
+.custom-card-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  margin-top: 15px;
+}
+
+.custom-card-body {
+  /* padding: 1rem; */
+}
+
+.custom-card-footer {
+  text-align: right;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.chart-header {
+  border: 1px solid #533529;
+  background-color: #533529;
+  color: white;
+  padding: 15px;
+  position: relative;
+  top: 8px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.chart-container {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  /* Ensure it doesn't go beyond its container */
+  margin: auto;
+  max-height: 100%;
+  background-color: white;
+  border: 1px solid #533529;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
