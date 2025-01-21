@@ -5,6 +5,9 @@ import AddIcon from '@mui/icons-material/Add';
 import { Alert, Snackbar, Button, } from '@mui/material';
 import LibraryAddIcon from '@mui/icons-material/LibraryAdd';
 
+
+import { getAllDepartments, saveDepartment } from '../../api';
+
 function DepartmentModal({ onUpdateDepartments }) {
     const [showModal, setShowModal] = useState(false);
     const [activeTab, setActiveTab] = useState('departments');
@@ -26,7 +29,7 @@ function DepartmentModal({ onUpdateDepartments }) {
 
     const fetchDepartments = async () => {
         try {
-            const response = await axios.post('http://3.27.226.110:8084/iassure/api/users/getAllDepartments');
+            const response = await axios.post(getAllDepartments);
             const departmentData = response.data;
 
             // Map department data including IDs and names
@@ -38,7 +41,8 @@ function DepartmentModal({ onUpdateDepartments }) {
 
     const handleCreateDepartment = async () => {
         try {
-            const response = await axios.post(`http://3.27.226.110:8084/iassure/api/users/saveDepartment?deptName=${encodeURIComponent(newDeptName)}`);
+            const response = await axios.post(`https://13.236.54.105/:8084/iassure/api/users/saveDepartment?deptName=${encodeURIComponent(newDeptName)}`);
+           
             // if (response.data.statusResponse.responseCode === 200) {
             //     setMessage('Department created successfully!');
             //     setSeverity('success')

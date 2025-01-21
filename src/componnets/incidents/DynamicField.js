@@ -5,6 +5,9 @@ import { useParams } from 'react-router-dom';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TextField, Autocomplete, FormControl, Checkbox, Typography, Grid, Button, IconButton, CircularProgress, Snackbar, Alert } from '@mui/material';
 
+import { createFields, getIncidentFields, getAllFields, deleteIncidentField, deleteField, submitFields } from '../../api';
+
+
 const Modal = ({ isOpen, onClose, children, loading }) => {
     if (!isOpen) return null;
 
@@ -76,7 +79,7 @@ const DynamicFormFields = ({ incidentId }) => {
     const fetchAvailableFields = async () => {
         setLoading(true);
         try {
-            const response = await axios.post(`http://3.27.226.110:8084/iassure/api/incident/getAllFields`);
+            const response = await axios.post(getAllFields);
             if (response.status === 200) {
                 const data = response.data.dynamicFields;
                 const parsedFields = data.map(field => {
@@ -101,7 +104,7 @@ const DynamicFormFields = ({ incidentId }) => {
     const fetchIncidentFields = async () => {
         setLoading(true);
         try {
-            const response = await axios.post(`http://3.27.226.110:8084/iassure/api/incident/getIncidentFields`, {
+            const response = await axios.post(getIncidentFields, {
                 incidentId: id
             });
             if (response.status === 200) {
@@ -155,7 +158,7 @@ const DynamicFormFields = ({ incidentId }) => {
 
         setLoading(true);
         try {
-            const response = await axios.post("http://3.27.226.110:8084/iassure/api/incident/createFields", fieldData);
+            const response = await axios.post(createFields, fieldData);
             if (response.status === 200) {
                 showSnackbar("New field created successfully.", 'success');
                 setNewField({ type: 'text', label: '', options: [{ value: '', isSelected: false }] });
@@ -190,7 +193,7 @@ const DynamicFormFields = ({ incidentId }) => {
             if (fieldInIncident) {
                 setLoading(true);
                 try {
-                    const response = await axios.post("http://3.27.226.110:8084/iassure/api/incident/deleteIncidentField", {
+                    const response = await axios.post(deleteIncidentField, {
                         "incidentId": id,
                         "fieldId": fieldId
                     });
@@ -206,7 +209,7 @@ const DynamicFormFields = ({ incidentId }) => {
             } else {
                 setLoading(true);
                 try {
-                    const response = await axios.post("http://3.27.226.110:8084/iassure/api/incident/deleteField", { fieldId });
+                    const response = await axios.post(deleteField, { fieldId });
                     if (response.status === 200) {
                         showSnackbar("Field deleted successfully.", 'success');
                         fetchAvailableFields();
@@ -263,7 +266,7 @@ const DynamicFormFields = ({ incidentId }) => {
 
         setLoading(true);
         try {
-            const response = await axios.post("http://3.27.226.110:8084/iassure/api/incident/submitFields", { fields: fieldsToSubmit });
+            const response = await axios.post(submitFields, { fields: fieldsToSubmit });
             if (response.status === 200) {
                 showSnackbar("Fields submitted successfully.", 'success');
                 setTempIncidentFields([]);

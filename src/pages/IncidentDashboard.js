@@ -398,6 +398,8 @@ import DynamicTable from '../componnets/incidents/DynamicTable';
 import SendIcon from '@mui/icons-material/Send';
 import fevicon from '../assets/images/fevicon.png'
 
+import { addDashboardWithAI } from '../api';
+
 const HistoryItem = ({ item, onLoad }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -534,7 +536,7 @@ const IncidentDashboard = () => {
     setMessages((prev) => [...prev, { type: 'user', content: prompt }]);
 
     try {
-      const response = await fetch('http://3.27.226.110:8084/iassure/api/incident/addDashboardWithAI', {
+      const response = await fetch(addDashboardWithAI, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

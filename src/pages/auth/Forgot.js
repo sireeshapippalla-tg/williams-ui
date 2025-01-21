@@ -7,6 +7,8 @@ import Email from '@mui/icons-material/Email';
 import williamslogo from '../../assets/images/william-logo.png';
 import axios from 'axios';
 
+import { forgotPassword } from '../../api';
+
 const ForgotPassword = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -77,7 +79,7 @@ const ForgotPassword = () => {
 
         try {
             const payload = { username: userName, password: newPassword };
-            const response = await axios.post('http://3.27.226.110:8084/iassure/api/users/forgotPassword', payload);
+            const response = await axios.post(forgotPassword, payload);
             console.log(response);
             if (response.data.responseCode === 200) {
                 // setSuccessMessage('Password changed successfully!');

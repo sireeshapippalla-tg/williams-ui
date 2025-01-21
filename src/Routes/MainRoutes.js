@@ -14,19 +14,20 @@ import AISearchDashboard from '../componnets/incidents/AISearch';
 import Dashboard from '../pages/incidents/Dashboard';
 
 
+
 const MainRoutes = () => {
   return (
     <div>
       <Routes>
         {/* Protected Routes */}
-        <Route path='/incident/dashboard1'
+        <Route path='/incident/dashboard'
           element={
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
           }
         />
-        <Route path='/incident/dashboard'
+        <Route path='/incident/dashboard1'
           element={
             <ProtectedRoute>
 

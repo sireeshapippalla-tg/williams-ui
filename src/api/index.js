@@ -1,4 +1,5 @@
-export const BASE_API_URL = 'http://3.27.226.110:8084/iassure/api/';
+// export const BASE_API_URL = 'http://3.27.226.110:8084/iassure/api/';
+export const BASE_API_URL = 'http://13.236.54.105:8084/iassure/api/';
 // export const METERSLIS = BASE_API_URL +
 export const fetchIncidentDetailsDashboard = BASE_API_URL + 'incident/fetchIncidentDetailsDashboard'   //{"orgId":1,"incidentStatusId":34,"userId":1}
 export const getMastersListByType = BASE_API_URL + 'incident/getMastersListByType'   //{"sourceName":"Incident Status / Incident Source / Incident Category / Incident Severity"}
@@ -42,5 +43,13 @@ export const addDashboardWithAI = BASE_API_URL + 'incident/addDashboardWithAI'
 export const getSuggestions = BASE_API_URL + 'incident/getSuggestions'
 export const getTasksByDepartment = BASE_API_URL + 'incident/getTasksByDepartment'
 export const saveTasksForDepartment = BASE_API_URL + 'incident/saveTasksForDepartment'
+export const createFields = BASE_API_URL + 'incident/createFields'
+export const getIncidentFields = BASE_API_URL + 'incident/getIncidentFields'
+export const getAllFields = BASE_API_URL + 'incident/getAllFields'
+export const deleteIncidentField = BASE_API_URL + 'incident/deleteIncidentField'
+export const deleteField = BASE_API_URL + 'incident/deleteField'
+export const submitFields = BASE_API_URL + 'incident/submitFields'
+export const saveDepartment = BASE_API_URL + 'users/saveDepartment'
+export const forgotPassword = BASE_API_URL + 'users/forgotPassword'
 
 export const config = 'IAssure'
