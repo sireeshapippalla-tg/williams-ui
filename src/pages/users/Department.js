@@ -41,7 +41,7 @@ function DepartmentModal({ onUpdateDepartments }) {
 
     const handleCreateDepartment = async () => {
         try {
-            const response = await axios.post(`https://13.236.54.105/:8084/iassure/api/users/saveDepartment?deptName=${encodeURIComponent(newDeptName)}`);
+            const response = await axios.post(`http://13.236.54.105:8084/iassure/api/users/saveDepartment?deptName=${encodeURIComponent(newDeptName)}`);
            
             // if (response.data.statusResponse.responseCode === 200) {
             //     setMessage('Department created successfully!');
