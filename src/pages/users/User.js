@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import AddIcon from '@mui/icons-material/Add';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
+import Breadcrumbs from '@mui/material/Breadcrumbs';
+import Link from '@mui/material/Link';
 import DepartmentModal from './Department';
 import Button from '@mui/material/Button';
 import { Autocomplete, TextField, Menu, MenuItem, InputAdornment } from '@mui/material';
@@ -580,14 +582,18 @@ const User = () => {
             <div className='row' style={{ marginBottom: "15px" }}>
                 <div className='col-md-6 route-head incident_mbl'>
                     <h3 className='mb-0'>Admin Panel</h3>
-                    <div>
-                        <Link href="#">Dashboard</Link> <span> / Admin Panel</span>
+                    <Breadcrumbs aria-label="breadcrumb" className="breadcrumbs">
+                        <Link underline="hover" color="inherit" href="/incident/dashboard">
+                        Dashboard
+                        </Link>
 
-                    </div>
+                        <Link underline="hover" color="inherit" href='#'>
+                        Admin Panel
+                        </Link>
+                    </Breadcrumbs>
+
                 </div>
-                {/* <div className='col-md-6 btn_incident_create incident_mbl' style={{ float: "right" }}>
-                    <DepartmentModal onUpdateDepartments={fetchDepartments} />
-                </div> */}
+        
                 <div className=' col-lg-6 col-md-12 col-sm-12 btn_incident_create incident_mbl user-responsive-btn' style={{ float: "right" }}>
                     <Button className='me-2'
                         startIcon={<PersonAddIcon />}
@@ -625,22 +631,22 @@ const User = () => {
                                     </TableRow>
                                 </TableHead>
                                 {isLoading ?
-                                      <TableBody>
-                                      <TableRow>
-                                          <TableCell colSpan={columns.length} style={{ textAlign: 'center', height: '300px' }}>
-                                              <div
-                                                  style={{
-                                                      display: 'flex',
-                                                      justifyContent: 'center',
-                                                      alignItems: 'center',
-                                                      height: '100%',
-                                                  }}
-                                              >
-                                                  <CircularProgress />
-                                              </div>
-                                          </TableCell>
-                                      </TableRow>
-                                  </TableBody>
+                                    <TableBody>
+                                        <TableRow>
+                                            <TableCell colSpan={columns.length} style={{ textAlign: 'center', height: '300px' }}>
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        justifyContent: 'center',
+                                                        alignItems: 'center',
+                                                        height: '100%',
+                                                    }}
+                                                >
+                                                    <CircularProgress />
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableBody>
                                     :
                                     <TableBody>
                                         {rows
@@ -665,7 +671,7 @@ const User = () => {
                                                                             Edit
                                                                         </Button>
                                                                         <Button
-                                                                        className='userCancel_btn'
+                                                                            className='userCancel_btn'
                                                                             variant="contained"
                                                                             color="error"
                                                                             onClick={() => handleDeleteDialog(row.userId)}

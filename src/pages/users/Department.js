@@ -39,37 +39,62 @@ function DepartmentModal({ onUpdateDepartments }) {
         }
     };
 
-    const handleCreateDepartment = async () => {
-        try {
-            const response = await axios.post(`http://13.236.54.105:8084/iassure/api/users/saveDepartment?deptName=${encodeURIComponent(newDeptName)}`);
+    // const handleCreateDepartment = async () => {
+    //     try {
+    //         const response = await axios.post(`http://13.236.54.105:8084/iassure/api/users/saveDepartment?deptName=${encodeURIComponent(newDeptName)}`);
            
-            // if (response.data.statusResponse.responseCode === 200) {
-            //     setMessage('Department created successfully!');
-            //     setSeverity('success')
-            //     setOpen(true)
-            //     setNewDeptName('')
-            //     fetchDepartments(); 
-            //     setActiveTab('departments')
-            // }else{
-            //     setMessage('Failed to add department!');
-            //     setSeverity('error')
-            //     setOpen(true)
-            // }
-            setMessage('Department created successfully!...');
-            setSeverity('success')
-            setOpen(true)
-            setNewDeptName('');  // Clear input field
-            fetchDepartments();  // Refresh department list
-            setActiveTab('departments')
+    //         // if (response.data.statusResponse.responseCode === 200) {
+    //         //     setMessage('Department created successfully!');
+    //         //     setSeverity('success')
+    //         //     setOpen(true)
+    //         //     setNewDeptName('')
+    //         //     fetchDepartments(); 
+    //         //     setActiveTab('departments')
+    //         // }else{
+    //         //     setMessage('Failed to add department!');
+    //         //     setSeverity('error')
+    //         //     setOpen(true)
+    //         // }
+    //         setMessage('Department created successfully!...');
+    //         setSeverity('success')
+    //         setOpen(true)
+    //         setNewDeptName('');  // Clear input field
+    //         fetchDepartments();  // Refresh department list
+    //         setActiveTab('departments')
+    //         onUpdateDepartments();
+    //     } catch (error) {
+    //         console.log('Error creating department:', error);
+    //         setMessage('Error creating department:', error);
+    //         setSeverity(error);
+    //         setOpen(true)
+    //     }
+    // };
+
+    const handleCreateDepartment = async () => {
+        if (!newDeptName || typeof newDeptName !== "string") {
+            setMessage("Invalid department name!");
+            setSeverity("error");
+            setOpen(true);
+            return;
+        }
+    
+        try {
+            const response = await axios.post(saveDepartment(newDeptName));
+    
+            setMessage("Department created successfully!");
+            setSeverity("success");
+            setOpen(true);
+            setNewDeptName("");
+            fetchDepartments();
+            setActiveTab("departments");
             onUpdateDepartments();
         } catch (error) {
-            console.log('Error creating department:', error);
-            setMessage('Error creating department:', error);
-            setSeverity(error);
-            setOpen(true)
+            console.log("Error creating department:", error);
+            setMessage("Error creating department!");
+            setSeverity("error");
+            setOpen(true);
         }
     };
-
     useEffect(() => {
         if (activeTab === 'departments') {
             fetchDepartments();
@@ -77,7 +102,7 @@ function DepartmentModal({ onUpdateDepartments }) {
     }, [activeTab]);
 
     return (
-        <div className='col-md-6 btn_incident_create ' style={{ float: "right", borderRadius: "6px" }}>
+        <div className='col-md-6  ' style={{ float: "right", borderRadius: "6px" }}>
           
             <Button className='me-2'
                 startIcon={<LibraryAddIcon />}
@@ -121,13 +146,14 @@ function DepartmentModal({ onUpdateDepartments }) {
                         </Tab>
                     </Tabs>
                 </Modal.Body>
-            </Modal>
-
-            <Snackbar open={open} autoHideDuration={3000} onClose={handleDeptClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-                <Alert onClose={handleDeptClose} severity={severity}>
+                <Snackbar open={open} autoHideDuration={3000} onClose={handleDeptClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }} className='snackbar-close-btn'>
+                <Alert onClose={handleDeptClose} severity={severity} >
                     {message}
                 </Alert>
             </Snackbar>
+            </Modal>
+
+           
         </div>
     );
 }

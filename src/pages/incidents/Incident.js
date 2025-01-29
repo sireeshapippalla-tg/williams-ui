@@ -8,7 +8,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import BuildIcon from '@mui/icons-material/Build';
 import { styled } from '@mui/material/styles';
@@ -20,6 +20,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Menu, MenuItem } from '@mui/material';
+import Breadcrumbs from '@mui/material/Breadcrumbs';
+import Link from '@mui/material/Link';
 
 import {
   getIncidentCountDetails1,
@@ -357,10 +359,15 @@ const Incident = () => {
       <div className='row mb-3'>
         <div className='col-md-6 col-sm-12 route-head incident_mbl'>
           <h3 className='mb-0'>Incidents</h3>
-          <div>
-            <Link href="#">Home</Link> <span> / Incidents</span>
+          <Breadcrumbs aria-label="breadcrumb" className="breadcrumbs">
+            <Link underline="hover" color="inherit" href="/incident/dashboard">
+              Dashboard
+            </Link>
 
-          </div>
+            <Link underline="hover" color="inherit" href='#'>
+              Incidents
+            </Link>
+          </Breadcrumbs>
         </div>
 
         <div className='col-md-6 col-sm-12 btn_incident_create incident_mbl incident-create-btn-resonsive' style={{ float: "right" }}>
@@ -414,7 +421,23 @@ const Incident = () => {
                   {/* <h3 class="mb-3 fw-bold">{incidentCount.total}</h3> */}
                   <h3 class="mb-3 fw-bold">{incidentCount ? incidentCount.total : ""}</h3>
                   <div class="progress mb-2" style={{ height: "5px" }}>
-                    <div class="progress-bar bg-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"
+                    <div class="progress-bar bg-info " role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"
+                      style={{ width: "70%" }}>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card card_incident">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between mb-3">
+                    <div>
+                      <span class="card-head" >Open Incidents</span>
+                    </div>
+                  </div>
+                  <h3 class="mb-3 fw-bold">{incidentCount ? incidentCount.open : ""}</h3>
+                  <div class="progress mb-2" style={{ height: "5px" }}>
+                    <div class="progress-bar bg-danger" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"
                       style={{ width: "70%" }}>
                     </div>
                   </div>
@@ -426,9 +449,7 @@ const Incident = () => {
                     <div>
                       <span class="card-head">Pending Incidents</span>
                     </div>
-                    {/* <div>
-                      <span class="text-danger fw-bold">-2.8%</span>
-                    </div> */}
+
                   </div>
                   <h3 class="mb-3 fw-bold">{incidentCount ? incidentCount.inProgress : ""}</h3>
                   <div class="progress mb-2" style={{ height: "5px" }}>
@@ -450,30 +471,13 @@ const Incident = () => {
                   </div>
                   <h3 class="mb-3 fw-bold">{incidentCount ? incidentCount.resolved : ""}</h3>
                   <div class="progress mb-2" style={{ height: "5px" }}>
-                    <div class="progress-bar bg-info" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"
+                    <div class="progress-bar bg-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"
                       style={{ width: "70%" }}>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="card card_incident">
-                <div class="card-body">
-                  <div class="d-flex justify-content-between mb-3">
-                    <div>
-                      <span class="card-head" >Open Incidents</span>
-                    </div>
-                    {/* <div>
-                      <span class="text-danger fw-bold">-75%</span>
-                    </div> */}
-                  </div>
-                  <h3 class="mb-3 fw-bold">{incidentCount ? incidentCount.open : ""}</h3>
-                  <div class="progress mb-2" style={{ height: "5px" }}>
-                    <div class="progress-bar bg-primary" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"
-                      style={{ width: "70%" }}>
-                    </div>
-                  </div>
-                </div>
-              </div>
+
             </div>
           </div>
         </div>
@@ -596,80 +600,80 @@ const Incident = () => {
 
         <div className="table-responsive-container">
 
-        <Paper className='tbl mt-2'
-        // sx={{ width: '100%', overflow: 'hidden' }}
-        >
-          <TableContainer className='tablescroll-mobile' sx={{ overflowX: 'auto' }}>
-            <Table stickyHeader res aria-label="sticky table"
+          <Paper className='tbl mt-2'
+          // sx={{ width: '100%', overflow: 'hidden' }}
+          >
+            <TableContainer className='tablescroll-mobile' sx={{ overflowX: 'auto' }}>
+              <Table stickyHeader res aria-label="sticky table"
               // sx={{ minWidth: 650 }}
-             
-            >
-              <TableHead>
-                <TableRow>
-                  {columns.map((column) => (
-                    !column.hidden && ( // Only render if column is not hidden
-                      <TableCell
-                        key={column.id}
-                        align={column.align}
-                        style={{ minWidth: column.minWidth }}
-                      >
-                        {column.label}
-                      </TableCell>
-                    )
-                  ))}
-                </TableRow>
-              </TableHead>
-              {isLoading ? (
-                <div>Loading...</div>
-              ) : (
-                <TableBody>
-                  {rows
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row) => (
-                      <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-                        {columns.map((column) => {
-                          if (column.hidden) return null; // Skip hidden columns
-                          const value = row[column.id];
-                          if (column.id === 'status') {
-                            return (
-                              <StyledStatusTableCell key={column.id} align={column.align} status={row.status}>
-                                <StyledStatusText status={row.status}>
-                                  {value}
-                                </StyledStatusText>
-                              </StyledStatusTableCell>
-                            );
-                          }
-                          return (
-                            <TableCell
-                              style={{ cursor: "pointer" }}
-                              key={column.id}
-                              align={column.align}
-                              onClick={() => clickHandlerresolve(row.id)}
-                            >
-                              {column.format && typeof value === 'number'
-                                ? column.format(value)
-                                : value}
-                            </TableCell>
-                          );
-                        })}
-                      </StyledTableRow>
+
+              >
+                <TableHead>
+                  <TableRow>
+                    {columns.map((column) => (
+                      !column.hidden && ( // Only render if column is not hidden
+                        <TableCell
+                          key={column.id}
+                          align={column.align}
+                          style={{ minWidth: column.minWidth }}
+                        >
+                          {column.label}
+                        </TableCell>
+                      )
                     ))}
-                </TableBody>
-              )}
-            </Table>
-          </TableContainer>
-          <div>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 20, 40, 100]}
-              component="div"
-              count={rows.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-          </div>
-        </Paper>
+                  </TableRow>
+                </TableHead>
+                {isLoading ? (
+                  <div>Loading...</div>
+                ) : (
+                  <TableBody>
+                    {rows
+                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .map((row) => (
+                        <StyledTableRow hover role="checkbox" tabIndex={-1} key={row.code}>
+                          {columns.map((column) => {
+                            if (column.hidden) return null; // Skip hidden columns
+                            const value = row[column.id];
+                            if (column.id === 'status') {
+                              return (
+                                <StyledStatusTableCell key={column.id} align={column.align} status={row.status}>
+                                  <StyledStatusText status={row.status}>
+                                    {value}
+                                  </StyledStatusText>
+                                </StyledStatusTableCell>
+                              );
+                            }
+                            return (
+                              <TableCell
+                                style={{ cursor: "pointer" }}
+                                key={column.id}
+                                align={column.align}
+                                onClick={() => clickHandlerresolve(row.id)}
+                              >
+                                {column.format && typeof value === 'number'
+                                  ? column.format(value)
+                                  : value}
+                              </TableCell>
+                            );
+                          })}
+                        </StyledTableRow>
+                      ))}
+                  </TableBody>
+                )}
+              </Table>
+            </TableContainer>
+            <div>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 20, 40, 100]}
+                component="div"
+                count={rows.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </div>
+          </Paper>
         </div>
       </div>
       {/* Ai promt diapog */}

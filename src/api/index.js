@@ -49,7 +49,8 @@ export const getAllFields = BASE_API_URL + 'incident/getAllFields'
 export const deleteIncidentField = BASE_API_URL + 'incident/deleteIncidentField'
 export const deleteField = BASE_API_URL + 'incident/deleteField'
 export const submitFields = BASE_API_URL + 'incident/submitFields'
-export const saveDepartment = BASE_API_URL + 'users/saveDepartment'
 export const forgotPassword = BASE_API_URL + 'users/forgotPassword'
+export const saveDepartment = (deptName) => `${BASE_API_URL}users/saveDepartment?deptName=${encodeURIComponent(deptName)}`;
+
 
 export const config = 'IAssure'
